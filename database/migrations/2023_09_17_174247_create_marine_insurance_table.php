@@ -1,0 +1,41 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('marine_insurance', function (Blueprint $table) {
+            $table->id();
+            $table->bigInteger('mobile_no')->nullable();
+            $table->string('transportation', 255)->nullable();
+            $table->string('policy_holder_name', 255)->nullable();
+            $table->string('national_id', 255)->nullable();
+            $table->string('from', 255)->nullable();
+            $table->string('via', 255)->nullable();
+            $table->string('to', 255)->nullable();
+            $table->bigInteger('insurance_amount')->nullable();
+            $table->string('subject_matter_insurance', 500)->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('marine_insurance');
+    }
+};

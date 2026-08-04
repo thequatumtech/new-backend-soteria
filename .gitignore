@@ -1,0 +1,11 @@
+/vendor/*
+/vendor
+/.env
+/.idea/
+/public/uploads/
+/public/*
+/public/insurance/*
+/.htaccess
+/default.php
+/backend_soterial/
+
