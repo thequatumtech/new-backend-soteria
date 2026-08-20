@@ -338,6 +338,9 @@ class MarineInsuranceController extends Controller
         try {
 
             $data = MarinePlan::with('policy_covers', 'insurance_company')
+                ->whereHas('insurance_company', function ($q) {
+                    $q->whereNull('deleted_at');
+                })
                 ->where('limit', 'LIKE', '%' . $request->limit . '%')
                 ->get();
 

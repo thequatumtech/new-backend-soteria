@@ -404,7 +404,7 @@
                                 <div>{{__('messages.clients.agent_id')}}</div>
                                 <div class="shadow1  p-2 " style="padding-bottom: 2.5rem;">
                                     <input type="number" name="agent_id" id="agent_id"
-                                           style="border: none; font-weight: 330;" autocomplete="off" value="{{old('agent_id')?:($client->agent_id ?? '')}}">
+                                           style="border: none; font-weight: 330;" autocomplete="off" value="{{old('agent_id')?:($client->agent?->agent_code ?? '')}}">
                                 </div>
                             </div>
                         </div>

@@ -257,7 +257,7 @@ class CriticalIllnessInsuranceController extends Controller
             $purchase['plan_name']             = $plan_data->plan_name;
             $purchase['policy_plan_limit']     = $policy_limit;
             $purchase['insurance_company_id']  = $data->insurance_company_id;
-            $purchase['inception_date']        = $data->effective_date;
+            $purchase['inception_date'] = $data->effective_date ?? $data->inception_date ?? '';
             $purchase['expiry_date']           = $data->expiry_date;
             $purchase['commission_percentage'] = $data->commission_percentage ?? $plan_data->commission_percentage;
             $purchase['policy_pdf_url']        = $path;
@@ -307,6 +307,9 @@ class CriticalIllnessInsuranceController extends Controller
     {
         try {
             $data = CriticalIllnessPlan::with('policy_covers', 'insurance_company')
+                ->whereHas('insurance_company', function ($q) {
+                    $q->whereNull('deleted_at');
+                })
                 ->where('plan_name', 'LIKE', '%' . $request->limit . '%')
                 ->get();
 

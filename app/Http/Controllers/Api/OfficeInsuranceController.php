@@ -252,7 +252,7 @@ class OfficeInsuranceController extends Controller
 
                 $office = ClientOfficeInsurance::create($data);
 
-                $data['policy_type'] = 4;
+                $data['policy_type'] = 2;
                 $data['policy_id'] = $office->id;
                 $data['inception_date'] = $data['effective_date'];
 
@@ -360,6 +360,9 @@ class OfficeInsuranceController extends Controller
     {
         try {
             $data = OfficePlan::with('policy_covers', 'insurance_company')
+                ->whereHas('insurance_company', function ($q) {
+                    $q->whereNull('deleted_at');
+                })
                 ->where('plan_name', 'LIKE', '%' . $request->limit . '%')
                 ->get();
 

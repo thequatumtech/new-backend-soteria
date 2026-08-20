@@ -69,13 +69,62 @@
         margin-bottom: 20px;
         text-align: center;
         font-size: 14px;
+        table-layout: fixed;
     }
 
-    .signatures td {
+    .signatures>tbody>tr>td {
+        width: 50%;
         padding: 15px;
         border: 1px solid #ccc;
         font-weight: bold;
         background-color: #e0e0e0;
+        vertical-align: top;
+    }
+
+    .signature-content {
+        width: 100%;
+        text-align: center;
+    }
+
+    .signature-title {
+        height: 20px;
+        line-height: 20px;
+        margin-bottom: 10px;
+    }
+
+    .signature-image-box {
+        width: 150px;
+        height: 70px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .signatures img {
+        width: 150px !important;
+        height: 70px !important;
+        max-width: 150px !important;
+        max-height: 70px !important;
+        min-width: 150px !important;
+        min-height: 70px !important;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .signatures .signature-image {
+        width: 150px !important;
+        height: 70px !important;
+        max-width: 150px !important;
+        max-height: 70px !important;
+        min-width: 150px !important;
+        min-height: 70px !important;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .authorized-title {
+        height: 20px;
+        line-height: 20px;
+        margin-top: 10px;
     }
 
     footer {
@@ -91,9 +140,9 @@
 
         <!-- HEADER -->
         <header class="policy-header">
-            <img src="{{ public_path('insurance/'.$data->insurance_company_id.'/'.$data->logo) }}"
-                alt="Company Logo" class="logo">
-            <h1>Home Insurance Contract</h1>
+            <img src="{{ public_path('insurance/' . $data->insurance_company_id . '/' . $data->logo) }}"
+                alt="{{ $data->company_name }}" class="logo">
+            <h1>{{ $data->plan_name }}</h1>
         </header>
 
         <!-- POLICY DETAILS -->
@@ -131,43 +180,43 @@
                 <td>NatHealth</td>
             </tr> -->
         </table>
+
         @php
         $columns = [];
 
-        if(!empty($purchase->policy_plan_limit))
+        if (!empty($purchase->policy_plan_limit))
         $columns['Limit'] = number_format($purchase->policy_plan_limit, 2) . ' ' . $abbr;
 
-        if(!empty($purchase->net_premium))
+        if (!empty($purchase->net_premium))
         $columns['Net Premium'] = number_format($purchase->net_premium, 2) . ' ' . $abbr;
 
         $fees_label = 'Issuance Fees' . (!empty($data->fees) && $data->fees > 0 ? ' (' . $data->fees . '%)' : '');
-        if(!empty($purchase->fees))
+        if (!empty($purchase->fees))
         $columns[$fees_label] = number_format($purchase->fees, 2) . ' ' . $abbr;
 
         $stamps_label = 'Stamps' . (!empty($data->stamps) && $data->stamps > 0 ? ' (' . $data->stamps . '%)' : '');
-        if(!empty($purchase->stamps))
+        if (!empty($purchase->stamps))
         $columns[$stamps_label] = number_format($purchase->stamps, 2) . ' ' . $abbr;
 
         $sales_tax_label = 'Sales Tax' . (!empty($data->sales_tax) && $data->sales_tax > 0 ? ' (' . $data->sales_tax . '%)' : '');
-        if(!empty($purchase->sales_tax))
+        if (!empty($purchase->sales_tax))
         $columns[$sales_tax_label] = number_format($purchase->sales_tax, 2) . ' ' . $abbr;
 
         $cbj_label = 'Contribution to the Guarantee Fund (CBJ)' . (!empty($data->cbj) && $data->cbj > 0 ? ' (' . $data->cbj . '%)' : '');
-        if(!empty($purchase->cbj))
+        if (!empty($purchase->cbj))
         $columns[$cbj_label] = number_format($purchase->cbj, 2) . ' ' . $abbr;
 
         $cbj_tax_label = 'Sales Tax on CBJ Contribution Fund' . (!empty($data->sales_tax_cbj) && $data->sales_tax_cbj > 0 ? ' (' . $data->sales_tax_cbj . '%)' : '');
-        if(!empty($purchase->sales_tax_cbj))
+        if (!empty($purchase->sales_tax_cbj))
         $columns[$cbj_tax_label] = number_format($purchase->sales_tax_cbj, 2) . ' ' . $abbr;
 
-        if(!empty($purchase->gross_premium))
+        if (!empty($purchase->gross_premium))
         $columns['Gross Premium'] = number_format($purchase->gross_premium, 2) . ' ' . $abbr;
 
         // if(!empty($purchase->commission_amount))
         // $columns['Commission Amount'] = number_format($purchase->commission_amount, 2) . ' ' . $abbr;
 
         @endphp
-
 
         @if(count($columns) > 0)
         <div class="policy-summary">
@@ -186,6 +235,7 @@
             </table>
         </div>
         @endif
+
         <div class="policy-summary">
             <h4>Policy Covers</h4>
 
@@ -209,6 +259,7 @@
                 @endforeach
             </table>
         </div>
+
         <!-- POLICY TEXT -->
         <div class="policy-summary">
             {!! $data->insurance_policy_text !!}
@@ -220,16 +271,47 @@
                 <td>{{ $data->company_name }}</td>
                 <td>Policy Holder: {{ $data->first_name }} {{ $data->last_name }} {{ $data->third_name }} {{ $data->family_name }}</td>
             </tr>
+
             <tr>
                 <td>
-                    Insurer<br>
-                    <img src="{{ public_path('insurance/'.$data->insurance_company_id.'/'.$data->company_stamp) }}"
-                        alt="Stamp" class="logo">
+                    <div class="signature-content">
+                        <div class="signature-title">
+                            Insurer
+                        </div>
+
+                        <div class="signature-image-box">
+                            <img
+                                src="{{ public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp) }}"
+                                alt="Stamp"
+                                width="150"
+                                height="70"
+                                class="signature-image">
+                        </div>
+                    </div>
                 </td>
+
                 <td>
-                    Insured<br>
-                    <img src="{{ public_path('insurance/'.$data->insurance_company_id.'/'.$data->authorized_signature) }}"
-                        alt="Signature" class="logo">
+                    <div class="signature-content">
+                        <div class="signature-title">
+                            Insured
+                        </div>
+
+                        <div class="signature-image-box">
+                            {{-- User Signature --}}
+                            @if(!empty($data->user_signature) && file_exists(public_path($data->user_signature)))
+                            <img
+                                src="{{ public_path($data->user_signature) }}"
+                                alt="User Signature"
+                                width="150"
+                                height="70"
+                                class="signature-image">
+                            @endif
+                        </div>
+
+                        <div class="authorized-title">
+                            Authorized Signature
+                        </div>
+                    </div>
                 </td>
             </tr>
         </table>

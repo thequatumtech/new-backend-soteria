@@ -334,7 +334,11 @@
                         <th>{{__('messages.renewal_section.premium_paid')}}</th>
                         <th>{{__('messages.renewal_section.insurance_company')}}</th>
                         <th class="no-order no-search">{{__('messages.renewal_section.action')}}</th>
-                        <th class="no-order no-search">{{__('messages.renewal_section.select')}}</th>
+                        {{-- <th class="no-order no-search">{{__('messages.renewal_section.select')}}</th> --}}
+                         <th class="no-order no-search">
+                                                       <input class="form-check-input" type="checkbox" id="select_all_checkbox" title="Select All">
+
+                        </th>
                     </tr>
                 </thead>
                 <tbody id="policy_table_body">
@@ -701,5 +705,7 @@
     });
 </script>
 
-<script src="{{asset('js/renewal_section.js')}}"></script>
+
+   
+<script src="{{asset('js/renewal_section.js')}}?v={{ time() }}"></script>
 @endsection

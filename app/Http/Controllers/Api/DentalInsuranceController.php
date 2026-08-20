@@ -430,7 +430,7 @@ class DentalInsuranceController extends Controller
             $purchase['plan_name']            = $plan->plan_name;
             $purchase['policy_plan_limit']    = $policy_limit;
             $purchase['insurance_company_id'] = $data->insurance_company_id;
-            $purchase['inception_date']       = $data->effective_date;
+            $purchase['inception_date']       = $data->inception_date;
             $purchase['expiry_date']          = $data->expiry_date;
             $purchase['commission_percentage'] = $data->commission_percentage;
             $purchase['policy_pdf_url']       = $path;
@@ -453,6 +453,8 @@ class DentalInsuranceController extends Controller
             $pdf->save($path);
 
             $data['url'] = url('insurance_pdfs/dentals_policy/' . $filename);
+            $data->purchase_id = $dental->id;
+
 
 
 
@@ -472,6 +474,8 @@ class DentalInsuranceController extends Controller
                 'data' => $data
             ]);
         } catch (\Exception $e) {
+  \Illuminate\Support\Facades\Log::error('Dental Insurance Purchase Error: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error($e->getTraceAsString());
 
             return response()->json([
                 'status' => false,
@@ -487,6 +491,9 @@ class DentalInsuranceController extends Controller
     {
         try {
             $data = DentalPlan::with('policy_covers', 'insurance_company')
+            ->whereHas('insurance_company', function ($q) {
+                $q->whereNull('deleted_at');
+            })
                 ->where('plan_name', 'LIKE', '%' . $request->limit . '%')
                 ->get();
 

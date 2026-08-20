@@ -68,13 +68,60 @@
         border-collapse: collapse;
         margin-bottom: 20px;
         text-align: center;
+        table-layout: fixed;
     }
 
-    .signatures td {
+    .signatures>tbody>tr>td {
+        width: 50%;
         padding: 15px;
         border: 1px solid #ccc;
         font-weight: bold;
         background-color: #e0e0e0;
+        vertical-align: top;
+    }
+
+    .signatures img {
+        width: 150px !important;
+        height: 70px !important;
+        max-width: 150px !important;
+        max-height: 70px !important;
+        margin: 0 auto;
+    }
+
+    .signature-image {
+        width: 150px !important;
+        height: 70px !important;
+        max-width: 150px !important;
+        max-height: 70px !important;
+        margin: 0 auto;
+    }
+
+    .insured-signature-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
+    }
+
+    .insured-signature-table td {
+        width: 100%;
+        padding: 0;
+        border: 0;
+        background-color: transparent;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .insured-signature-table .insured-title {
+        padding-bottom: 8px;
+    }
+
+    .insured-signature-table .insured-image {
+        height: 80px;
+        padding-bottom: 8px;
+    }
+
+    .insured-signature-table .authorized-title {
+        padding-top: 5px;
     }
 
     footer {
@@ -87,8 +134,8 @@
 <body>
     <div class="policy-container">
         <header class="policy-header">
-            <img src="{{public_path('insurance/'.$data->insurance_company_id.'/'.$data->logo)}}" alt="Arabia Insurance Jordan" class="logo">
-            <h1>Individual Medical insurance contract</h1>
+            <img src="{{public_path('insurance/' . $data->insurance_company_id . '/' . $data->logo)}}" alt="{{ $data->company_name }}" class="logo">
+            <h1>{{ $data->plan_name }}</h1>
         </header>
 
         <table class="policy-details">
@@ -106,11 +153,11 @@
             </tr>
             <tr>
                 <td><strong>Effective Date</strong></td>
-                <td>{{date('m-d-Y',strtotime($data->inception_date))}}</td>
+                <td>{{date('m-d-Y', strtotime($data->inception_date))}}</td>
             </tr>
             <tr>
                 <td><strong>Expiry Date</strong></td>
-                <td>{{date('m-d-Y',strtotime($data->expiry_date))}}</td>
+                <td>{{date('m-d-Y', strtotime($data->expiry_date))}}</td>
             </tr>
             <!-- <tr>
                 <td><strong>Geographical Coverage</strong></td>
@@ -149,22 +196,22 @@
                 </tr>
 
                 <tr>
-                    @isset($plan->limit)<td>{{ number_format((float)$plan->limit, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
-                    @isset($plan->net_premium_amount)<td>{{ number_format((float)$plan->net_premium_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
-                    @isset($plan->fees_amount)<td>{{ number_format((float)$plan->fees_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
-                    @isset($plan->stamps_amount)<td>{{ number_format((float)$plan->stamps_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
-                    @isset($plan->sales_tax_amount)<td>{{ number_format((float)$plan->sales_tax_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
+                    @isset($plan->limit)<td>{{ number_format((float) $plan->limit, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
+                    @isset($plan->net_premium_amount)<td>{{ number_format((float) $plan->net_premium_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
+                    @isset($plan->fees_amount)<td>{{ number_format((float) $plan->fees_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
+                    @isset($plan->stamps_amount)<td>{{ number_format((float) $plan->stamps_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
+                    @isset($plan->sales_tax_amount)<td>{{ number_format((float) $plan->sales_tax_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
 
                     @if(isset($plan->cbj_amount) && $plan->cbj_amount > 0)
-                    <td>{{ number_format((float)$plan->cbj_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>
+                    <td>{{ number_format((float) $plan->cbj_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>
                     @endif
 
                     @if(isset($plan->sales_tax_cbj_amount) && $plan->sales_tax_cbj_amount > 0)
-                    <td>{{ number_format((float)$plan->sales_tax_cbj_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>
+                    <td>{{ number_format((float) $plan->sales_tax_cbj_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>
                     @endif
 
                     @isset($plan->gross_premium_amount)
-                    <td>{{ number_format((float)$plan->gross_premium_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>
+                    <td>{{ number_format((float) $plan->gross_premium_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>
                     @endisset
                 </tr>
             </table>
@@ -226,8 +273,59 @@
                 <td>Policy Holder / {{$data->first_name}} {{$data->last_name}} {{$data->third_name}} {{$data->family_name}}</td>
             </tr>
             <tr>
-                <td>Insurer <img src="{{public_path('insurance/'.$data->insurance_company_id.'/'.$data->company_stamp)}}" alt="" class="logo"></td>
-                <td>Insured <img src="{{public_path('insurance/'.$data->insurance_company_id.'/'.$data->authorized_signature)}}" alt="" class="logo"></td>
+                <td>
+                    Insurer
+
+                    <div>
+                        <img
+                            src="{{public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp)}}"
+                            alt=""
+                            width="150"
+                            height="70"
+                            class="signature-image">
+                    </div>
+                </td>
+
+                <td>
+                    <table class="insured-signature-table">
+                        <tr>
+                            <td class="insured-title">
+                                Insured
+                            </td>
+                        </tr>
+
+                        {{-- User Signature --}}
+                        @if(!empty($data->user_signature) && file_exists(public_path($data->user_signature)))
+                        <tr>
+                            <td class="insured-image">
+                                <img
+                                    src="{{ public_path($data->user_signature) }}"
+                                    alt="User Signature"
+                                    width="150"
+                                    height="70"
+                                    class="signature-image">
+                            </td>
+                        </tr>
+                        @else
+                        <tr>
+                            <td class="insured-image">
+                                <img
+                                    src="{{public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature)}}"
+                                    alt="Authorized Signature"
+                                    width="150"
+                                    height="70"
+                                    class="signature-image">
+                            </td>
+                        </tr>
+                        @endif
+
+                        <tr>
+                            <td class="authorized-title">
+                                Authorized Signature
+                            </td>
+                        </tr>
+                    </table>
+                </td>
             </tr>
         </table>
 

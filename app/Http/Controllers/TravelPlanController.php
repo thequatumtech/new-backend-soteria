@@ -84,6 +84,7 @@ class TravelPlanController extends Controller
             $travel_insurance_plan->restricted_age_ids = $request->restricted_age_ids ? json_encode($request->restricted_age_ids) : null;
             $travel_insurance_plan->restricted_dangerous_activities_ids = $request->restricted_dangerous_activities_ids ? json_encode($request->restricted_dangerous_activities_ids) : null;
             // $travel_insurance_plan->geographical_areas_ids = $request->geographical_areas_ids;
+            $travel_insurance_plan->geographical_areas_ids = $request->geographical_areas_ids;
             $travel_insurance_plan->countries = $request->countries;
             $travel_insurance_plan->limit = $request->limit;
             $travel_insurance_plan->net_premium = $request->net_premium ?? 0;
@@ -171,7 +172,7 @@ class TravelPlanController extends Controller
             $travel_insurance_plan->restricted_district_ids = $request->restricted_district_ids ? json_encode($request->restricted_district_ids) : null;
             $travel_insurance_plan->restricted_age_ids = $request->restricted_age_ids ? json_encode($request->restricted_age_ids) : null;
             $travel_insurance_plan->restricted_dangerous_activities_ids = $request->restricted_dangerous_activities_ids ? json_encode($request->restricted_dangerous_activities_ids) : null;
-            // $travel_insurance_plan->geographical_areas_ids = $request->geographical_areas_ids;
+            $travel_insurance_plan->geographical_areas_ids = $request->geographical_areas_ids;
             $travel_insurance_plan->countries = $request->countries;
             $travel_insurance_plan->limit = $request->limit;
             $travel_insurance_plan->net_premium = $request->net_premium ?? 0;

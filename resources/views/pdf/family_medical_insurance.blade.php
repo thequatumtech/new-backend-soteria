@@ -87,8 +87,8 @@
 <body>
     <div class="policy-container">
         <header class="policy-header">
-            <img src="{{public_path('insurance/'.$data->insurance_company_id.'/'.$data->logo)}}" alt="Arabia Insurance Jordan" class="logo">
-            <h1>Family Medical insurance contract</h1>
+            <img src="{{public_path('insurance/' . $data->insurance_company_id . '/' . $data->logo)}}" alt="{{ $data->company_name }}" class="logo">
+            <h1>{{ $data->plan_name }}</h1>
         </header>
 
         <table class="policy-details">
@@ -106,11 +106,11 @@
             </tr>
             <tr>
                 <td><strong>Effective Date</strong></td>
-                <td>{{date('m-d-Y',strtotime($data->inception_date))}}</td>
+                <td>{{date('m-d-Y', strtotime($data->inception_date))}}</td>
             </tr>
             <tr>
                 <td><strong>Expiry Date</strong></td>
-                <td>{{date('m-d-Y',strtotime($data->expiry_date))}}</td>
+                <td>{{date('m-d-Y', strtotime($data->expiry_date))}}</td>
             </tr>
             <!-- <tr>
                 <td><strong>Geographical Coverage</strong></td>
@@ -142,14 +142,14 @@
                 </tr>
 
                 <tr>
-                    @isset($plan->limit)<td>{{ number_format((float)$plan->limit, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
-                    @isset($plan->net_premium_amount)<td>{{ number_format((float)$plan->net_premium_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
-                    @isset($plan->fees_amount)<td>{{ number_format((float)$plan->fees_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
-                    @isset($plan->stamps_amount)<td>{{ number_format((float)$plan->stamps_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
-                    @isset($plan->sales_tax_amount)<td>{{ number_format((float)$plan->sales_tax_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
-                    @if(isset($plan->cbj_amount) && $plan->cbj_amount > 0)<td>{{ number_format((float)$plan->cbj_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endif
-                    @if(isset($plan->sales_tax_cbj_amount) && $plan->sales_tax_cbj_amount > 0)<td>{{ number_format((float)$plan->sales_tax_cbj_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endif
-                    @isset($plan->gross_premium_amount)<td>{{ number_format((float)$plan->gross_premium_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
+                    @isset($plan->limit)<td>{{ number_format((float) $plan->limit, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
+                    @isset($plan->net_premium_amount)<td>{{ number_format((float) $plan->net_premium_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
+                    @isset($plan->fees_amount)<td>{{ number_format((float) $plan->fees_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
+                    @isset($plan->stamps_amount)<td>{{ number_format((float) $plan->stamps_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
+                    @isset($plan->sales_tax_amount)<td>{{ number_format((float) $plan->sales_tax_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
+                    @if(isset($plan->cbj_amount) && $plan->cbj_amount > 0)<td>{{ number_format((float) $plan->cbj_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endif
+                    @if(isset($plan->sales_tax_cbj_amount) && $plan->sales_tax_cbj_amount > 0)<td>{{ number_format((float) $plan->sales_tax_cbj_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endif
+                    @isset($plan->gross_premium_amount)<td>{{ number_format((float) $plan->gross_premium_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
                 </tr>
             </table>
         </div>
@@ -209,8 +209,18 @@
                 <td>Policy Holder / {{$data->first_name}} {{$data->last_name}} {{$data->third_name}} {{$data->family_name}}</td>
             </tr>
             <tr>
-                <td>Insurer <img src="{{public_path('insurance/'.$data->insurance_company_id.'/'.$data->company_stamp)}}" alt="" class="logo"></td>
-                <td>Insured <img src="{{public_path('insurance/'.$data->insurance_company_id.'/'.$data->authorized_signature)}}" alt="" class="logo"></td>
+                <td>Insurer <img src="{{public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp)}}" alt="" class="logo"></td>
+                <td>
+                    Insured <br>
+                    {{-- User Signature --}}
+                    @if(!empty($data->user_signature) && file_exists(public_path($data->user_signature)))
+                        <img src="{{ public_path($data->user_signature) }}" alt="User Signature" class="logo">
+                    @endif
+
+                    <img src="{{public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature)}}"
+                        alt="Authorized Signature" class="logo">
+
+                </td>
             </tr>
         </table>
 

@@ -11,6 +11,8 @@ use App\Models\Client;
 use Carbon\Carbon;
 use App\Models\Currency;
 use Illuminate\Support\Facades\Log;
+use App\Models\Ages;
+use App\Models\PetBreed;
 
 class PetInsuranceController extends Controller
 {
@@ -121,11 +123,12 @@ class PetInsuranceController extends Controller
             if (!empty($data['pets_dob'])) {
                 $petAge = Carbon::parse($data['pets_dob'])->age;
             }
-            $restrictedCountries = $this->normalizeRestricted($plan_data->restricted_country_ids);
-            $restrictedCities    = $this->normalizeRestricted($plan_data->restricted_city_ids);
-            $restrictedDistricts = $this->normalizeRestricted($plan_data->restricted_district_ids);
-            $restrictedAges      = $this->normalizeRestricted($plan_data->restricted_age_ids);
-            $restrictedPetAges   = $this->normalizeRestricted($plan_data->restricted_pet_age_ids);
+            $restrictedCountries  = $this->normalizeRestricted($plan_data->restricted_country_ids);
+            $restrictedCities     = $this->normalizeRestricted($plan_data->restricted_city_ids);
+            $restrictedDistricts  = $this->normalizeRestricted($plan_data->restricted_district_ids);
+            $restrictedAges       = $this->normalizeRestricted($plan_data->restricted_age_ids);
+            $restrictedPetAgeIds  = $this->normalizeRestricted($plan_data->restricted_pet_age_ids);
+            $restrictedBreedIds   = $this->normalizeRestricted($plan_data->restricted_pet_breed_ids);
 
             if ($clientCountry && in_array($clientCountry, $restrictedCountries)) {
                 return $this->restrictionError('country');
@@ -153,18 +156,36 @@ class PetInsuranceController extends Controller
                     }
                 }
             }
-            foreach ($restrictedPetAges as $range) {
-                $range = str_replace(' ', '', $range);
+            if (!empty($restrictedPetAgeIds)) {
+                $petDob = !empty($data['pets_dob']) ? Carbon::parse($data['pets_dob']) : null;
 
-                if (str_contains($range, '-')) {
-                    [$min, $max] = explode('-', $range);
-                    if ($petAge >= (int)$min && $petAge <= (int)$max) {
-                        return $this->restrictionError('pet age');
+                if ($petDob) {
+                    $petAgeInYears  = $petDob->age;
+                    $petAgeInMonths = (int) $petDob->diffInMonths(Carbon::now());
+
+                    $restrictedAgeRecords = Ages::whereIn('id', $restrictedPetAgeIds)->get();
+
+                    foreach ($restrictedAgeRecords as $ageRecord) {
+                        if ($ageRecord->type === 'year' && $petAgeInYears == $ageRecord->age) {
+                            return $this->restrictionError('pet age');
+                        }
+                        if ($ageRecord->type === 'month' && $petAgeInMonths == $ageRecord->age) {
+                            return $this->restrictionError('pet age');
+                        }
                     }
-                } else {
-                    if ((int)$range === $petAge) {
-                        return $this->restrictionError('pet age');
-                    }
+                }
+            }
+
+            if (!empty($restrictedBreedIds) && !empty($data['breed'])) {
+                $breedInput = strtolower(trim($data['breed']));
+
+                $restrictedBreeds = PetBreed::whereIn('id', $restrictedBreedIds)
+                    ->get()
+                    ->map(fn($b) => strtolower(trim($b->breed)))
+                    ->toArray();
+
+                if (in_array($breedInput, $restrictedBreeds)) {
+                    return $this->restrictionError('breed');
                 }
             }
 
@@ -254,7 +275,7 @@ class PetInsuranceController extends Controller
             $purchase['plan_name']            = $plan_data->plan_name;
             $purchase['policy_plan_limit']    = $policy_limit;
             $purchase['insurance_company_id'] = $data->insurance_company_id;
-            $purchase['inception_date']       = $data->effective_date;
+            $purchase['inception_date'] = $data->effective_date ?? $data->inception_date ?? '';
             $purchase['expiry_date']          = $data->expiry_date;
             $purchase['commission_percentage'] = $data->commission_percentage;
             $purchase['policy_pdf_url']       = $path;
@@ -312,8 +333,11 @@ class PetInsuranceController extends Controller
         try {
 
             $data = PetPlan::with('policy_covers', 'insurance_company')
-                ->where('plan_name', 'LIKE', '%' . $request->limit . '%')
-                ->get();
+            ->whereHas('insurance_company', function ($q) {
+                $q->whereNull('deleted_at');
+            })
+            ->where('plan_name', 'LIKE', '%' . $request->limit . '%')
+            ->get();
 
             $data->transform(function ($item) {
                 if (!empty($item->insurance_policy_pdf)) {

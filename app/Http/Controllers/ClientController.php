@@ -113,7 +113,7 @@ class ClientController extends Controller
 
         if ($purchased_policy->isNotEmpty()) {
 
-            // 🔥 Add details to each policy
+            //  Add details to each policy
             $purchased_policy->transform(function ($policy) {
                 $policy->details = [
                     'police_no'   => $policy->policy_no ?? 'N/A',
@@ -162,66 +162,150 @@ class ClientController extends Controller
             $clientId = $request->client_id;
         }
         try {
-            $request->validate([
-                'first_name' => 'required',
-                'father_name' => 'required',
-                'grandfather_name' => 'required',
-                'surname' => 'required',
-                'language' => 'required',
-                'nationality_id' => 'required',
-                'national_id_number' => 'required',
-                'residence_id_number' => 'required',
-                'birth_date' => ['required', 'date', new AdultRule],
-                'gender' => 'required',
-                'marital_status' => 'required',
-                'email_id' => ['required', 'email', 'unique:clients,email_id,' . $clientId . ',id,deleted_at,NULL'],
-                'mobile_no' => ['required', 'numeric', 'unique:clients,mobile_no,' . $clientId . ',id,deleted_at,NULL'],
-                'country_id' => 'required|numeric',
-                'residing_country_same' => 'required',
-                'city_id' => 'required|numeric',
-                'district_id' => 'required|numeric',
-                'street_name' => 'required',
-                'building_no' => 'required',
-                'company_name' => 'required',
-                'occupation_id' => 'required|numeric',
-                'work_nature' => 'required',
-                'company_city_id' => 'required|numeric',
-                'company_district_id' => 'required|numeric',
-                'company_street_name' => 'required',
-                'company_building_no' => 'required',
-                'company_contact_no' => 'required',
-                'id_front' => [$clientId ? 'nullable' : 'required', 'file', 'max:10240', 'image'],
-                'id_back' => [$clientId ? 'nullable' : 'required', 'file', 'max:10240', 'image'],
-                'profile_pic' => [$clientId ? 'nullable' : 'required', 'file', 'max:10240', 'image'],
-                'agent_id' => 'nullable|numeric',
-                'password' => 'required_without:client_id',
-                'has_company' => 'required',
-                'client_company_name' => 'required_if:has_company,1',
-                'client_company_registered_national_id_no' => 'required_if:has_company,1',
-                'client_company_registration_no' => 'required_if:has_company,1',
-                'client_company_country_id' => 'required_if:has_company,1|numeric',
-                'client_company_city_id' => 'required_if:has_company,1|numeric',
-                'client_company_district_id' => 'required_if:has_company,1|numeric',
-                'client_company_street_name' => 'required_if:has_company,1',
-                'client_company_building_no' => 'required_if:has_company,1',
-                'client_company_office_no' => 'required_if:has_company,1',
-                'client_company_telephone_no' => 'required_if:has_company,1',
-                'client_company_owner_first_name' => 'required_if:has_company,1',
-                'client_company_owner_father_name' => 'required_if:has_company,1',
-                'client_company_owner_grandfather_name' => 'required_if:has_company,1',
-                'client_company_owner_surname' => 'required_if:has_company,1',
-                'client_company_owner_telephone_no' => 'required_if:has_company,1',
-                'is_partner' => 'required_if:has_company,1',
-                'is_authorized' => 'required_if:has_company,1',
-                'authorized_position' => 'required_if:is_authorized,1',
-                'is_authorization_in_registration' => 'required_if:is_authorized,1',
-                'issuer_authorization_document' => ['required_if:has_company,1|required_unless:client_id,null', 'file', 'max:10240', 'mimes:jpeg,png,gif,bmp,pdf'],
-                'ownership_document' => ['required_if:has_company,1|required_unless:client_id,null', 'file', 'max:10240', 'mimes:jpeg,png,gif,bmp,pdf'],
-                'career_municipality_license' => ['required_if:has_company,1|required_unless:client_id,null', 'file', 'max:10240', 'mimes:jpeg,png,gif,bmp,pdf'],
-                'company_tax_certificate' => ['required_if:has_company,1|required_unless:client_id,null', 'file', 'max:10240', 'mimes:jpeg,png,gif,bmp,pdf'],
-                'practice_certificate' => ['required_if:has_company,1|required_unless:client_id,null', 'file', 'max:10240', 'mimes:jpeg,png,gif,bmp,pdf'],
-            ]/*, $customMessages*/);
+            // $request->validate([
+            //     'first_name' => 'required',
+            //     'father_name' => 'required',
+            //     'grandfather_name' => 'required',
+            //     'surname' => 'required',
+            //     'language' => 'required',
+            //     'nationality_id' => 'required',
+            //     'national_id_number' => 'required',
+            //     'residence_id_number' => 'required',
+            //     'birth_date' => ['required', 'date', new AdultRule],
+            //     'gender' => 'required',
+            //     'marital_status' => 'required',
+            //     'email_id' => ['required', 'email', 'unique:clients,email_id,' . $clientId . ',id,deleted_at,NULL'],
+            //     'mobile_no' => ['required', 'numeric', 'unique:clients,mobile_no,' . $clientId . ',id,deleted_at,NULL'],
+            //     'country_id' => 'required|numeric',
+            //     'residing_country_same' => 'required',
+            //     'city_id' => 'required|numeric',
+            //     'district_id' => 'required|numeric',
+            //     'street_name' => 'required',
+            //     'building_no' => 'required',
+            //     'company_name' => 'required',
+            //     'occupation_id' => 'required|numeric',
+            //     'work_nature' => 'required',
+            //     'company_city_id' => 'required|numeric',
+            //     'company_district_id' => 'required|numeric',
+            //     'company_street_name' => 'required',
+            //     'company_building_no' => 'required',
+            //     'company_contact_no' => 'required',
+            //     'id_front' => [$clientId ? 'nullable' : 'required', 'file', 'max:10240', 'image'],
+            //     'id_back' => [$clientId ? 'nullable' : 'required', 'file', 'max:10240', 'image'],
+            //     'profile_pic' => [$clientId ? 'nullable' : 'required', 'file', 'max:10240', 'image'],
+            //     'agent_id' => 'nullable|numeric',
+            //     'password' => 'required_without:client_id',
+            //     'has_company' => 'required',
+            //     'client_company_name' => 'required_if:has_company,1',
+            //     'client_company_registered_national_id_no' => 'required_if:has_company,1',
+            //     'client_company_registration_no' => 'required_if:has_company,1',
+            //     'client_company_country_id' => 'required_if:has_company,1|numeric',
+            //     'client_company_city_id' => 'required_if:has_company,1|numeric',
+            //     'client_company_district_id' => 'required_if:has_company,1|numeric',
+            //     'client_company_street_name' => 'required_if:has_company,1',
+            //     'client_company_building_no' => 'required_if:has_company,1',
+            //     'client_company_office_no' => 'required_if:has_company,1',
+            //     'client_company_telephone_no' => 'required_if:has_company,1',
+            //     'client_company_owner_first_name' => 'required_if:has_company,1',
+            //     'client_company_owner_father_name' => 'required_if:has_company,1',
+            //     'client_company_owner_grandfather_name' => 'required_if:has_company,1',
+            //     'client_company_owner_surname' => 'required_if:has_company,1',
+            //     'client_company_owner_telephone_no' => 'required_if:has_company,1',
+            //     'is_partner' => 'required_if:has_company,1',
+            //     'is_authorized' => 'required_if:has_company,1',
+            //     'authorized_position' => 'required_if:is_authorized,1',
+            //     'is_authorization_in_registration' => 'required_if:is_authorized,1',
+            //     'issuer_authorization_document' => ['required_if:has_company,1|required_unless:client_id,null', 'file', 'max:10240', 'mimes:jpeg,png,gif,bmp,pdf'],
+            //     'ownership_document' => ['required_if:has_company,1|required_unless:client_id,null', 'file', 'max:10240', 'mimes:jpeg,png,gif,bmp,pdf'],
+            //     'career_municipality_license' => ['required_if:has_company,1|required_unless:client_id,null', 'file', 'max:10240', 'mimes:jpeg,png,gif,bmp,pdf'],
+            //     'company_tax_certificate' => ['required_if:has_company,1|required_unless:client_id,null', 'file', 'max:10240', 'mimes:jpeg,png,gif,bmp,pdf'],
+            //     'practice_certificate' => ['required_if:has_company,1|required_unless:client_id,null', 'file', 'max:10240', 'mimes:jpeg,png,gif,bmp,pdf'],
+            // ]/*, $customMessages*/);
+ if (empty($request->agent_id)) {
+            return back()->withInput()->with('error', 'Agent ID is required.');
+        }
 
+        $agentExists = \App\Models\AgentModel::where('agent_code', $request->agent_id)->exists();
+        if (!$agentExists) {
+            return back()->withInput()->with('error', 'Selected agent does not exist.');
+        }
+
+        $request->validate([
+            'first_name'          => 'required',
+            'father_name'         => 'required',
+            'grandfather_name'    => 'required',
+            'surname'             => 'required',
+            'language'            => 'required',
+            'nationality_id'      => 'required',
+            'national_id_number'  => 'required',
+            'residence_id_number' => 'required',
+            'birth_date'          => ['required', 'date', new AdultRule],
+            'gender'              => 'required',
+            'marital_status'      => 'required',
+
+            // ✅ FIX: Properly ignore current client ID on edit for email & mobile
+            'email_id'  => [
+                'required',
+                'email',
+                'unique:clients,email_id,' . ($clientId ?? 'NULL') . ',id,deleted_at,NULL'
+            ],
+            'mobile_no' => [
+                'required',
+                'numeric',
+                'unique:clients,mobile_no,' . ($clientId ?? 'NULL') . ',id,deleted_at,NULL'
+            ],
+
+            'country_id'               => 'required|numeric',
+            'residing_country_same'    => 'required',
+            'city_id'                  => 'required|numeric',
+            'district_id'              => 'required|numeric',
+            'street_name'              => 'required',
+            'building_no'              => 'required',
+            'company_name'             => 'required',
+            'occupation_id'            => 'required|numeric',
+            'work_nature'              => 'required',
+            'company_city_id'          => 'required|numeric',
+            'company_district_id'      => 'required|numeric',
+            'company_street_name'      => 'required',
+            'company_building_no'      => 'required',
+            'company_contact_no'       => 'required',
+
+            'id_front'    => [$clientId ? 'nullable' : 'required', 'file', 'max:10240', 'image'],
+            'id_back'     => [$clientId ? 'nullable' : 'required', 'file', 'max:10240', 'image'],
+            'profile_pic' => [$clientId ? 'nullable' : 'required', 'file', 'max:10240', 'image'],
+
+            // ✅ agent_id is now validated above, keep as nullable here
+            'agent_id'    => 'nullable|string',
+
+            'password'    => 'required_without:client_id',
+            'has_company' => 'required',
+
+            'client_company_name'                      => 'required_if:has_company,1',
+            'client_company_registered_national_id_no' => 'required_if:has_company,1',
+            'client_company_registration_no'           => 'required_if:has_company,1',
+            'client_company_country_id'                => 'required_if:has_company,1|numeric',
+            'client_company_city_id'                   => 'required_if:has_company,1|numeric',
+            'client_company_district_id'               => 'required_if:has_company,1|numeric',
+            'client_company_street_name'               => 'required_if:has_company,1',
+            'client_company_building_no'               => 'required_if:has_company,1',
+            'client_company_office_no'                 => 'required_if:has_company,1',
+            'client_company_telephone_no'              => 'required_if:has_company,1',
+            'client_company_owner_first_name'          => 'required_if:has_company,1',
+            'client_company_owner_father_name'         => 'required_if:has_company,1',
+            'client_company_owner_grandfather_name'    => 'required_if:has_company,1',
+            'client_company_owner_surname'             => 'required_if:has_company,1',
+            'client_company_owner_telephone_no'        => 'required_if:has_company,1',
+            'is_partner'                               => 'required_if:has_company,1',
+            'is_authorized'                            => 'required_if:has_company,1',
+            'authorized_position'                      => 'required_if:is_authorized,1',
+            'is_authorization_in_registration'         => 'required_if:is_authorized,1',
+
+            'issuer_authorization_document' => ['required_if:has_company,1|required_unless:client_id,null', 'file', 'max:10240', 'mimes:jpeg,png,gif,bmp,pdf'],
+            'ownership_document'            => ['required_if:has_company,1|required_unless:client_id,null', 'file', 'max:10240', 'mimes:jpeg,png,gif,bmp,pdf'],
+            'career_municipality_license'   => ['required_if:has_company,1|required_unless:client_id,null', 'file', 'max:10240', 'mimes:jpeg,png,gif,bmp,pdf'],
+            'company_tax_certificate'       => ['required_if:has_company,1|required_unless:client_id,null', 'file', 'max:10240', 'mimes:jpeg,png,gif,bmp,pdf'],
+            'practice_certificate'          => ['required_if:has_company,1|required_unless:client_id,null', 'file', 'max:10240', 'mimes:jpeg,png,gif,bmp,pdf'],
+        ]);
             if (!$request->filled('client_id')) {
                 $client = new Client();
                 $client->first_name = $request->first_name;
@@ -345,7 +429,9 @@ class ClientController extends Controller
                 $client->company_building_no = $request->company_building_no;
                 $client->company_contact_no = $request->company_contact_no;
                 $client->agent_id = $request->filled('agent_id') ? $request->agent_id : null;
-                $client->password = Hash::make($request->password);
+                if ($request->filled('password')) {
+                    $client->password = Hash::make($request->password);
+                }
                 $client->has_company = $request->has_company;
                 $client->save();
                 $files = [
@@ -490,7 +576,7 @@ class ClientController extends Controller
                 'position' => $client->occupation->name,
                 'company_city' => $client->company_city->name,
                 'company_district' => $client->company_district->name,
-                'agent_code' => $client->company_district->name,
+                'agent_code' => $client->agent?->agent_code ?? '',
                 'storage_path' => asset('uploads/clients/')
             ];
             $company_merger_arr = [];
@@ -530,32 +616,107 @@ class ClientController extends Controller
         }
     }
 
-    public function send_message(Request $request)
+    // public function send_message(Request $request)
+    // {
+    //     try {
+    //         $client_id = explode(',', $request->send_client_id);
+    //         $all_clients = Client::whereIn('id', $client_id)->get();
+    //         if ($all_clients->count()) {
+    //             foreach ($all_clients as $single) {
+    //                 $client_message = new ClientMessage();
+    //                 $client_message->client_id = $single->id;
+    //                 $client_message->message = $request->message;
+    //                 $client_message->save();
+    //                 $to_name = $single->full_name;
+    //                 $to_email = $single->email_id;
+    //                 $data = array('name' => $to_name, 'body' => nl2br($request->message));
+    //                 Mail::send('mail', $data, function ($message) use ($to_name, $to_email) {
+    //                     $message->to($to_email, $to_name)
+    //                         ->subject(__('messages.clients.send_message_subject'));
+    //                     $message->from(env('MAIL_USERNAME'), env('MAIL_FROM_NAME'));
+    //                 });
+    //             }
+    //         }
+    //         return back()->with('success', __('messages.clients.message_sent'));
+    //     } catch (\Exception $e) {
+    //         logger()->error($e->getTraceAsString());
+    //         logger()->error($e->getMessage());
+    //         return back()->with('error', __('messages.clients.message_not_sent'));
+    //     }
+    // }
+     public function send_message(Request $request)
     {
+
+    // dd($request->all());
+    // die();
+
+        $request->validate([
+            'send_client_id' => 'required|string',
+            'message' => 'required|string',
+        ]);
+
         try {
-            $client_id = explode(',', $request->send_client_id);
-            $all_clients = Client::whereIn('id', $client_id)->get();
-            if ($all_clients->count()) {
-                foreach ($all_clients as $single) {
-                    $client_message = new ClientMessage();
-                    $client_message->client_id = $single->id;
-                    $client_message->message = $request->message;
-                    $client_message->save();
-                    $to_name = $single->full_name;
-                    $to_email = $single->email_id;
-                    $data = array('name' => $to_name, 'body' => nl2br($request->message));
-                    Mail::send('mail', $data, function ($message) use ($to_name, $to_email) {
-                        $message->to($to_email, $to_name)
-                            ->subject(__('messages.clients.send_message_subject'));
-                        $message->from(env('MAIL_USERNAME'), env('MAIL_FROM_NAME'));
+
+            $clientIds = array_filter(
+                array_map('trim', explode(',', $request->send_client_id))
+            );
+
+            $allClients = Client::whereIn('id', $clientIds)->get();
+
+            if ($allClients->isEmpty()) {
+                return back()->with(
+                    'error',
+                    'No clients selected.'
+                );
+            }
+
+            foreach ($allClients as $client) {
+
+                // Save message
+                $clientMessage = new ClientMessage();
+                $clientMessage->client_id = $client->id;
+                $clientMessage->message = $request->message;
+                $clientMessage->save();
+
+                // Send email only if email exists
+                if (!empty($client->email_id)) {
+
+                    $toName = $client->full_name;
+                    $toEmail = $client->email_id;
+
+                    $data = [
+                        'name' => $toName,
+                        'body' => nl2br($request->message),
+                    ];
+
+                    Mail::send('mail', $data, function ($message) use ($toName, $toEmail) {
+                        $message->to($toEmail, $toName)
+                            ->subject(
+                                __('messages.clients.send_message_subject')
+                            );
+
+                        $message->from(
+                            env('MAIL_USERNAME'),
+                            env('MAIL_FROM_NAME')
+                        );
                     });
                 }
             }
-            return back()->with('success', __('messages.clients.message_sent'));
+
+            return back()->with(
+                'success',
+                __('messages.clients.message_sent')
+            );
+
         } catch (\Exception $e) {
-            logger()->error($e->getTraceAsString());
+
             logger()->error($e->getMessage());
-            return back()->with('error', __('messages.clients.message_not_sent'));
+            logger()->error($e->getTraceAsString());
+
+            return back()->with(
+                'error',
+                __('messages.clients.message_not_sent')
+            );
         }
     }
 

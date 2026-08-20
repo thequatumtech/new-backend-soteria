@@ -21,6 +21,7 @@
     .shadow1 {
         box-shadow: 4px 4px 13px -3px #00000040;
     }
+
     /* Style for modal content */
     .view-modal-content {
         background-color: #fefefe;
@@ -31,9 +32,11 @@
         /*border: 1px solid #888;*/
         width: 80%;
     }
+
     /* Override default error styles */
     .error {
-        color: inherit; /* Set the color to inherit */
+        color: inherit;
+        /* Set the color to inherit */
     }
 </style>
 @endsection
@@ -43,9 +46,11 @@
     <div class="container-fluid">
         <div class="header d-flex justify-content-between p-3 py-2 align-items-center">
             <div class="text-white group-title fw-bold">{{__('messages.reports.renewal')}} {{__('messages.reports.reports')}}</div>
-            <a href="javascript:void(0)" id="toggleForm" class="btn pe-0">
-                <img src="{{asset('img/icon-add.png')}}" alt="">
-            </a>
+            @include('admin.reports.partials.report-download-controls', [
+            'pdfRoute' => route('reports.download', ['report' => 'policy_renewal_report', 'format' => 'pdf']),
+            'excelRoute' => route('reports.download', ['report' => 'policy_renewal_report', 'format' => 'excel']),
+            'filePrefix' => 'Policy_Renewal_Report',
+            ])
         </div>
         <!-- Form to be toggled -->
         <form id="reportForm" action="" method="GET" class="d-none">
@@ -66,20 +71,20 @@
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="insurance_company" id="insurance_company">
                                     <option value="">Select Company</option>
                                     @foreach ($insuranceCompanies as $company)
-                                        <option value="{{ $company->id }}" {{ request('insurance_company')==$company->id ? 'selected' : ''}}>{{ $company->company_name }}</option>
+                                    <option value="{{ $company->id }}" {{ request('insurance_company')==$company->id ? 'selected' : ''}}>{{ $company->company_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
                                 <label for="issue_date">From Date</label>
                                 {{-- <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">  --}}
-                                    <input type="date" name="issue_date" id="issue_date" value="{{request('issue_date')}}">
+                                <input type="date" name="issue_date" id="issue_date" value="{{request('issue_date')}}">
                                 {{-- <div> --}}
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
                                 <label for="expiry_date">To Date</label>
                                 {{-- <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">  --}}
-                                    <input type="date" name="expiry_date" id="expiry_date" value="{{request('expiry_date')}}">
+                                <input type="date" name="expiry_date" id="expiry_date" value="{{request('expiry_date')}}">
                                 {{-- <div> --}}
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
@@ -87,7 +92,7 @@
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="policy_type" id="policy_type">
                                     <option value="">Select Policy Type</option>
                                     @foreach ($policyTypes as $type)
-                                        <option value="{{ $type['id'] }}" {{ request('policy_type')==$type['id'] ? 'selected' : ''}}>{{ $type['name'] }}</option>
+                                    <option value="{{ $type['id'] }}" {{ request('policy_type')==$type['id'] ? 'selected' : ''}}>{{ $type['name'] }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -96,7 +101,7 @@
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="agent_name" id="agent_name">
                                     <option value="">Select Agent</option>
                                     @foreach ($agents as $agent)
-                                        <option value="{{ $agent->id }}" {{ request('agent_name')==$agent->id ? 'selected' : ''}}>{{ $agent->first_name }}</option>
+                                    <option value="{{ $agent->id }}" {{ request('agent_name')==$agent->id ? 'selected' : ''}}>{{ $agent->first_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -105,20 +110,20 @@
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="supervisor" id="supervisor">
                                     <option value="">Select Supervisor Name</option>
                                     @foreach ($supervisor as $supervisor)
-                                        <option value="{{ $supervisor->id }}" {{ request('supervisor')==$supervisor->id ? 'selected' : ''}}>{{ $supervisor->svname }}</option>
+                                    <option value="{{ $supervisor->id }}" {{ request('supervisor')==$supervisor->id ? 'selected' : ''}}>{{ $supervisor->svname }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
                                 <label for="renew_status">Policies Renewed</label>
                                 {{-- <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">  --}}
-                                    <input type="checkbox" name="renew_status" {{request('renew_status')==1 ? 'checked' : ''}} id="renew_status" value="1">
+                                <input type="checkbox" name="renew_status" {{request('renew_status')==1 ? 'checked' : ''}} id="renew_status" value="1">
                                 {{-- <div> --}}
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
                                 <label for="renew_status">Non-Renewed Policies</label>
                                 {{-- <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">  --}}
-                                    <input type="checkbox" name="non_renew_status" {{request('non_renew_status')==2 ? 'checked' : ''}} id="renew_status" value="2">
+                                <input type="checkbox" name="non_renew_status" {{request('non_renew_status')==2 ? 'checked' : ''}} id="renew_status" value="2">
                                 {{-- <div> --}}
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
@@ -132,78 +137,78 @@
         <div class="m-2 text-center">
             <img class="p-3" src="{{asset('img/DashboardSotariaLogo.png')}}" alt="">
             <h4>
-                 @php
-                    switch(request('grouptype'))
-                    {
-                        case 'policy_type':
-                            echo "Renewal By Policy Type";
-                            break;
-                        case 'agent_name':
-                            echo "Renewal By Agent";
-                            break;
-                        case 'supervisor_name':
-                            echo "Renewal By Supervisor";
-                            break;
-                        default:
-                            echo "Renewal By Policy Type";
-                            break;
-                    }
+                @php
+                switch(request('grouptype'))
+                {
+                case 'policy_type':
+                echo "Renewal By Policy Type";
+                break;
+                case 'agent_name':
+                echo "Renewal By Agent";
+                break;
+                case 'supervisor_name':
+                echo "Renewal By Supervisor";
+                break;
+                default:
+                echo "Renewal By Policy Type";
+                break;
+                }
                 @endphp
             </h4>
             <p>From: {{ request('issue_date') ?? '--' }} To: {{ request('expiry_date') ?? '--' }}</p>
         </div>
         <div class="body bg-white py-4 px-4 d-flex flex-column gap-3 pb-5">
             @if ($policies)
-                @foreach ($policies as $company => $data)
-                    <h3>{{ $company }}</h3>
-                    <table class="table table-striped" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th class="no-search">{{__('messages.claims.policy_type')}}</th>
-                                <th class="no-search">{{__('messages.reports.client')}}</th>
-                                <th class="no-search">{{__('messages.reports.agent')}}</th>
-                                <th class="no-search">{{__('messages.agents.supervisor')}}</th>
-                                <th class="no-order no-search">{{__('messages.reports.expiry_date')}}</th>
-                                <th class="no-order no-search">{{__('messages.plans.gross_premium')}}</th>
-                                <th class="no-order no-search">{{__('messages.insurance_company.insurance_company')}}</th>
-                                <th class="no-order no-search">{{__('messages.reports.renewed')}} or {{__('messages.reports.non_renewed')}} ?</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($data['policies'] as $policy)
-                                <tr>
-                                    <td>{{ $policy->policy_type }}</td>
-                                    <td>{{ $policy->client_name }}</td>
-                                    <td>{{ $policy->agent_name }}</td>
-                                    <td>{{ $policy->supervisor_name }}</td>
-                                    <td>{{ $policy->expiry_date }}</td>
-                                    <td>{{ $policy->gross_premium }}</td>
-                                    <td>{{ $policy->company_name }}</td>
-                                    <td>{{ $policy->renew_status }}</td>
-                                </tr>
-                            @endforeach
-                            <!-- Totals Row -->
-                            <tr>
-                                <td colspan="5"><strong>TOTAL</strong></td>
-                                <td>{{ $data['totals']['total_gross_premium'] }}</td>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                @endforeach
+            @foreach ($policies as $company => $data)
+            <h3>{{ $company }}</h3>
+            <table class="table table-striped" style="width:100%">
+                <thead>
+                    <tr>
+                        <th class="no-search">{{__('messages.claims.policy_type')}}</th>
+                        <th class="no-search">{{__('messages.reports.client')}}</th>
+                        <th class="no-search">{{__('messages.reports.agent')}}</th>
+                        <th class="no-search">{{__('messages.agents.supervisor')}}</th>
+                        <th class="no-order no-search">{{__('messages.reports.expiry_date')}}</th>
+                        <th class="no-order no-search">{{__('messages.plans.gross_premium')}}</th>
+                        <th class="no-order no-search">{{__('messages.insurance_company.insurance_company')}}</th>
+                        <th class="no-order no-search">{{__('messages.reports.renewed')}} or {{__('messages.reports.non_renewed')}} ?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($data['policies'] as $policy)
+                    <tr>
+                        <td>{{ $policy->policy_type }}</td>
+                        <td>{{ $policy->client_name }}</td>
+                        <td>{{ $policy->agent_name }}</td>
+                        <td>{{ $policy->supervisor_name }}</td>
+                        <td>{{ $policy->expiry_date }}</td>
+                        <td>{{ $policy->gross_premium }}</td>
+                        <td>{{ $policy->company_name }}</td>
+                        <td>{{ $policy->renew_status }}</td>
+                    </tr>
+                    @endforeach
+                    <!-- Totals Row -->
+                    <tr>
+                        <td colspan="5"><strong>TOTAL</strong></td>
+                        <td>{{ $data['totals']['total_gross_premium'] }}</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+            @endforeach
             @else
-                <h4 class="text-center">No Record Found</h4>
+            <h4 class="text-center">No Record Found</h4>
             @endif
         </div>
     </div>
-    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;"> 
+    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
         <input type="hidden" id="selected_client_id">
-    <div>
-    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;"> 
-        <input type="hidden" id="selected_client_names">
-    <div>
+        <div>
+            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                <input type="hidden" id="selected_client_names">
+                <div>
 </main>
 
 <!-- START Delete Customers -->
@@ -226,19 +231,19 @@
                             <div class="row pt-5">
                                 <div class="col-12 col-lg-9">
                                     <h4>{{__('messages.clients.delete_confirm')}}</h4>
-                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;"> 
+                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                         <input type="hidden" id="deleteing_id" name="delete_customer_id">
-                                    <div>
-                                </div>
-                            </div>
-                            <div class="col-12 col-lg-3">
-                                <div class="pt-4 " style="border: none;">
-                                    <button data-bs-target="#notif" data-bs-toggle="modal" type="submit" class="btn rounded-1 w-100 text-white opacity-50 p-2" style="background-color: #EF7C00;">{{__('messages.clients.delete')}}</button>
+                                        <div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-lg-3">
+                                        <div class="pt-4 " style="border: none;">
+                                            <button data-bs-target="#notif" data-bs-toggle="modal" type="submit" class="btn rounded-1 w-100 text-white opacity-50 p-2" style="background-color: #EF7C00;">{{__('messages.clients.delete')}}</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
             </form>
         </div>
     </div>
@@ -265,22 +270,22 @@
                             <div class="row pt-5">
                                 <div class="col-12 col-lg-9">
                                     <h4>{{__('messages.clients.messages')}}</h4>
-                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;"> 
+                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                         <input type="hidden" id="send_client_id" name="send_client_id">
-                                    <div>
-                                    <div class="shadow-1 p-2">
-                                        <textarea class="input-1" name="message" style="resize: none;min-height: 6.5rem;width: 100%;" required placeholder="{{__('messages.clients.type_here')}}"></textarea>
+                                        <div>
+                                            <div class="shadow-1 p-2">
+                                                <textarea class="input-1" name="message" style="resize: none;min-height: 6.5rem;width: 100%;" required placeholder="{{__('messages.clients.type_here')}}"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-lg-3">
+                                        <div class="pt-4 " style="border: none;">
+                                            <button data-bs-target="#notif" data-bs-toggle="modal" type="submit" class="btn rounded-1 w-100 text-white opacity-50 p-2" style="background-color: #EF7C00;">{{__('messages.clients.send')}}</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-lg-3">
-                                <div class="pt-4 " style="border: none;">
-                                    <button data-bs-target="#notif" data-bs-toggle="modal" type="submit" class="btn rounded-1 w-100 text-white opacity-50 p-2" style="background-color: #EF7C00;">{{__('messages.clients.send')}}</button>
-                                </div>
-                            </div>
                         </div>
-                    </div>
-                </div>
             </form>
         </div>
     </div>
@@ -307,19 +312,19 @@
                                 <div class="col-12 col-lg-9">
                                     <h4>{{__('messages.clients.add_to_blacklist_header')}}</h4>
                                     <span id="add_to_blacklist_clients"></span>
-                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;"> 
+                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                         <input type="hidden" id="add_to_blacklist_client_id" name="add_to_blacklist_client_id">
-                                    <div>
-                                </div>
-                            </div>
-                            <div class="col-12 col-lg-3">
-                                <div class="pt-4 " style="border: none;">
-                                    <button data-bs-target="#notif" data-bs-toggle="modal" type="submit" class="btn rounded-1 w-100 text-white opacity-50 p-2" style="background-color: #EF7C00;">{{__('messages.clients.yes')}}</button>
+                                        <div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-lg-3">
+                                        <div class="pt-4 " style="border: none;">
+                                            <button data-bs-target="#notif" data-bs-toggle="modal" type="submit" class="btn rounded-1 w-100 text-white opacity-50 p-2" style="background-color: #EF7C00;">{{__('messages.clients.yes')}}</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
             </form>
         </div>
     </div>
@@ -353,5 +358,5 @@
 </script>
 <script src="{{asset('js/client.js?v=1.2')}}">
 </script>
+@include('admin.reports.partials.report-download-js')
 @endsection
-

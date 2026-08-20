@@ -80,7 +80,10 @@ class ClientHomeInsurance extends Model
             'insurance_companies.id as insurance_company_id'
         )
             ->leftJoin('home_plans', 'client_home_insurances.plan_id', '=', 'home_plans.id')
-            ->leftJoin('insurance_companies', 'home_plans.insurance_company_id', '=', 'insurance_companies.id')
+            ->leftJoin('insurance_companies', function ($join) {
+                $join->on('home_plans.insurance_company_id', '=', 'insurance_companies.id')
+                    ->whereNull('insurance_companies.deleted_at');
+            })
             ->leftJoin('insurance_company_documents', 'insurance_companies.id', '=', 'insurance_company_documents.insurance_id')
             ->where('client_home_insurances.id', $id)
             ->first();

@@ -331,6 +331,15 @@ $authorized_routes = json_decode($admin->authorized_routes, 1);
                     </a>
                 </li>
                 @endif
+                {{-- @if($is_super_admin == 1 || in_array('pages.new-chat',$authorized_routes)) --}}
+                <li class="{{$currentRouteName == 'pages.new-chat' ? 'active-main' : '' }}">
+                    <a href="{{ route('pages.new-chat') }}">
+                        <i class="fa fa-phone"></i>
+                        <span>new chat</span>
+                        {{-- <span>{{__('messages.sidebar_titles.new_chat')}}</span> --}}
+                    </a>
+                </li>
+                {{-- @endif --}}
                 @if($is_super_admin == 1 || in_array('pages.contactus',$authorized_routes))
                 <li class="{{$currentRouteName == 'pages.contactus' ? 'active-main' : '' }}">
                     <a href="{{ route('pages.contactus') }}">
@@ -453,13 +462,16 @@ $authorized_routes = json_decode($admin->authorized_routes, 1);
                 @endif
 
                 @if($is_super_admin == 1 || in_array('admin_basic',$authorized_routes))
-                <li class="sidebar-dropdown {{in_array($currentRouteName, ['ages.list','chronic_disease.list','claim_status.list','complaint_status.list','dangerous_activities.list','engine_capacity.list','engine_type.list','insurance_period.list','medical_network.list','motor_plan.list','protection_system.list','in_patient_deductible.list','out_patient_deductible.list','no_of_visits.list','country.list','district.list','occupations.list','language.list','nationality.list','currency.list','geographical_area.list','claim_deductible.list','cities.list','pages.vehicle-brand','pages.vehicle-categories','pages.vehicle-color','pages.vehicle-type','type_of_covers.list','insured-items-categories.list','insured_item_sub_categories.list']) ? 'active-main active' : '' }} ">
+                <li class="sidebar-dropdown {{in_array($currentRouteName, ['ages.list','chronic_disease.list','claim_status.list','complaint_status.list','dangerous_activities.list','engine_capacity.list','engine_type.list','insurance_period.list','medical_network.list','motor_plan.list','protection_system.list','in_patient_deductible.list','out_patient_deductible.list','no_of_visits.list','country.list','district.list','occupations.list','language.list','nationality.list','currency.list','geographical_area.list','claim_deductible.list','cities.list','pages.vehicle-brand','pages.vehicle-categories','pages.vehicle-color','pages.vehicle-type','type_of_covers.list','insured-items-categories.list','insured_item_sub_categories.list','banner.list']) ? 'active-main active' : '' }} ">
                     <a href="javascript:void(0)">
                         <i class="far fa-gem"></i>
                         <span>{{__('messages.sidebar_titles.admin_basic')}}</span>
                     </a>
-                    <div class="sidebar-submenu" style="{{in_array($currentRouteName, ['ages.list','chronic_disease.list','claim_status.list','complaint_status.list','dangerous_activities.list','engine_capacity.list','engine_type.list','insurance_period.list','medical_network.list','motor_plan.list','protection_system.list','in_patient_deductible.list','out_patient_deductible.list','no_of_visits.list','country.list','district.list','occupations.list','language.list','nationality.list','currency.list','geographical_area.list','claim_deductible.list','cities.list','pages.vehicle-brand','pages.vehicle-categories','pages.vehicle-color','pages.vehicle-type','type_of_covers.list','insured-items-categories.list','insured_item_sub_categories.list']) ? 'display:block;' : '' }}">
+                    <div class="sidebar-submenu" style="{{in_array($currentRouteName, ['ages.list','chronic_disease.list','claim_status.list','complaint_status.list','dangerous_activities.list','engine_capacity.list','engine_type.list','insurance_period.list','medical_network.list','motor_plan.list','protection_system.list','in_patient_deductible.list','out_patient_deductible.list','no_of_visits.list','country.list','district.list','occupations.list','language.list','nationality.list','currency.list','geographical_area.list','claim_deductible.list','cities.list','pages.vehicle-brand','pages.vehicle-categories','pages.vehicle-color','pages.vehicle-type','type_of_covers.list','insured-items-categories.list','insured_item_sub_categories.list','banner.list']) ? 'display:block;' : '' }}">
                         <ul>
+                            <li class="{{in_array($currentRouteName,['banner.list']) ? 'active-main' : ''}}">
+                                <a href="{{ route('banner.list') }}">Banner Management</a>
+                            </li>
                             <li class="{{in_array($currentRouteName,['ages.list']) ? 'active-main' : ''}}">
                                 <a href="{{ route('ages.list') }}">{{__('messages.sidebar_titles.age')}}</a>
                             </li>
@@ -591,7 +603,18 @@ $authorized_routes = json_decode($admin->authorized_routes, 1);
                     </ul>
                 </li>
 
-
+                {{-- PETS --}}
+                @php $petRoutes = ['pet_breed.list']; @endphp
+                <li class="inner-dropdown {{ in_array($currentRouteName, $petRoutes) ? 'open' : '' }}">
+                    <a href="javascript:void(0)">
+                        Pets <i class="fa fa-angle-right toggle-arrow {{ in_array($currentRouteName, $petRoutes) ? 'rotate-90' : '' }}" style="float:right;"></i>
+                    </a>
+                    <ul class="inner-submenu" style="display: {{ in_array($currentRouteName, $petRoutes) ? 'block' : 'none' }};">
+                        <li class="{{ $currentRouteName == 'pet_breed.list' ? 'active-sub' : '' }}">
+                            <a href="{{ route('pet_breed.list') }}">Pet Breeds</a>
+                        </li>
+                    </ul>
+                </li>
                 {{-- <li class="{{in_array($currentRouteName,['engine_type.list']) ? 'active-main' : ''}}">
                 <a href="{{ route('engine_type.list') }}">{{__('messages.sidebar_titles.engine_type')}}</a>
                 </li> --}}
@@ -630,11 +653,10 @@ $authorized_routes = json_decode($admin->authorized_routes, 1);
                 <li class="{{in_array($currentRouteName,['currency.list']) ? 'active-main' : ''}}">
                     <a href="{{ route('currency.list') }}">{{__('messages.sidebar_titles.currency')}}</a>
                 </li>
-                {{-- <li class="{{in_array($currentRouteName,['geographical_area.list']) ? 'active-main' : ''}}">
+                 <li class="{{in_array($currentRouteName,['geographical_area.list']) ? 'active-main' : ''}}">
                 <a href="{{ route('geographical_area.list') }}">{{__('messages.sidebar_titles.geographical_area')}}</a>
                 </li>
-                --}}
-                {{-- <li class="{{in_array($currentRouteName,['type_of_covers.list']) ? 'active-main' : ''}}">
+            {{-- <li class="{{in_array($currentRouteName,['type_of_covers.list']) ? 'active-main' : ''}}">
                 <a href="{{ route('type_of_covers.list') }}">{{__('messages.sidebar_titles.type_of_cover')}}</a>
                 </li>
                 <li class="{{in_array($currentRouteName,['insured-items-categories.list']) ? 'active-main' : ''}}">

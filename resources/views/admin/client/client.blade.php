@@ -87,8 +87,9 @@
                         <th class="no-search">{{__('messages.clients.agent')}}</th>
                         <th class="no-search">{{__('messages.clients.no_of_policies')}}</th>
                         <th class="no-order no-search">{{__('messages.clients.action')}}</th>
-                        <th class="no-order no-search">{{__('messages.clients.select')}}<br />
-                        <!-- {{--<input class="form-check-input select-all-checkbox" type="checkbox">--}}</th> -->
+                        {{-- <th class="no-order no-search">{{__('messages.clients.select')}}<br /> --}}
+                        <th class="no-order no-search">{{__('messages.clients.select')}}<input class="form-check-input select-all-checkbox" type="checkbox" id="select_all_clients" title="Select All">
+                            <!-- {{--<input class="form-check-input select-all-checkbox" type="checkbox">--}}</th> -->
                         <th class="no-show">Email Address</th>
                         <th class="no-show">National Id/Passport</th>
                         <th class="no-show">Residence No.</th>

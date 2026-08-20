@@ -21,6 +21,7 @@
     .shadow1 {
         box-shadow: 4px 4px 13px -3px #00000040;
     }
+
     /* Style for modal content */
     .view-modal-content {
         background-color: #fefefe;
@@ -31,9 +32,11 @@
         /*border: 1px solid #888;*/
         width: 80%;
     }
+
     /* Override default error styles */
     .error {
-        color: inherit; /* Set the color to inherit */
+        color: inherit;
+        /* Set the color to inherit */
     }
 </style>
 @endsection
@@ -43,9 +46,11 @@
     <div class="container-fluid">
         <div class="header d-flex justify-content-between p-3 py-2 align-items-center">
             <div class="text-white group-title fw-bold">{{__('messages.reports.client_reports')}}</div>
-            <a href="javascript:void(0)" id="toggleForm" class="btn pe-0">
-                <img src="{{asset('img/icon-add.png')}}" alt="">
-            </a>
+            @include('admin.reports.partials.report-download-controls', [
+            'pdfRoute' => route('reports.download', ['report' => 'client_report', 'format' => 'pdf']),
+            'excelRoute' => route('reports.download', ['report' => 'client_report', 'format' => 'excel']),
+            'filePrefix' => 'Client_Report',
+            ])
         </div>
         <!-- Form to be toggled -->
         <form id="reportForm" action="" method="GET" class="d-none">
@@ -73,19 +78,19 @@
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="insurance_company" id="insurance_company">
                                     <option value="">Select Company</option>
                                     @foreach ($insuranceCompanies as $company)
-                                        <option value="{{ $company->id }}" {{ request('insurance_company')==$company->id ? 'selected' : ''}}>{{ $company->company_name }}</option>
+                                    <option value="{{ $company->id }}" {{ request('insurance_company')==$company->id ? 'selected' : ''}}>{{ $company->company_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
                                 <label for="issue_date">Issue Date</label>
-                                <div class="shadow1 p-2" style="padding-bottom: 2.5rem;"> 
+                                <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                     <input type="date" name="issue_date" id="issue_date" value="{{request('issue_date')}}">
                                 </div>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
                                 <label for="expiry_date">Expiry Date</label>
-                                <div class="shadow1 p-2" style="padding-bottom: 2.5rem;"> 
+                                <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                     <input type="date" name="expiry_date" id="expiry_date" value="{{request('expiry_date')}}">
                                 </div>
                             </div>
@@ -94,7 +99,7 @@
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="client_age" id="client_age">
                                     <option value="">Select Client Age</option>
                                     @foreach ($ages as $age)
-                                        <option value="{{ $age->age }}" {{ request('client_age')==$age->age ? 'selected' : ''}}>{{ $age->age }}</option>
+                                    <option value="{{ $age->age }}" {{ request('client_age')==$age->age ? 'selected' : ''}}>{{ $age->age }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -103,7 +108,7 @@
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="client_position" id="client_position">
                                     <option value="">Select Client Position</option>
                                     @foreach ($positions as $position)
-                                        <option value="{{ $position->id }}" {{ request('client_position')==$position->id ? 'selected' : ''}}>{{ $position->name }}</option>
+                                    <option value="{{ $position->id }}" {{ request('client_position')==$position->id ? 'selected' : ''}}>{{ $position->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -112,7 +117,7 @@
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="client_district" id="client_district">
                                     <option value="">Select Client district</option>
                                     @foreach ($district as $district)
-                                        <option value="{{ $district->id }}" {{ request('client_district')==$district->id ? 'selected' : ''}}>{{ $district->name }}</option>
+                                    <option value="{{ $district->id }}" {{ request('client_district')==$district->id ? 'selected' : ''}}>{{ $district->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -121,7 +126,7 @@
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="policy_type" id="policy_type">
                                     <option value="">Select Policy Type</option>
                                     @foreach ($policyTypes as $type)
-                                        <option value="{{ $type['id'] }}" {{ request('policy_type')==$type['id'] ? 'selected' : ''}}>{{ $type['name'] }}</option>
+                                    <option value="{{ $type['id'] }}" {{ request('policy_type')==$type['id'] ? 'selected' : ''}}>{{ $type['name'] }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -138,7 +143,7 @@
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="client_city" id="client_city">
                                     <option value="">Select Client City</option>
                                     @foreach ($city as $city)
-                                        <option value="{{ $city->id }}" {{ request('client_city')==$city->id ? 'selected' : ''}}>{{ $city->name }}</option>
+                                    <option value="{{ $city->id }}" {{ request('client_city')==$city->id ? 'selected' : ''}}>{{ $city->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -147,7 +152,7 @@
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="policy_plan" id="policy_plan">
                                     <option value="">Select Policy Plan</option>
                                     @foreach ($policy_plan as $plan)
-                                        <option value="{{ $plan->plan_name }}" {{ request('policy_plan')==$plan->plan_name ? 'selected' : ''}}>{{ $plan->plan_name }}</option>
+                                    <option value="{{ $plan->plan_name }}" {{ request('policy_plan')==$plan->plan_name ? 'selected' : ''}}>{{ $plan->plan_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -166,18 +171,13 @@
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="client_name" id="client_name">
                                     <option value="">Select Clients’ Name</option>
                                     @foreach ($clients as $client)
-                                        <option value="{{ $client->id }}" {{ request('client_name')==$client->id ? 'selected' : ''}}>{{ $client->first_name }} {{ $client->father_name }} {{ $client->surname }}</option>
+                                    <option value="{{ $client->id }}" {{ request('client_name')==$client->id ? 'selected' : ''}}>{{ $client->first_name }} {{ $client->father_name }} {{ $client->surname }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
                                 <button type="submit" class="btn rounded-1 text-white opacity-50 p-2" style="background-color: #EF7C00;">Generate Report</button>
                             </div>
-                               <!-- <div class="col-12 col-lg-4 pt-4 d-flex gap-2 align-items-end">
-                                <button type="submit" class="btn rounded-1 text-white opacity-50 p-2 flex-grow-1" style="background-color: #EF7C00;">Generate</button>
-                                <button type="submit" name="export" value="excel" class="btn rounded-1 text-white opacity-50 p-2 flex-grow-1" style="background-color: #28a745;">Excel</button>
-                                <button type="submit" name="export" value="pdf" class="btn rounded-1 text-white opacity-50 p-2 flex-grow-1" style="background-color: #dc3545;">PDF</button>
-                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -187,101 +187,101 @@
             <img class="p-3" src="{{asset('img/DashboardSotariaLogo.png')}}" alt="">
             <h4>
                 @php
-                    switch(request('grouptype'))
-                    {
-                        case 'insurance_company':
-                            echo "Client's By Insurance Company";
-                            break;
-                        case 'position':
-                            echo "Client's By Position";
-                            break;
-                        case 'policy_type':
-                            echo "Client's By Policy Type";
-                            break;
-                        case 'gender':
-                            echo "Client's By Gender";
-                            break;
-                        case 'agent_name':
-                            echo "Client's By Agent Name";
-                            break;
-                        case 'policy_plan':
-                            echo "Client's By Policy Plan";
-                            break;
-                        case 'city':
-                            echo "Client's By City";
-                            break;
-                        case 'district':
-                            echo "Client's By District";
-                            break;
-                        case 'marital_status':
-                            echo "Client's By Marital Status";
-                            break;
-                        case 'age':
-                            echo "Client's By Age";
-                            break;
-                        default:
-                            echo "Client's By Insurance Company";
-                            break;
-                    }
+                switch(request('grouptype'))
+                {
+                case 'insurance_company':
+                echo "Client's By Insurance Company";
+                break;
+                case 'position':
+                echo "Client's By Position";
+                break;
+                case 'policy_type':
+                echo "Client's By Policy Type";
+                break;
+                case 'gender':
+                echo "Client's By Gender";
+                break;
+                case 'agent_name':
+                echo "Client's By Agent Name";
+                break;
+                case 'policy_plan':
+                echo "Client's By Policy Plan";
+                break;
+                case 'city':
+                echo "Client's By City";
+                break;
+                case 'district':
+                echo "Client's By District";
+                break;
+                case 'marital_status':
+                echo "Client's By Marital Status";
+                break;
+                case 'age':
+                echo "Client's By Age";
+                break;
+                default:
+                echo "Client's By Insurance Company";
+                break;
+                }
                 @endphp
             </h4>
             <p>From: {{ request('issue_date') ?? '--' }} To: {{ request('expiry_date') ?? '--' }}</p>
         </div>
         <div class="body bg-white py-4 px-4 d-flex flex-column gap-3 pb-5">
             @if($policies)
-                @foreach ($policies as $company => $data)
-                    <h3>{{ $company }}</h3>
-                    <table class="table table-striped " style="width:100%">
-                        <thead>
-                            <tr>
-                                <th class="no-search">{{__('messages.reports.client')}}</th>
-                                <th class="no-search">{{__('messages.sidebar_titles.age')}}</th>
-                                <th class="no-search">{{__('messages.clients.position')}}</th>
-                                <th class="no-search">{{__('messages.sidebar_titles.district')}}</th>
-                                <th class="no-search">{{__('messages.insurance_company.city')}}</th>
-                                <th>{{__('messages.reports.policy_type')}}</th>
-                                <th>{{__('messages.reports.policy_plan')}}</th>
-                                <th>{{__('messages.reports.clients_gender')}}</th>
-                                <th>{{__('messages.clients.marital_status')}}</th>
-                                <th class="no-order no-search">{{__('messages.claims.effective_date')}}</th>
-                                <th class="no-order no-search">{{__('messages.claims.expiry_date')}}</th>
-                                <th class="no-order no-search">{{__('messages.reports.gross_premium')}}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($data['policies'] as $policy)
-                                <tr>
-                                    <td>{{ $policy->client_name }}</td>
-                                    <td>{{ $policy->age }}</td>
-                                    <td>{{ $policy->position }}</td>
-                                    <td>{{ $policy->district }}</td>
-                                    <td>{{ $policy->city }}</td>
-                                    <td>{{ $policy->policy_type }}</td>
-                                    <td>{{ $policy->plan_name }}</td>
-                                    <td>{{ $policy->gender}}</td>
-                                    <td>{{ $policy->marital_status }}</td>
-                                    <td>{{ $policy->start_date }}</td>
-                                    <td>{{ $policy->expiry_date }}</td>
-                                    <td>{{ $policy->gross_premium }}</td>
-                                </tr>
-                            @endforeach
-                            <!-- Totals Row -->
-                            <tr>
-                                <td colspan="11" style="text-align: end !important;"><strong>TOTAL</strong></td>
-                                <td>{{ $data['totals']['total_gross_premium'] }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                @endforeach
+            @foreach ($policies as $company => $data)
+            <h3>{{ $company }}</h3>
+            <table class="table table-striped " style="width:100%">
+                <thead>
+                    <tr>
+                        <th class="no-search">{{__('messages.reports.client')}}</th>
+                        <th class="no-search">{{__('messages.sidebar_titles.age')}}</th>
+                        <th class="no-search">{{__('messages.clients.position')}}</th>
+                        <th class="no-search">{{__('messages.sidebar_titles.district')}}</th>
+                        <th class="no-search">{{__('messages.insurance_company.city')}}</th>
+                        <th>{{__('messages.reports.policy_type')}}</th>
+                        <th>{{__('messages.reports.policy_plan')}}</th>
+                        <th>{{__('messages.reports.clients_gender')}}</th>
+                        <th>{{__('messages.clients.marital_status')}}</th>
+                        <th class="no-order no-search">{{__('messages.claims.effective_date')}}</th>
+                        <th class="no-order no-search">{{__('messages.claims.expiry_date')}}</th>
+                        <th class="no-order no-search">{{__('messages.reports.gross_premium')}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($data['policies'] as $policy)
+                    <tr>
+                        <td>{{ $policy->client_name }}</td>
+                        <td>{{ $policy->age }}</td>
+                        <td>{{ $policy->position }}</td>
+                        <td>{{ $policy->district }}</td>
+                        <td>{{ $policy->city }}</td>
+                        <td>{{ $policy->policy_type }}</td>
+                        <td>{{ $policy->plan_name }}</td>
+                        <td>{{ $policy->gender}}</td>
+                        <td>{{ $policy->marital_status }}</td>
+                        <td>{{ $policy->start_date }}</td>
+                        <td>{{ $policy->expiry_date }}</td>
+                        <td>{{ $policy->gross_premium }}</td>
+                    </tr>
+                    @endforeach
+                    <!-- Totals Row -->
+                    <tr>
+                        <td colspan="11" style="text-align: end !important;"><strong>TOTAL</strong></td>
+                        <td>{{ $data['totals']['total_gross_premium'] }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            @endforeach
             @else
-                <h4 class="text-center">No Record Found</h4>
+            <h4 class="text-center">No Record Found</h4>
             @endif
         </div>
     </div>
-    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;"> 
+    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
         <input type="hidden" id="selected_client_id">
     </div>
-    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;"> 
+    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
         <input type="hidden" id="selected_client_names">
     </div>
 </main>
@@ -306,7 +306,7 @@
                             <div class="row pt-5">
                                 <div class="col-12 col-lg-9">
                                     <h4>{{__('messages.clients.delete_confirm')}}</h4>
-                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;"> 
+                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                         <input type="hidden" id="deleteing_id" name="delete_customer_id">
                                     </div>
                                 </div>
@@ -345,7 +345,7 @@
                             <div class="row pt-5">
                                 <div class="col-12 col-lg-9">
                                     <h4>{{__('messages.clients.messages')}}</h4>
-                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;"> 
+                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                         <input type="hidden" id="send_client_id" name="send_client_id">
                                     </div>
                                     <div class="shadow-1 p-2">
@@ -387,7 +387,7 @@
                                 <div class="col-12 col-lg-9">
                                     <h4>{{__('messages.clients.add_to_blacklist_header')}}</h4>
                                     <span id="add_to_blacklist_clients"></span>
-                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;"> 
+                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                         <input type="hidden" id="add_to_blacklist_client_id" name="add_to_blacklist_client_id">
                                     </div>
                                 </div>
@@ -433,5 +433,5 @@
 </script>
 <script src="{{asset('js/client.js?v=1.2')}}">
 </script>
+@include('admin.reports.partials.report-download-js')
 @endsection
-

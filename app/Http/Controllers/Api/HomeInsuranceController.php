@@ -352,6 +352,9 @@ class HomeInsuranceController extends Controller
     {
         try {
             $data = HomePlan::with('policy_covers', 'insurance_company')
+                ->whereHas('insurance_company', function ($q) {
+                    $q->whereNull('deleted_at');
+                })
                 ->where('plan_name', 'LIKE', '%' . $request->limit . '%')
                 ->get();
 

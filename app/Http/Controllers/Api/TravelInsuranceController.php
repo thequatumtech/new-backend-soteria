@@ -364,9 +364,35 @@ class TravelInsuranceController extends Controller
     public function getTravelInsurancePlan(Request $request)
     {
         try {
-            $data = TravelPlan::with('policy_covers', 'insurance_company');
-            if (!empty($request->plan)) {
+            $data = TravelPlan::with('policy_covers', 'insurance_company')
+                ->whereHas('insurance_company', function ($q) {
+                    $q->whereNull('deleted_at');
+                });
+                // ->where('plan_name', 'LIKE', '%' . $request->plan . '%');
+                if ($request->has('plan') && !empty($request->plan)) {
                 $data->where('plan_name', 'LIKE', '%' . $request->plan . '%');
+            }
+
+            if ($request->has('destination_country_id') && !empty($request->destination_country_id)) {
+                $data->where(function ($query) use ($request) {
+                    $query->whereJsonContains('countries', (string)$request->destination_country_id)
+                    ->orWhereJsonContains('countries', (int)$request->destination_country_id)
+                          ->orWhereHas('geographical_area', function ($q) use ($request) {
+                              $q->whereJsonContains('countries', (string)$request->destination_country_id)
+                          
+                          ->orWhereJsonContains('countries', (int)$request->destination_country_id);
+                });
+               });
+            }
+
+            if ($request->has('departure_from_country_id') && !empty($request->departure_from_country_id)) {
+                $data->where(function ($query) use ($request) {
+                    $query->whereNull('restricted_country_ids')
+                          ->orWhere(function($q) use ($request) {
+                              $q->whereJsonDoesntContain('restricted_country_ids', (string)$request->departure_from_country_id)
+                                ->whereJsonDoesntContain('restricted_country_ids', (int)$request->departure_from_country_id);
+                          });
+                });
             }
             $data = $data->get();
             $data->transform(function ($item) {

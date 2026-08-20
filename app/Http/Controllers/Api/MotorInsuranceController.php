@@ -479,7 +479,10 @@ class MotorInsuranceController extends Controller
     {
         try {
             $data = array();
-            $data = MotorInsurancePlan::where('motor_plan_id', 1)->get();
+            $data = MotorInsurancePlan::whereHas('insurance_company', function ($q) {
+                $q->whereNull('deleted_at');
+            })
+            ->where('motor_plan_id', 1)->get();
             return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Motor Insurance Comprehensive Plan successfully', 'data' => $data]);
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
@@ -488,7 +491,10 @@ class MotorInsuranceController extends Controller
     public function getCompulsory3MonthsPlan(Request $request)
     {
         try {
-            $data = MotorInsurancePlan::where('motor_plan_id', 2)->get();
+            $data = MotorInsurancePlan::whereHas('insurance_company', function ($q) {
+                $q->whereNull('deleted_at');
+            })
+            ->where('motor_plan_id', 2)->get();
             return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Motor Insurance Plan 3 Months successfully', 'data' => $data]);
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
@@ -498,7 +504,10 @@ class MotorInsuranceController extends Controller
     {
         try {
 
-            $data = MotorInsurancePlan::where('motor_plan_id', 3)->get();
+            $data = MotorInsurancePlan::whereHas('insurance_company', function ($q) {
+                $q->whereNull('deleted_at');
+            })
+            ->where('motor_plan_id', 3)->get();
             return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Motor Insurance Plan 6 Months successfully', 'data' => $data]);
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
@@ -508,7 +517,10 @@ class MotorInsuranceController extends Controller
     {
         try {
 
-            $data = MotorInsurancePlan::where('motor_plan_id', 4)->get();
+            $data = MotorInsurancePlan::whereHas('insurance_company', function ($q) {
+                $q->whereNull('deleted_at');
+            })
+            ->where('motor_plan_id', 4)->get();
             return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Motor Insurance Plan 9 Months successfully', 'data' => $data]);
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
@@ -518,7 +530,10 @@ class MotorInsuranceController extends Controller
     {
         try {
 
-            $data = MotorInsurancePlan::where('motor_plan_id', 5)->get();
+            $data = MotorInsurancePlan::whereHas('insurance_company', function ($q) {
+                $q->whereNull('deleted_at');
+            })
+            ->where('motor_plan_id', 5)->get();
             return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Motor Insurance Plan 12 Months successfully', 'data' => $data]);
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
@@ -528,7 +543,10 @@ class MotorInsuranceController extends Controller
     {
         try {
 
-            $data = MotorInsurancePlan::where('motor_plan_id', 6)->get();
+            $data = MotorInsurancePlan::whereHas('insurance_company', function ($q) {
+                $q->whereNull('deleted_at');
+            })
+            ->where('motor_plan_id', 6)->get();
             return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Motor Insurance Plan Total Loss Premium successfully', 'data' => $data]);
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);

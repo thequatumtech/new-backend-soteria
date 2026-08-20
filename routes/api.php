@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Api\ChatController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -32,6 +32,17 @@ Route::post('forgot-password', [ClientController::class, 'forgotPassword']);
 Route::post('register-otp-send', [ClientController::class, 'sendRegisterOtp']);
 
 Route::group(['middleware' => ['apitoken']], function () {
+    
+    Route::post('/save-signature', [ClientController::class, 'saveSignature']);
+    Route::post('/generate-final-pdf', [ClientController::class, 'generate_final_pdf']);
+
+    //write by digvijay live chat
+    Route::post('/chat/start', [ChatController::class, 'startChat']);
+    Route::post('/chat/send', [ChatController::class, 'sendMessage']);
+    Route::get('/chat/{chatId}/messages', [ChatController::class, 'getMessages']);
+    Route::post('/chat/{chatId}/mark-read', [ChatController::class, 'markAsRead']);
+    Route::get('/chat/list', [ChatController::class, 'chatList']);
+    //end live chat
     Route::get('/getProfile', [ClientController::class, 'getProfileDetail']);
 
     Route::get('/logout', [ClientController::class, 'Logout']);
@@ -158,6 +169,7 @@ Route::group(['middleware' => ['apitoken']], function () {
 });
 
 // admin basic
+Route::get('/get-banner', [BannersController::class, 'getBanner']);
 Route::get('/get-ages', [AdminbasicController::class, 'getAges']);
 Route::get('/get-occupations', [AdminbasicController::class, 'getOccupations']);
 Route::get('/get-chronic-disease', [AdminbasicController::class, 'getChronicDisease']);
@@ -189,3 +201,7 @@ Route::get('/get-type-cover', [AdminbasicController::class, 'getTypeCover']);
 Route::get('/get-item-category', [AdminbasicController::class, 'getItemCategory']);
 Route::get('/get-item-subcategory', [AdminbasicController::class, 'getItemSubcategory']);
 Route::post('/check-dangerous-activity', [AdminbasicController::class, 'checkDangerousActivity']);
+
+Route::get('/pet-breeds', [PetBreedController::class, 'index']);
+Route::get('/pet-breeds/{id}', [PetBreedController::class, 'show']);
+

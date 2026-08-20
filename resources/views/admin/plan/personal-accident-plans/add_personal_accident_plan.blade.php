@@ -81,47 +81,40 @@
         </div>
         <form action="{{route('personal_accident_plan.save')}}" id="add_motor_plan" method="post" enctype="multipart/form-data">
             @csrf
-            <input type="hidden" name="plan_id" value="{{isset($plan)?$plan->id:null}}">
-            <input type="hidden" id="form_type" name="form_type" value="{{isset($plan)?'edit':'add'}}">
+            <input type="hidden" name="plan_id" value="{{isset($plan) ? $plan->id : null}}">
+            <input type="hidden" id="form_type" name="form_type" value="{{isset($plan) ? 'edit' : 'add'}}">
             <div class="body bg-white py-4 px-4 d-flex flex-column gap-3 pb-5">
                 <div class="row p-3" style="color: #92959A;">
                     <div class="container">
                         <div class="row">
                             <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
-                                <div>{{__('messages.plans.insurance_company')}}</div>
+                                <div>{{__('messages.plans.insurance_company')}} *</div>
                                 <select name="insurance_company_id" class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" required>
                                     <option value="" disabled {{(!old('insurance_company_id') && !isset($plan->insurance_company_id) ? 'selected' : '')}} hidden>--Select--</option>
                                     @foreach($insurance_companies as $single)
-                                    <option value="{{$single->id}}" {{(old('insurance_company_id') && old('insurance_company_id') == $single->id) ? 'selected':(isset($plan->insurance_company_id) && $plan->insurance_company_id == $single->id? 'selected':'')}}>{{$single->company_name}}</option>
+                                    <option value="{{$single->id}}" {{(old('insurance_company_id') && old('insurance_company_id') == $single->id) ? 'selected' : (isset($plan->insurance_company_id) && $plan->insurance_company_id == $single->id ? 'selected' : '')}}>{{$single->company_name}}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
                                 <div>{{__('messages.plans.line_of_business')}}</div>
                                 <input type="text" style="border: none;" disabled value="{{$line_of_businesses}}">
-                                {{--
-                                <select name="line_of_business_id" class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" required>
-                                    <option value="" disabled {{(!old('line_of_business_id') && !isset($plan->line_of_business_id) ? 'selected' : '')}} hidden>--Select--</option>
-                                @foreach($line_of_businesses as $single)
-                                <option value="{{$single->id}}" {{(old('line_of_business_id') && old('line_of_business_id') == $single->id) ? 'selected':(isset($plan->line_of_business_id) && $plan->line_of_business_id == $single->id? 'selected':'')}}>{{$single->name}}</option>
-                                @endforeach
-                                </select>
-                                --}}
+
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
-                                <div>{{__('messages.plans.plan_name')}}</div>
+                                <div>{{__('messages.plans.plan_name')}} *</div>
                                 <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                    <input type="text" name="plan_name" style="border: none;" required value="{{old('plan_name')?:($plan->plan_name ?? '')}}">
+                                    <input type="text" name="plan_name" style="border: none;" required value="{{old('plan_name') ?: ($plan->plan_name ?? '')}}">
                                 </div>
                             </div>
                         </div>
-                        <h3 class="pt-5">{{__('messages.plans.personal_policy_period')}}</h3>
-                        <div class="row">
-                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
-                                <div>{{__('messages.plans.insurance_period')}}</div>
-                                <select name="insurance_period_id" class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" required>
+                        <!-- <h3 class="pt-5">{{__('messages.plans.personal_policy_period')}}</h3> -->
+                        <!-- <div class="row"> -->
+                            <!-- <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                <div>{{__('messages.plans.insurance_period')}}</div> -->
+                                <!-- <select name="insurance_period_id" class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" required>
                                     <option value="" disabled {{ (!old('insurance_period_id') && !isset($plan->insurance_period_id) ? 'selected' : '') }} hidden>--Select--</option>
                                     @foreach($insurance_periods as $single)
                                     <option value="{{ $single->id }}" data-name="{{ $single->name }}"
@@ -129,9 +122,9 @@
                                         {{ $single->name }}
                                     </option>
                                     @endforeach
-                                </select>
-                            </div>
-                        </div>
+                                </select> -->
+                            <!-- </div> -->
+                        <!-- </div> -->
                         <h3 class="pt-5">{{__('messages.plans.insurance_policy_wording')}}</h3>
                         <div class="row">
                             <div class="col-12">
@@ -167,7 +160,7 @@
                                 <div>{{__('messages.plans.policy_holder_country_restriction')}}</div>
                                 <select name="restricted_country_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
                                     @foreach($countries as $single)
-                                    <option value="{{$single->id}}" {{in_array($single->id,old('restricted_country_ids',[]))}}>{{$single->name}}</option>
+                                    <option value="{{$single->id}}" {{in_array($single->id, old('restricted_country_ids', []))}}>{{$single->name}}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -175,7 +168,7 @@
                                 <div>{{__('messages.plans.policy_holder_city_restriction')}}</div>
                                 <select name="restricted_city_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
                                     @foreach($cities as $single)
-                                    <option value="{{$single->id}}" {{in_array($single->id,old('restricted_city_ids',[]))}}>{{$single->name}}</option>
+                                    <option value="{{$single->id}}" {{in_array($single->id, old('restricted_city_ids', []))}}>{{$single->name}}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -185,7 +178,7 @@
                                 <div>{{__('messages.plans.policy_holder_district_restriction')}}</div>
                                 <select name="restricted_district_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
                                     @foreach($districts as $single)
-                                    <option value="{{$single->id}}" {{in_array($single->id,old('restricted_district_ids',[]))}}>{{$single->name}}</option>
+                                    <option value="{{$single->id}}" {{in_array($single->id, old('restricted_district_ids', []))}}>{{$single->name}}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -193,7 +186,7 @@
                                 <div>{{__('messages.plans.policy_holder_age_restriction')}}</div>
                                 <select name="restricted_age_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
                                     @foreach($ages as $single)
-                                    <option value="{{$single->id}}" {{in_array($single->id,old('restricted_age_ids',[]))}}>{{$single->age}}</option>
+                                    <option value="{{$single->id}}" {{in_array($single->id, old('restricted_age_ids', []))}}>{{$single->age}}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -203,7 +196,7 @@
                                 <div>{{__('messages.plans.policy_holder_occupation_restriction')}}</div>
                                 <select name="restricted_occupation_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
                                     @foreach($occupations as $single)
-                                    <option value="{{$single->id}}" {{in_array($single->id,old('restricted_occupation_ids',[]))}}>{{$single->name}}</option>
+                                    <option value="{{$single->id}}" {{in_array($single->id, old('restricted_occupation_ids', []))}}>{{$single->name}}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -211,21 +204,21 @@
                                 <div>{{__('messages.plans.policy_holder_dangerous_activities_restriction')}}</div>
                                 <select name="restricted_dangerous_activities_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
                                     @foreach($dangerous_activities as $single)
-                                    <option value="{{$single->id}}" {{in_array($single->id,old('restricted_dangerous_activities_ids',[]))}}>{{$single->name}}</option>
+                                    <option value="{{$single->id}}" {{in_array($single->id, old('restricted_dangerous_activities_ids', []))}}>{{$single->name}}</option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
-                        <h3 class="pt-5">{{ __('messages.plans.add_policy_covers') }}</h3>
+                        <h3 class="pt-5">{{ __('messages.plans.add_policy_covers') }} *</h3>
                         <table class="table-bordered dynamic-table" style="width: 100%;">
                             <thead>
                                 <tr>
                                     <th>{{ __('messages.plans.name_of_cover') }}</th>
                                     <th>{{ __('messages.plans.limit') }}</th>
                                     <th>{{ __('messages.plans.deductible') }}</th>
-                                    <!-- <th>{{ __('messages.plans.premium') }}</th> -->
+
                                     <th></th>
-                                    <th></th> <!-- Add More Button column -->
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -245,11 +238,7 @@
                                             <input type="text" name="policy_covers[0][cover_deductible]" style="border: none;" required>
                                         </div>
                                     </td>
-                                    <!-- <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="policy_covers[0][cover_premium]" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" style="border: none;" class="cover_premium calnet positive_number_only_2_decimal" required>
-                                        </div>
-                                    </td> -->
+
                                     <td width="5%">
                                         <button class="btn p-0 m-0 deletebtn" title="Delete">
                                             <img src="{{ asset('img/icon-delete.png') }}" alt="">
@@ -262,101 +251,75 @@
                             </tbody>
                         </table>
 
-                        <h3 class="pt-5">{{__('messages.plans.insurance_limit')}}</h3>
+                        <h3 class="pt-5">{{__('messages.plans.insurance_limit')}} *</h3>
                         <div class="row">
                             <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
                                 <div>{{__('messages.plans.coverage_amount')}}</div>
                                 <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                    <input type="text" name="limit" style="border: none;" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" required value="{{old('limit')?:($plan->limit ?? '')}}">
+                                    <input type="text" name="limit" style="border: none;" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" required value="{{old('limit') ?: ($plan->limit ?? '')}}">
                                 </div>
                             </div>
                         </div>
 
                         <h3 class="pt-5">{{__('messages.plans.pricing_schedule')}}</h3>
-                        <table class="table-bordered" style="width: 100%;">
-                            <thead>
-                                <tr>
-                                    <th colspan="5">{{__('messages.plans.pricing_schedule')}}</th>
-                                </tr>
-                                {{-- <tr>
-                                <th width="28%">{{__('messages.plans.age_period')}}</th>
-                                <th class="period-col m_3_col">{{__('messages.plans.m_3')}}</th>
-                                <th class="period-col m_6_col">{{__('messages.plans.m_6')}}</th>
-                                <th class="period-col m_9_col">{{__('messages.plans.m_9')}}</th>
-                                <th class="period-col m_12_col">{{__('messages.plans.m_12')}}</th>
-                                </tr> --}}
-                                <tr id="pricing-header">
-                                    <th width="28%">{{ __('messages.plans.age_period') }}</th>
-                                    <th class="selected-period-header"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {{-- @for($i=1;$i<=60;$i++)
-                                <tr data-id="0">
-                                    <td class="period-col m_3_col">
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="pricing_schedule[{{$i}}][age]" style="border: none;" value="{{$i}}"
-                                readonly required>
-                    </div>
-                    </td>
-                    <td class="period-col m_3_col">
-                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                            <input type="text" name="pricing_schedule[{{$i}}][m_3]" style="border: none;" value=""
-                                required>
+                        <div style="overflow-x: auto;">
+                            <table class="table-bordered" style="width: 100%; min-width: 1000px;">
+                                <thead>
+                                    <tr>
+                                        <th colspan="{{ count($insurance_periods) + 1 }}">{{__('messages.plans.pricing_schedule')}}</th>
+                                    </tr>
+                                    <tr>
+                                        <th width="80px">{{ __('messages.plans.age_period') }}</th>
+                                        @foreach($insurance_periods as $period)
+                                            <th>{{ $period->name }}</th>
+                                        @endforeach
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for ($i = 0; $i < 60; $i++)
+                                        <tr>
+                                            <td>
+                                                <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                    <input type="text"
+                                                        name="pricing_schedule[{{ $i }}][age]"
+                                                        style="border: none;"
+                                                        value="{{ $i + 1 }}"
+                                                        readonly required>
+                                                </div>
+                                            </td>
+                                            @foreach($insurance_periods as $period)
+                                                @php
+        $col = 'm_' . preg_replace('/[^0-9]/', '', $period->name);
+                                                @endphp
+                                                <td>
+                                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                        <input type="text"
+                                                            name="pricing_schedule[{{ $i }}][{{ $col }}]"
+                                                            oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');"
+                                                            style="border: none;"
+                                                            value="{{ old('pricing_schedule.' . $i . '.' . $col, '') }}"
+                                                            required>
+                                                    </div>
+                                                </td>
+                                            @endforeach
+                                        </tr>
+                                    @endfor
+                                </tbody>
+                            </table>
                         </div>
-                    </td>
-                    <td class="period-col m_3_col">
-                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                            <input type="text" name="pricing_schedule[{{$i}}][m_6]" style="border: none;" value=""
-                                required>
-                        </div>
-                    </td>
-                    <td class="period-col m_3_col">
-                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                            <input type="text" name="pricing_schedule[{{$i}}][m_9]" style="border: none;" value=""
-                                required>
-                        </div>
-                    </td>
-                    <td class="period-col m_3_col">
-                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                            <input type="text" name="pricing_schedule[{{$i}}][m_12]" style="border: none;" value=""
-                                required>
-                        </div>
-                    </td>
-                    </tr>
-                    @endfor --}}
-                    @for ($i = 0; $i < 60; $i++)
-                        <tr>
-                        <td>
-                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                <input type="text" name="pricing_schedule[{{ $i }}][age]" style="border: none;" value="{{ $i + 1 }}" readonly required>
-                            </div>
-                        </td>
-                        <td class="selected-period-input">
-                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                <input type="text" class="dynamic-input" name="pricing_schedule[{{ $i }}][m_1]" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" style="border: none;" required
-                                    value="{{ old('pricing_schedule.' . $i . '.m_1', (isset($plan) && isset($plan->pricingSchedules) ? $plan->pricingSchedules->where('age', $i + 1)->first()->m_1 ?? '' : '')) }}">
-                            </div>
-                        </td>
-                        </tr>
-                        @endfor
-
-                        </tbody>
-                        </table>
-
                         <h3 class="pt-5">{{__('messages.plans.premium_calculations')}}</h3>
                         <table class="table-bordered" style="width: 100%;">
                             <thead>
                                 <tr>
                                     <th width="20%">{{__('messages.plans.plan_name')}}</th>
                                     <th>{{__('messages.plans.limit')}}</th>
-                                    {{-- <th>{{__('messages.plans.net_premium')}}</th> --}}
+
                                     <th>{{__('messages.plans.fees')}}</th>
                                     <th>{{__('messages.plans.stamps')}}</th>
                                     <th>{{__('messages.plans.sales_tax')}}</th>
                                     <th>{{__('messages.plans.cbj')}}</th>
                                     <th>{{__('messages.plans.sales_tax_on_cbj')}}</th>
-                                    {{-- <th>{{__('messages.plans.gross_premium')}}</th> --}}
+
                                 </tr>
                             </thead>
                             <tbody>
@@ -372,11 +335,7 @@
                                         </div>
                                     </td>
                                     <input type="hidden" name="net_premium" id="net_premium" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" class="calc_gross_premium" style="border: none;" value="0">
-                                    {{-- <td>
-                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                        <input type="text" name="net_premium" id="net_premium" class="calc_gross_premium" style="border: none;" readonly required>
-                                    </div>
-                                </td> --}}
+
                                     <td>
                                         <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                             <input type="text" name="fees" id="fees" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" class="calc_gross_premium positive_number_only_2_decimal" style="border: none;" required>
@@ -403,12 +362,7 @@
                                             <input type="text" name="salextaxcbj" style="border: none;" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" class="calc_gross_premium positive_number_only_2_decimal" id="cbj_sales_tax" required>
                                         </div>
                                     </td>
-                                    {{--
-                                <td>
-                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                        <input type="text" name="gross_premium" id="gross_premium" style="border: none;" readonly required>
-                                    </div>
-                                </td> --}}
+
 
                                 </tr>
                             </tbody>
@@ -418,19 +372,14 @@
                         <table class="table-bordered" style="width: 100%;">
                             <thead>
                                 <tr>
-                                    {{-- <th>{{__('messages.plans.net_premium')}}</th> --}}
+
                                     <th>{{__('messages.plans.commission_percentage')}}</th>
-                                    {{-- <th>{{__('messages.plans.commission_amount')}}</th> --}}
+
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
 
-                                    {{-- <td>
-                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                        <input type="text" id="net_premium1" style="border: none;" readonly>
-                                    </div>
-                                </td> --}}
 
                                     <td>
                                         <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
@@ -438,12 +387,7 @@
                                         </div>
                                     </td>
                                     <input type="hidden" name="commission_amount" id="commission_amount" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" style="border: none;" value="0">
-                                    {{--
-                                <td>
-                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                        <input type="text" name="commission_amount" id="commission_amount" style="border: none;" required readonly>
-                                    </div>
-                                </td> --}}
+
 
                                 </tr>
                             </tbody>
@@ -453,7 +397,7 @@
                             <div class="col-12 col-lg-9"></div>
                             <div class="col-12 col-lg-3">
                                 <div class="pt-4 " style="border: none;">
-                                    <button type="submit" class="btn rounded-1 w-100 text-white opacity-50 p-2 submit-btn" style="background-color: #EF7C00;">{{isset($plan)? __('messages.clients.save') : __('messages.clients.add')}} </button>
+                                    <button type="submit" class="btn rounded-1 w-100 text-white opacity-50 p-2 submit-btn" style="background-color: #EF7C00;">{{isset($plan) ? __('messages.clients.save') : __('messages.clients.add')}} </button>
                                 </div>
                             </div>
                         </div>
@@ -467,148 +411,47 @@
 @endsection
 
 @section('script')
-<script>
-    var deleteIconUrl = "{{ asset('img/icon-delete.png') }}";
-</script>
+    <script>
+        var deleteIconUrl = "{{ asset('img/icon-delete.png') }}";
+    </script>
 
-{{-- <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const dropdown = document.querySelector('select[name="insurance_period_id"]');
-                const header = document.querySelector('.selected-period-header');
-                const inputRows = document.querySelectorAll('.selected-period-input');
 
-                dropdown.addEventListener('change', function() {
-                    const selectedOption = this.options[this.selectedIndex];
-                    const periodText = selectedOption.dataset.name || '';
-                    const monthMatch = periodText.match(/\d+/);
-                    const monthNumber = monthMatch ? monthMatch[0] : '1';
-                    const newMonthColumn = `m_${monthNumber}`;
-                    header.textContent = periodText;
-                    inputRows.forEach(function(row, index) {
-                        const input = row.querySelector('.dynamic-input');
-                        const age = index + 1;
-                        input.setAttribute('name', `pricing_schedule[${age}][${newMonthColumn}]`);
-                        // input.value = '';
+
+    <script>
+        $(document).ready(function() {
+            function fetchCBJ(companyId) {
+                if (companyId) {
+                    $.ajax({
+                        url: '{{ route("get.cbj") }}',
+                        type: 'GET',
+                        data: {
+                            insurance_company_id: companyId,
+                            line_of_business_id: 9
+                        },
+                        success: function(response) {
+                            $('input[name="cbj"]').val(response.cbj ?? '');
+                            $('input[name="fees"]').val(response.insurance_fee ?? '');
+                            $('input[name="stamps"]').val(response.stamp ?? '');
+                            $('input[name="sales_tax"]').val(response.tax ?? '');
+                            $('input[name="salextaxcbj"]').val(response.sales_tax_on_cbj ?? '');
+                            $('#commission_percentage').val(response.commission_percentage ?? '');
+                        },
+                        error: function() {
+                            alert('Failed to fetch values.');
+                        }
                     });
-                });
-
-                dropdown.dispatchEvent(new Event('change'));
-            });
-        </script> --}}
-<!-- old script -->
-<!-- <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const dropdown = document.querySelector('select[name="insurance_period_id"]');
-        const header = document.querySelector('.selected-period-header');
-        const inputRows = document.querySelectorAll('.selected-period-input');
-        dropdown.addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            const periodText = selectedOption.dataset.name || '';
-            const monthMatch = periodText.match(/\d+/);
-            const monthNumber = monthMatch ? monthMatch[0] : '1';
-            const newMonthColumn = `m_${monthNumber}`;
-            header.textContent = periodText;
-            inputRows.forEach(function(row, index) {
-                const input = row.querySelector('.dynamic-input');
-                // Use index (0-59) for array structure, not age (1-60)
-                input.setAttribute('name', `pricing_schedule[${index}][${newMonthColumn}]`);
-                //input.value = '';
-            });
-        });
-        dropdown.dispatchEvent(new Event('change'));
-    });
-</script> -->
-
-<!-- updated script -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const dropdown = document.querySelector('select[name="insurance_period_id"]');
-        const header = document.querySelector('.selected-period-header');
-        const inputRows = document.querySelectorAll('.selected-period-input');
-
-        const periodValuesCache = {};
-
-        function saveCurrentValues(columnKey) {
-            if (!columnKey) return;
-            periodValuesCache[columnKey] = [];
-            inputRows.forEach(function(row) {
-                const input = row.querySelector('.dynamic-input');
-                periodValuesCache[columnKey].push(input.value);
-            });
-        }
-
-        function restoreValues(columnKey) {
-            if (!columnKey || !periodValuesCache[columnKey]) return;
-            inputRows.forEach(function(row, index) {
-                const input = row.querySelector('.dynamic-input');
-                input.value = periodValuesCache[columnKey][index] ?? '';
-            });
-        }
-
-        let currentColumnKey = null;
-
-        dropdown.addEventListener('change', function() {
-            saveCurrentValues(currentColumnKey);
-
-            const selectedOption = this.options[this.selectedIndex];
-            const periodText = selectedOption.dataset.name || '';
-            const monthMatch = periodText.match(/\d+/);
-            const monthNumber = monthMatch ? monthMatch[0] : '1';
-            const newMonthColumn = `m_${monthNumber}`;
-
-            header.textContent = periodText;
-
-            inputRows.forEach(function(row, index) {
-                const input = row.querySelector('.dynamic-input');
-                input.setAttribute('name', `pricing_schedule[${index}][${newMonthColumn}]`);
-            });
-
-            restoreValues(newMonthColumn);
-
-            currentColumnKey = newMonthColumn;
-        });
-
-        dropdown.dispatchEvent(new Event('change'));
-    });
-</script>
-<script>
-    $(document).ready(function() {
-        function fetchCBJ(companyId) {
-            if (companyId) {
-                $.ajax({
-                    url: '{{ route("get.cbj") }}',
-                    type: 'GET',
-                    data: {
-                        insurance_company_id: companyId,
-                        line_of_business_id: 9
-                    },
-                    success: function(response) {
-                        $('input[name="cbj"]').val(response.cbj ?? '');
-                        $('input[name="fees"]').val(response.insurance_fee ?? '');
-                        $('input[name="stamps"]').val(response.stamp ?? '');
-                        $('input[name="sales_tax"]').val(response.tax ?? '');
-                        $('input[name="salextaxcbj"]').val(response.sales_tax_on_cbj ?? '');
-                        $('#commission_percentage').val(response.commission_percentage ?? '');
-                    },
-                    error: function() {
-                        alert('Failed to fetch values.');
-                    }
-                });
+                }
             }
-        }
 
-        // On change
-        $('select[name="insurance_company_id"]').on('change', function() {
-            let companyId = $(this).val();
-            fetchCBJ(companyId);
+            $('select[name="insurance_company_id"]').on('change', function() {
+                fetchCBJ($(this).val());
+            });
+
+            let preselectedCompanyId = $('select[name="insurance_company_id"]').val();
+            if (preselectedCompanyId) {
+                fetchCBJ(preselectedCompanyId);
+            }
         });
-
-        // Trigger fetch on page load if already selected
-        let preselectedCompanyId = $('select[name="insurance_company_id"]').val();
-        if (preselectedCompanyId) {
-            fetchCBJ(preselectedCompanyId);
-        }
-    });
-</script>
-<script src="{{asset('js/personal_accident_plan.js')}}"></script>
+    </script>
+    <script src="{{asset('js/personal_accident_plan.js')}}"></script>
 @endsection

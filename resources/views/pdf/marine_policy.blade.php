@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
@@ -77,6 +78,15 @@
         background-color: #e0e0e0;
     }
 
+    .signatures .signature-image {
+        max-width: 120px;
+        max-height: 60px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        margin-top: 10px;
+    }
+
     footer {
         text-align: center;
         font-size: 12px;
@@ -87,7 +97,7 @@
 <body>
     <div class="policy-container">
         <header class="policy-header">
-            <img src="{{public_path('insurance/'.$data->insurance_company_id.'/'.$data->logo)}}" alt="Arabia Insurance Jordan" class="logo">
+            <img src="{{public_path('insurance/' . $data->insurance_company_id . '/' . $data->logo)}}" alt="{{ $data->company_name }}" class="logo">
             <h1>Marine insurance contract</h1>
         </header>
 
@@ -106,11 +116,11 @@
             </tr>
             <tr>
                 <td><strong>Effective Date</strong></td>
-                <td>{{date('m-d-Y',strtotime($data->effective_date))}}</td>
+                <td>{{date('m-d-Y', strtotime($data->effective_date))}}</td>
             </tr>
             <tr>
                 <td><strong>Expiry Date</strong></td>
-                <td>{{date('m-d-Y',strtotime($data->expiry_date))}}</td>
+                <td>{{date('m-d-Y', strtotime($data->expiry_date))}}</td>
             </tr>
             <!-- <tr>
                 <td><strong>Geographical Coverage</strong></td>
@@ -130,25 +140,33 @@
         $abbr = $abbr ?? 'JOD';
 
         $columns = [];
-        if(!empty($purchase->policy_plan_limit)) $columns['Limit'] = number_format($purchase->policy_plan_limit, 2) . ' ' . $abbr;
-        if(!empty($purchase->net_premium)) $columns['Net Premium'] = number_format($purchase->net_premium, 2) . ' ' . $abbr;
+        if (!empty($purchase->policy_plan_limit))
+        $columns['Limit'] = number_format($purchase->policy_plan_limit, 2) . ' ' . $abbr;
+        if (!empty($purchase->net_premium))
+        $columns['Net Premium'] = number_format($purchase->net_premium, 2) . ' ' . $abbr;
 
         $fees_label = 'Issuance Fees' . ($data->fees > 0 ? ' (' . $data->fees . '%)' : '');
-        if(!empty($purchase->fees)) $columns[$fees_label] = number_format($purchase->fees, 2) . ' ' . $abbr;
+        if (!empty($purchase->fees))
+        $columns[$fees_label] = number_format($purchase->fees, 2) . ' ' . $abbr;
 
         $stamps_label = 'Stamps' . ($data->stamps > 0 ? ' (' . $data->stamps . '%)' : '');
-        if(!empty($purchase->stamps)) $columns[$stamps_label] = number_format($purchase->stamps, 2) . ' ' . $abbr;
+        if (!empty($purchase->stamps))
+        $columns[$stamps_label] = number_format($purchase->stamps, 2) . ' ' . $abbr;
 
         $sales_tax_label = 'Sales Tax' . ($data->sales_tax > 0 ? ' (' . $data->sales_tax . '%)' : '');
-        if(!empty($purchase->sales_tax)) $columns[$sales_tax_label] = number_format($purchase->sales_tax, 2) . ' ' . $abbr;
+        if (!empty($purchase->sales_tax))
+        $columns[$sales_tax_label] = number_format($purchase->sales_tax, 2) . ' ' . $abbr;
 
         $cbj_label = 'Contribution to the Guarantee Fund (CBJ)' . ($data->cbj > 0 ? ' (' . $data->cbj . '%)' : '');
-        if(!empty($purchase->cbj)) $columns[$cbj_label] = number_format($purchase->cbj, 2) . ' ' . $abbr;
+        if (!empty($purchase->cbj))
+        $columns[$cbj_label] = number_format($purchase->cbj, 2) . ' ' . $abbr;
 
         $cbj_tax_label = 'Sales Tax on CBJ Contribution Fund' . ($data->sales_tax_cbj > 0 ? ' (' . $data->sales_tax_cbj . '%)' : '');
-        if(!empty($purchase->sales_tax_cbj)) $columns[$cbj_tax_label] = number_format($purchase->sales_tax_cbj, 2) . ' ' . $abbr;
+        if (!empty($purchase->sales_tax_cbj))
+        $columns[$cbj_tax_label] = number_format($purchase->sales_tax_cbj, 2) . ' ' . $abbr;
 
-        if(!empty($purchase->gross_premium)) $columns['Gross Premium'] = number_format($purchase->gross_premium, 2) . ' ' . $abbr;
+        if (!empty($purchase->gross_premium))
+        $columns['Gross Premium'] = number_format($purchase->gross_premium, 2) . ' ' . $abbr;
 
         // if(!empty($purchase->commission_amount)) $columns['Commission Amount'] = number_format($purchase->commission_amount, 2) . ' ' . $abbr;
         @endphp
@@ -205,8 +223,25 @@
                 <td>Policy Holder / {{$data->first_name}} {{$data->last_name}} {{$data->third_name}} {{$data->family_name}}</td>
             </tr>
             <tr>
-                <td>Insurer <img src="{{public_path('insurance/'.$data->insurance_company_id.'/'.$data->company_stamp)}}" alt="" class="logo"></td>
-                <td>Insured <img src="{{public_path('insurance/'.$data->insurance_company_id.'/'.$data->authorized_signature)}}" alt="" class="logo"></td>
+                <td>
+                    Insurer <br>
+                    <img src="{{public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp)}}"
+                        alt=""
+                        class="signature-image">
+                </td>
+                <td>
+                    Insured <br>
+                    {{-- User Signature --}}
+                    @if(!empty($data->user_signature) && file_exists(public_path($data->user_signature)))
+                    <img src="{{ public_path($data->user_signature) }}"
+                        alt="User Signature"
+                        class="signature-image">
+                    @endif
+
+                    <img src="{{public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature)}}"
+                        alt="Authorized Signature"
+                        class="signature-image">
+                </td>
             </tr>
         </table>
 

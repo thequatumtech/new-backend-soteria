@@ -207,6 +207,15 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                <div>{{__('messages.plans.geographical_area')}}</div>
+                                <select name="geographical_areas_ids" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;">
+                                    <option value="" disabled="" selected="" hidden="">--Select--</option>
+                                    @foreach($geographical_areas as $single)
+                                    <option value="{{$single->id}}" {{$single->id == old('geographical_areas_ids',$plan->geographical_areas_ids) ? 'selected' : ''}}>{{$single->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                         <div class="row">
                             <!-- <div class="col-12 col-lg-6 pt-4 d-flex flex-column">

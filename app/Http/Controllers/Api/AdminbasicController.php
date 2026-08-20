@@ -440,7 +440,25 @@ class AdminbasicController extends Controller
             elseif ($request->insurance_type == 10) {
                 $data = [];
 
-                $plan_names = TravelPlan::select('plan_name', 'policy_period')->get();
+                // $plan_names = TravelPlan::select('plan_name', 'policy_period')->get();
+                   $query = TravelPlan::select('plan_name', 'policy_period')
+                    ->whereHas('insurance_company', function ($q) {
+                        $q->whereNull('deleted_at');
+                    });
+
+                if ($request->has('destination_country_id') && !empty($request->destination_country_id)) {
+                    $query->where(function ($q) use ($request) {
+                        $q->whereJsonContains('countries', (string)$request->destination_country_id)
+                          ->orWhereJsonContains('countries', (int)$request->destination_country_id)
+                          ->orWhereHas('geographical_area', function ($q2) use ($request) {
+                              $q2->whereJsonContains('countries', (string)$request->destination_country_id)
+                                 ->orWhereJsonContains('countries', (int)$request->destination_country_id);
+                          });
+                    });
+                }
+
+                $plan_names = $query->groupBy('plan_name', 'policy_period')->get();
+
 
                 foreach ($plan_names as $val) {
                     $data[] = [

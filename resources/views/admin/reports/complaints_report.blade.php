@@ -21,6 +21,7 @@
     .shadow1 {
         box-shadow: 4px 4px 13px -3px #00000040;
     }
+
     /* Prevent number input spinner */
     input[type=number]::-webkit-inner-spin-button,
     input[type=number]::-webkit-outer-spin-button {
@@ -29,7 +30,8 @@
     }
 
     input[type=number] {
-        -moz-appearance: textfield; /* Firefox */
+        -moz-appearance: textfield;
+        /* Firefox */
     }
 
     .radio-class {
@@ -50,6 +52,7 @@
         clear: none;
         margin: 2px 0 0 2px;
     }
+
     input[type="file"] {
         height: 50px;
         cursor: pointer;
@@ -57,11 +60,13 @@
         opacity: 0;
         position: relative;
     }
-    .file-margin{
-        text-align:center;
+
+    .file-margin {
+        text-align: center;
     }
-    .file-margin .error{
-        text-align:center;
+
+    .file-margin .error {
+        text-align: center;
     }
 </style>
 @endsection
@@ -71,9 +76,11 @@
     <div class="container-fluid">
         <div class="header d-flex justify-content-between p-3 py-2 align-items-center">
             <div class="text-white group-title fw-bold">{{__('messages.sidebar_titles.complaints_report')}}</div>
-            <a href="javascript:void(0)" id="toggleForm" class="btn pe-0">
-                <img src="{{asset('img/icon-add.png')}}" alt="">
-            </a>
+            @include('admin.reports.partials.report-download-controls', [
+            'pdfRoute' => route('reports.download', ['report' => 'complaints_report', 'format' => 'pdf']),
+            'excelRoute' => route('reports.download', ['report' => 'complaints_report', 'format' => 'excel']),
+            'filePrefix' => 'Complaints_Report',
+            ])
         </div>
         <!-- Form to be toggled -->
         <form id="reportForm" action="" method="GET" class="d-none">
@@ -95,7 +102,7 @@
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="insurance_company" id="insurance_company">
                                     <option value="">Select Company</option>
                                     @foreach ($insuranceCompanies as $company)
-                                        <option value="{{ $company->id }}" {{ request('insurance_company')==$company->id ? 'selected' : ''}}>{{ $company->company_name }}</option>
+                                    <option value="{{ $company->id }}" {{ request('insurance_company')==$company->id ? 'selected' : ''}}>{{ $company->company_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -116,7 +123,7 @@
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="client_name" id="client_name">
                                     <option value="">Select Clients’ Name</option>
                                     @foreach ($clients as $client)
-                                        <option value="{{ $client->id }}" {{ request('client_name')==$client->id ? 'selected' : ''}}>{{ $client->first_name }} {{ $client->father_name }} {{ $client->surname }}</option>
+                                    <option value="{{ $client->id }}" {{ request('client_name')==$client->id ? 'selected' : ''}}>{{ $client->first_name }} {{ $client->father_name }} {{ $client->surname }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -125,7 +132,7 @@
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="policy_type" id="policy_type">
                                     <option value="">Select Policy Type</option>
                                     @foreach ($policyTypes as $type)
-                                        <option value="{{ $type['id'] }}" {{ request('policy_type')==$type['id'] ? 'selected' : ''}}>{{ $type['name'] }}</option>
+                                    <option value="{{ $type['id'] }}" {{ request('policy_type')==$type['id'] ? 'selected' : ''}}>{{ $type['name'] }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -148,68 +155,68 @@
         </form>
         <div class="m-2 text-center">
             <img class="p-3" src="{{asset('img/DashboardSotariaLogo.png')}}" alt="">
-            <h4>Complaints by 
+            <h4>Complaints by
                 @php
-                    switch(request('grouptype'))
-                    {
-                        case 'insurance_company':
-                            echo "Insurance Company";
-                            break;
-                        case 'policy_type':
-                            echo "Policy Type";
-                            break;
-                        case 'client_name':
-                            echo "Client Name";
-                            break;
-                        case 'complaint_status':
-                            echo "Complaints Status";
-                            break;
-                        default:
-                            echo "Insurance Company";
-                            break;
-                    }
+                switch(request('grouptype'))
+                {
+                case 'insurance_company':
+                echo "Insurance Company";
+                break;
+                case 'policy_type':
+                echo "Policy Type";
+                break;
+                case 'client_name':
+                echo "Client Name";
+                break;
+                case 'complaint_status':
+                echo "Complaints Status";
+                break;
+                default:
+                echo "Insurance Company";
+                break;
+                }
                 @endphp
             </h4>
             <p>From: {{ request('issue_date') ?? '--' }} To: {{ request('expiry_date') ?? '--' }}</p>
         </div>
         <div class="body bg-white py-4 px-4 d-flex flex-column gap-3 pb-5">
             @if($policies)
-                @foreach ($policies as $company => $data)
-                    <h3>{{ $company }}</h3>
-                    <table class="table table-striped " style="width:100%">
-                        <thead>
-                            <tr>
-                                <th class="no-search">{{__('messages.reports.policy_no')}}</th>
-                                <th class="no-search">{{__('messages.complaints.insurance_company')}}</th>
-                                <th class="no-search">{{__('messages.reports.client')}}</th>
-                                <th>{{__('messages.complaints.policy_type')}}</th>
-                                <th class="no-search">{{__('messages.complaints.complaint_status')}}</th>
-                                <th class="no-order no-search">{{__('messages.complaints.complaint_reason')}}</th>
-                                <th class="no-order no-search">{{__('messages.complaints.premium_amount')}}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($data['policies'] as $policy)
-                                <tr>
-                                    <td>{{ $policy->policy_no }}</td>
-                                    <td>{{ $policy->company_name }}</td>
-                                    <td>{{ $policy->client_name }}</td>
-                                    <td>{{ $policy->policy_type }}</td>
-                                    <td>{{ $policy->complaint_status }}</td>
-                                    <td>{{ $policy->complaint_message }}</td>
-                                    <td>{{ $policy->gross_premium }}</td>
-                                </tr>
-                            @endforeach
-                            <!-- Totals Row -->
-                            <tr>
-                                <td colspan="6"><strong>TOTAL</strong></td>
-                                <td>{{ $data['totals']['total_complaint_amount'] }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                @endforeach
+            @foreach ($policies as $company => $data)
+            <h3>{{ $company }}</h3>
+            <table class="table table-striped " style="width:100%">
+                <thead>
+                    <tr>
+                        <th class="no-search">{{__('messages.reports.policy_no')}}</th>
+                        <th class="no-search">{{__('messages.complaints.insurance_company')}}</th>
+                        <th class="no-search">{{__('messages.reports.client')}}</th>
+                        <th>{{__('messages.complaints.policy_type')}}</th>
+                        <th class="no-search">{{__('messages.complaints.complaint_status')}}</th>
+                        <th class="no-order no-search">{{__('messages.complaints.complaint_reason')}}</th>
+                        <th class="no-order no-search">{{__('messages.complaints.premium_amount')}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($data['policies'] as $policy)
+                    <tr>
+                        <td>{{ $policy->policy_no }}</td>
+                        <td>{{ $policy->company_name }}</td>
+                        <td>{{ $policy->client_name }}</td>
+                        <td>{{ $policy->policy_type }}</td>
+                        <td>{{ $policy->complaint_status }}</td>
+                        <td>{{ $policy->complaint_message }}</td>
+                        <td>{{ $policy->gross_premium }}</td>
+                    </tr>
+                    @endforeach
+                    <!-- Totals Row -->
+                    <tr>
+                        <td colspan="6"><strong>TOTAL</strong></td>
+                        <td>{{ $data['totals']['total_complaint_amount'] }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            @endforeach
             @else
-                <h4 class="text-center">No Record Found</h4>
+            <h4 class="text-center">No Record Found</h4>
             @endif
         </div>
     </div>
@@ -367,28 +374,28 @@
     });
 </script>
 <script>
-$(document).ready(function(){
-  // Show or hide date fields on page load based on the selected value
-  toggleDateFields();
+    $(document).ready(function() {
+        // Show or hide date fields on page load based on the selected value
+        toggleDateFields();
 
-  // Show or hide date fields when the group type is changed
-  $("#grouptype").on('change', function() {
-    toggleDateFields();
-  });
+        // Show or hide date fields when the group type is changed
+        $("#grouptype").on('change', function() {
+            toggleDateFields();
+        });
 
-  // Function to toggle date fields
-  function toggleDateFields() {
-    if($("#grouptype").val() === 'date') {
-        $("#dateFields").show();
-        $("#endDateField").show();
-    } else {
-        $("#dateFields").hide();
-        $("#endDateField").hide();
-    }
-  }
-});
+        // Function to toggle date fields
+        function toggleDateFields() {
+            if ($("#grouptype").val() === 'date') {
+                $("#dateFields").show();
+                $("#endDateField").show();
+            } else {
+                $("#dateFields").hide();
+                $("#endDateField").hide();
+            }
+        }
+    });
 </script>
 <script src="{{asset('js/client.js?v=1.2')}}">
 </script>
+@include('admin.reports.partials.report-download-js')
 @endsection
-

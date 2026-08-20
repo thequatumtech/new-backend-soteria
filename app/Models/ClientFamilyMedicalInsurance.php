@@ -143,15 +143,30 @@ class ClientFamilyMedicalInsurance extends Model
             // Dynamically set the net_premium based on insurance_periods.name
             // $insurancePeriodVal = $plan->periods_val; // Assuming this returns a value like '2'
             // $netPremiumsField = 'year_' . $insurancePeriodVal;
+            $insuranceClass = $data['insurance_class'] ?? null;
 
-            if ($data['insurance_class'] == 'VIP Class') {
+
+            // if ($data['insurance_class'] == 'VIP Class') {
+            //     $plan->net_premium = $plan->vip_class ?? 0;
+            // } elseif ($data['insurance_class'] == 'First Class') {
+            //     $plan->net_premium = $plan->first_class ?? 0;
+            // } elseif ($data['insurance_class'] == 'Second Class') {
+            //     $plan->net_premium = $plan->second_class ?? 0;
+            // } elseif ($data['insurance_class'] == 'Third Class') {
+            //     $plan->net_premium = $plan->third_class ?? 0;
+            //  } else {
+            //     $plan->net_premium = 0;
+            // }
+            if ($insuranceClass === 'VIP Class') {
                 $plan->net_premium = $plan->vip_class ?? 0;
-            } elseif ($data['insurance_class'] == 'First Class') {
+            } elseif ($insuranceClass === 'First Class') {
                 $plan->net_premium = $plan->first_class ?? 0;
-            } elseif ($data['insurance_class'] == 'Second Class') {
+            } elseif ($insuranceClass === 'Second Class') {
                 $plan->net_premium = $plan->second_class ?? 0;
-            } elseif ($data['insurance_class'] == 'Third Class') {
+            } elseif ($insuranceClass === 'Third Class') {
                 $plan->net_premium = $plan->third_class ?? 0;
+            } else {
+                $plan->net_premium = 0;
             }
             // $plan->gross_premium = $plan->net_premium + $plan->fees + $plan->stamps + $plan->sales_tax ?? 0;
                // Calculate components

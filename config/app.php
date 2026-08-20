@@ -69,8 +69,8 @@ return [
     |
     */
 
-    'timezone' => env('APP_TIMEZONE','America/Los_Angeles'),
-
+    // 'timezone' => env('APP_TIMEZONE','America/Los_Angeles'),
+    'timezone' => env('APP_TIMEZONE', 'UTC'),
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration

@@ -23,13 +23,15 @@ class AgeController extends Controller
     {
         try {
             $request->validate([
-                // 'age' => 'required|integer|max:100|unique:ages',
                 'age' => [
                     'required',
                     'integer',
                     'max:100',
-                    Rule::unique('ages')->whereNull('deleted_at'),
+                    Rule::unique('ages')
+                        ->where('type', $request->type)
+                        ->whereNull('deleted_at'),
                 ],
+                'type' => ['required', 'in:year,month'],
             ]);
             Ages::create($request->all());
             return redirect()->route('ages.list')->with('success', __('messages.age.age_created'));
@@ -42,33 +44,36 @@ class AgeController extends Controller
     }
 
     //update data
-    public function update(Request $request,Ages $age)
-    {  
-        
+    public function update(Request $request, Ages $age)
+    {
+
         try {
             $request->validate([
                 'age' => [
                     'required',
                     'integer',
                     'max:100',
-                    Rule::unique('ages')->ignore($request->age_id)->whereNull('deleted_at'),
-                ],                
+                    Rule::unique('ages')
+                        ->ignore($request->age_id)
+                        ->where('type', $request->type)
+                        ->whereNull('deleted_at'),
+                ],
+                'type' => ['required', 'in:year,month'],
             ]);
 
             $age = Ages::findOrFail($request->age_id);
             $age->update($request->all());
 
-            return redirect()->route('ages.list')->with('success', __('messages.age.edit_created'));        
+            return redirect()->route('ages.list')->with('success', __('messages.age.edit_created'));
             // Validation passed, handle the validated data
             // You can access the validated data via $validatedData array
-        
+
         } catch (ValidationException $e) {
             // Validation failed, handle the error
             $errors = $e->validator->errors()->all();
             return redirect()->route('ages.list')->with('error', __('messages.age.error'));
             // Handle errors here
         }
-        
     }
 
     public function destroy(Request $request)

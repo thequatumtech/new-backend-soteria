@@ -24,6 +24,10 @@ class TravelPlan extends Model
     {
         return $this->belongsTo(LineOfBusiness::class, 'line_of_business_id', 'id');
     }
+    public function geographical_area()
+    {
+        return $this->belongsTo(\App\Models\GeographicalArea::class, 'geographical_areas_ids', 'id');
+    }
 
     public function policy_covers()
     {

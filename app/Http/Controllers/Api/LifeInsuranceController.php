@@ -7,7 +7,6 @@ use App\Models\{ClientLifeInsurance, PurchasePolicy};
 use App\Models\InsurancePlanModels\{LifePlan, LifePlanPolicyCover, LifePlanPricingSchedule};
 use DateTime;
 use PDF;
-use App\Models\InsurancePeriod;
 use Illuminate\Http\Request;
 use App\Models\Client;
 use Carbon\Carbon;
@@ -48,6 +47,7 @@ class LifeInsuranceController extends Controller
             'data' => []
         ], 422);
     }
+
     private function normalizeDate($date)
     {
         if (!$date) return null;
@@ -213,6 +213,7 @@ class LifeInsuranceController extends Controller
             if ($clientOccupation && in_array($clientOccupation, $restrictedOccupations)) {
                 return $this->restrictionError('occupation');
             }
+
             if ($clientAge < 21 || $clientAge > 60) {
                 return response()->json([
                     'status' => false,
@@ -221,6 +222,7 @@ class LifeInsuranceController extends Controller
                     'data' => []
                 ], 422);
             }
+
             $userChronics = $this->normalizeRestricted($data['chronic_diseases_id'] ?? '');
             if (!empty($userChronics)) {
                 foreach ($userChronics as $chronicId) {
@@ -232,11 +234,9 @@ class LifeInsuranceController extends Controller
 
             $effective_date = $data['effective_date'];
 
-            $years = (int) $data['insurance_period'];
-
-            $yearColumn = 'year_' . $years;
             $pricingSchedule = LifePlanPricingSchedule::where('life_plan_id', $data['plan_id'])
                 ->where('age', $clientAge)
+                ->whereNull('deleted_at')
                 ->first();
 
             // Log::info('Insurance Period Debug', [
@@ -258,7 +258,13 @@ class LifeInsuranceController extends Controller
                 ], 422);
             }
 
-            if (!isset($pricingSchedule->$yearColumn) || $pricingSchedule->$yearColumn === null) {
+            $years = (int) ($data['insurance_period'] ?? 0);
+
+            $yearColumn = 'year_' . $years;
+
+            $netPremiumValue = $pricingSchedule->$yearColumn ?? null;
+
+            if ($netPremiumValue === null || $netPremiumValue === '') {
                 return response()->json([
                     'status' => false,
                     'status_code' => 422,
@@ -267,9 +273,28 @@ class LifeInsuranceController extends Controller
                 ], 422);
             }
 
-            $netPremiumFromSchedule = (float) $pricingSchedule->$yearColumn;
+            if (is_string($netPremiumValue) && strtolower(trim($netPremiumValue)) === 'n/a') {
+                return response()->json([
+                    'status' => false,
+                    'status_code' => 422,
+                    'message' => "No pricing available for {$years} year(s) in this plan.",
+                    'data' => []
+                ], 422);
+            }
+
+            if (!is_numeric($netPremiumValue)) {
+                return response()->json([
+                    'status' => false,
+                    'status_code' => 422,
+                    'message' => "No pricing available for {$years} year(s) in this plan.",
+                    'data' => []
+                ], 422);
+            }
+
+            $netPremiumFromSchedule = (float) $netPremiumValue;
 
             $expiry_date = date('Y-m-d', strtotime("+$years years", strtotime($effective_date)));
+
             if ($existingLife) {
                 $Life = ClientLifeInsurance::find($existingLife->policy_id);
                 if ($Life) {
@@ -315,20 +340,22 @@ class LifeInsuranceController extends Controller
                     'data' => []
                 ], 422);
             }
+
             $purchaseRecord = PurchasePolicy::find($Life->id);
+
             if ($purchaseRecord) {
                 $data->inception_date = $purchaseRecord->inception_date;
                 $data->expiry_date = $purchaseRecord->expiry_date;
             }
 
             $directory = public_path('insurance_pdfs/life_policy');
+
             if (!file_exists($directory)) {
                 mkdir($directory, 0755, true);
             }
 
             $filename = uniqid() . '_policy_' . $Life->id . '.pdf';
             $path = $directory . '/' . $filename;
-
 
             $netPremium = $netPremiumFromSchedule;
             $policy_limit = (float)$plan_data->limit ?? 0; // Assuming limit is available in plan
@@ -346,7 +373,6 @@ class LifeInsuranceController extends Controller
             // $stampsAmount = $data->stamps;
             // $taxAmount = $data->sales_tax;
             // $grossPremium = $data->gross_premium;
-
 
             $feesPercentage   = (float)($plan_data->fees ?? 0);
             $stampsPercentage = (float)($plan_data->stamps ?? 0);
@@ -386,6 +412,7 @@ class LifeInsuranceController extends Controller
             PurchasePolicy::updatePurchasePolicy($purchase);
 
             $data->purchase_id = $Life->id;
+
             // Prepare unformatted data for PDF - needs to match the dynamic calculation
             $plan_for_pdf = clone $plan_data;
             $plan_for_pdf->net_premium_amount = $netPremium;
@@ -400,12 +427,12 @@ class LifeInsuranceController extends Controller
             $client = Client::with('country.currency')->find($request->user_id);
             $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
 
-
             $pdf = PDF::loadView('pdf/life_policy', [
                 'data' => $data,
                 'abbr' => $abbr,
                 'plan' => $plan_for_pdf
             ]);
+
             $pdf->save($path);
 
             $url = url('insurance_pdfs/life_policy/' . $filename);
@@ -416,8 +443,8 @@ class LifeInsuranceController extends Controller
             // $data->gross_premium = $data->gross_premium;
             // $data->sales_tax = $data->sales_tax;
             // $data->stamps = $data->stamps;
-            $data->commission_percentage = $data->commission_percentage . '%';
 
+            $data->commission_percentage = $data->commission_percentage . '%';
 
             $data->net_premium       = number_format($data['net_premium'], 2) . ' ' . $abbr;
             $data->fees              = number_format($data['fees'], 2) . ' ' . $abbr;
@@ -426,7 +453,9 @@ class LifeInsuranceController extends Controller
             $data->stamps            = number_format($data['stamps'], 2) . ' ' . $abbr;
             $data->cbj               = number_format($data['cbj'], 2) . ' ' . $abbr;
             $data->sales_tax_cbj     = number_format($data['sales_tax_cbj'], 2) . ' ' . $abbr;
+
             // $data->commission_amount = number_format($data['commission_amount'], 2) . ' ' . $abbr;
+
             return response()->json([
                 'status' => true,
                 'status_code' => 200,
@@ -440,6 +469,7 @@ class LifeInsuranceController extends Controller
                 'line'    => $e->getLine(),
                 'trace'   => $e->getTraceAsString(),
             ]);
+
             return response()->json([
                 'status' => false,
                 'status_code' => 500,
@@ -449,11 +479,13 @@ class LifeInsuranceController extends Controller
         }
     }
 
-
     public function getLifeInsurancePlan(Request $request)
     {
         try {
             $data = LifePlan::with('policy_covers', 'insurance_company')
+                ->whereHas('insurance_company', function ($q) {
+                    $q->whereNull('deleted_at');
+                })
                 ->where('limit', 'LIKE', '%' . $request->limit . '%')
                 ->get();
 
@@ -461,9 +493,11 @@ class LifeInsuranceController extends Controller
                 if (!empty($item->insurance_policy_pdf)) {
                     $item->insurance_policy_pdf = url('uploads/insurance_plans/' . $item->id . '/' . $item->insurance_policy_pdf);
                 }
+
                 if (!empty($item->insurance_company->privacy_policy)) {
                     $item->insurance_company->privacy_policy = url('insurance/' . $item->insurance_company->id . '/' . $item->insurance_company->privacy_policy);
                 }
+
                 return $item;
             });
 
@@ -487,9 +521,6 @@ class LifeInsuranceController extends Controller
     {
         try {
             $insuranceid = $request->insurance_id;
-            if ($insuranceid) {
-                $ins = InsurancePeriod::where('id', $insuranceid)->firstOrFail();
-            }
         } catch (\Exception $e) {
         }
     }

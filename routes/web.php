@@ -40,6 +40,7 @@ use App\Http\Controllers\TypeOfCoverController;
 use App\Http\Controllers\InsuredItemCategoryController;
 use App\Http\Controllers\InsuredItemSubCategoryController;
 use App\Http\Controllers\AgeController;
+use App\Http\Controllers\BannersController;
 use App\Http\Controllers\ChronicDiseaseController;
 use App\Http\Controllers\ClaimStatusController;
 use App\Http\Controllers\ComplaintStatusController;
@@ -65,6 +66,7 @@ use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\BlackListController;
 use App\Http\Controllers\TermsAndConditionController;
+use App\Http\Controllers\PetBreedController;
 use App\Http\Middleware\CheckAdminAuthorization;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\ReportController;
@@ -72,6 +74,10 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
+//added for chat
+use App\Http\Controllers\Admin\AdminChatController;
+
+use Illuminate\Support\Facades\Storage;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -83,6 +89,17 @@ use Illuminate\Support\Facades\Schema;
 |
 */
 
+Route::get('/update-purchase-policy-cbj-columns', function () {
+    try {
+        $lastId = DB::table('purchase_policy')
+            ->orderByDesc('id')
+            ->value('id');
+
+        return 'Last purchase policy ID: ' . ($lastId ?? 'No records found');
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
+});
 Route::get('/', [AdminAuthController::class, 'getLogin'])->middleware('guest')->name('adminLogin');
 Route::get('/logout', [AdminAuthController::class, 'adminLogout'])->name('adminLogout');
 Route::get('/download/{id}', [UtilsController::class, 'downloadMedia'])->name('downloadMedia');
@@ -95,11 +112,32 @@ if (env('APP_ENV') == 'local') {
         Artisan::call('config:clear');
         Artisan::call('view:clear');
         Artisan::call('route:clear');
+        Artisan::call('optimize:clear');
+
         print_r('Cache cleared successfully');
     });
 }
+Route::get('/check-timezone', function () {
+    return response()->json([
+        'laravel_timezone' => config('app.timezone'),
+        'php_timezone' => date_default_timezone_get(),
+        'current_time' => now()->toDateTimeString()
+    ]);
+});
+
+// clear php  OPcache
+    Route::get('/clear-opcache', function () {
+        if (function_exists('opcache_reset')) {
+            opcache_reset();
+            return 'OPcache cleared!';
+        }
+        return 'OPcache not enabled';
+    });
 Route::post('/get-cities', [CitiesController::class, 'get_cities'])->name('get_cities');
 Route::post('/get-districts', [DistrictController::class, 'get_districts'])->name('get_districts');
+
+
+
 // Route::get('/check-policy', function () {
 //     $coupons = \App\Models\ClientDiscountCoupon::all();
 //         return response()->json($coupons);
@@ -116,6 +154,17 @@ Route::post('/get-districts', [DistrictController::class, 'get_districts'])->nam
 // Route::get('/check-discount-coupon', function () {
 //     return \App\Models\DiscountCoupon::find(7);
 // });
+Route::get('/run-migration', function () {
+    Artisan::call('migrate', [
+        '--path' => 'database/migrations/2026_08_18_230001_create_final_policy_pdfs_table.php',
+        '--force' => true,
+    ]);
+
+    return response()->json([
+        'message' => 'Migration executed successfully',
+        'output' => Artisan::output(),
+    ]);
+});
 
 Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
 
@@ -180,6 +229,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
     //         return 'Error: ' . $e->getMessage();
     //     }
     // });
+
     Route::get('/update-pet-plans-add-pet-age-restriction', function () {
         try {
             DB::statement("
@@ -345,7 +395,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
         dd($data);
     });
     Route::get('/getcouponsn', function () {
-        $data = DB::table('purchase_policy')->where('expiry_date', '2025-05-10')->first();
+        $data = DB::table('life_plans')->where('id', 25)->first();
         dd($data);
     });
     Route::get('/setcoupondate', function () {
@@ -357,6 +407,25 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
 
         return "Expiry date updated";
     });
+    Route::get('/run-banners-migration', function () {
+        try {
+            Artisan::call('migrate', [
+                '--path' => 'database/migrations/2026_08_12_234404_add_restricted_pet_breed_ids_to_pet_plans_table.php',
+                '--force' => true
+            ]);
+
+            return response()->json([
+                'status'  => true,
+                'message' => Artisan::output()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    });
+    
     // Route::get('/update-travel_plans-columns', function () {
     //     try {
     //         if (!Schema::hasColumn('travel_plans', 'restricted_dangerous_activities_ids')) {
@@ -542,13 +611,13 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
     //         ->get();   // or ->first() if you expect only one result
     //     dd($data);
     // });
-    // Route::get('/test-purchase-policy', function () {
-    //     // Fetch all records from personal_accident_plans
-    //     $plans = DB::table('home_plans')->get();
+    Route::get('/test-purchase-policy', function () {
+        // Fetch all records from personal_accident_plans
+        $plans = DB::table('banners')->get();
 
-    //     // Dump all data
-    //     dd($plans->toJson(JSON_PRETTY_PRINT));
-    // });
+        // Dump all data
+        dd($plans->toJson(JSON_PRETTY_PRINT));
+    });
     // Route::get('/test-update-expire-date', function () {
 
     //     DB::table('purchase_policy')
@@ -625,6 +694,18 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
         Route::get('customer/edit/{id}', [CustomerController::class, 'CustomerEdit'])->name('customer.edit');
         Route::post('/customer-update', [CustomerController::class, 'CustomerUpdate'])->name('customer.update');
         Route::delete('delete-customer', [CustomerController::class, 'destoryCustomer'])->name('destoryCustomer');
+        
+        /**
+         * live chat routes
+         */
+        //write by digvijay
+         Route::get('new-chat', [AdminChatController::class, 'newchat'])->name('pages.new-chat');
+        Route::post('/chat/start', [AdminChatController::class, 'startChat']);
+        Route::post('/chat/send', [AdminChatController::class, 'sendMessage']);
+        Route::get('/chat/{chatId}/messages', [AdminChatController::class, 'getMessages']);
+        Route::post('/chat/{chatId}/mark-read', [AdminChatController::class, 'markAsRead']);
+        Route::get('/chat/inbox', [AdminChatController::class, 'chatList']);          // existing chats, paginated
+        Route::get('/get-clients-for-chat', [AdminChatController::class, 'getClientsForChat']); // search all clients, paginated
 
         /**
          * Agent Routes
@@ -908,7 +989,11 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
         // Route::post('notify-renewal', [RenewalSectionController::class, 'notify_renewal'])->name('notify_renewal');
         // Route::post('cancel-policy', [RenewalSectionController::class, 'cancel_policy'])->name('cancel_policy');
         Route::match(['get', 'post'], 'notify-renewal/{id?}', [RenewalSectionController::class, 'notify_renewal'])->name('notify_renewal');
-        Route::match(['get', 'post'], 'cancel-policy/{id?}', [RenewalSectionController::class, 'cancel_policy'])->name('cancel_policy');
+        // Route::match(['get', 'post'], 'cancel-policy/{id?}', [RenewalSectionController::class, 'cancel_policy'])->name('cancel_policy');
+          Route::post(
+            'cancel-policy',
+            [RenewalSectionController::class, 'cancel_policy']
+        )->name('cancel_policy');
         Route::get('expired-policies', [RenewalSectionController::class, 'expired_policies'])->name('expired_policies');
         Route::post('/renew-policy', [RenewalSectionController::class, 'renew_policy'])->name('renew_policy');
         Route::get('purchased-policy/{id}', [RenewalSectionController::class, 'purchased_policy'])->name('policy.purchased_policy');
@@ -1032,6 +1117,15 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
         Route::post('social-media-create', [SocialMediaController::class, 'social_media_create'])->name('social_media.create');
 
         Route::withoutMiddleware('checkAdminAuthorization')->middleware('checkAdminAuthorizationForAdminBasics')->prefix('admin-basic')->group(function () {
+
+            /**
+             * Admin basic - Banner Management
+             */
+            Route::get('/banner', [BannersController::class, 'bannerindex'])->name('banner.list');
+            Route::post('banner/create', [BannersController::class, 'bannercreate'])->name('banner.create');
+            Route::patch('banner/update', [BannersController::class, 'bannerupdate'])->name('banner.update');
+            Route::delete('banner/delete', [BannersController::class, 'bannerdestroy'])->name('banner.destroy');
+
             /**
              * Admin basic - Age
              */
@@ -1042,7 +1136,14 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
             Route::patch('age', [AgeController::class, 'update'])->name('ages.update');
             Route::delete('age', [AgeController::class, 'destroy'])->name('ages.destroy');
 
+            /**
+             * Admin basic - Pet Breed
+             */
 
+            Route::get('/pet-breed', [PetBreedController::class, 'index'])->name('pet_breed.list');
+            Route::post('/pet-breed/create', [PetBreedController::class, 'create'])->name('pet_breed.create');
+            Route::patch('/pet-breed/update', [PetBreedController::class, 'update'])->name('pet_breed.update');
+            Route::delete('/pet-breed/destroy', [PetBreedController::class, 'destroy'])->name('pet_breed.destroy');
             /**
              * Admin basic - Chronic Disease
              */
@@ -1353,6 +1454,10 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
         Route::get('sold_policies_by_location', [ReportController::class, 'sold_policies_by_location'])->name('sold_policies_by_location.list');
         Route::get('claims_report', [ReportController::class, 'claims_report'])->name('claims_report.list');
         Route::get('complaints_report', [ReportController::class, 'complaints_report'])->name('complaints_report.list');
+        
+        Route::get('sold-policy-report/download-pdf', [ReportController::class, 'downloadSoldPolicyPDF'])->name('sold_policy_report.download_pdf');
+        Route::get('sold-policy-report/download-excel', [ReportController::class, 'downloadSoldPolicyExcel'])->name('sold_policy_report.download_excel');
+        Route::get('reports/{report}/download/{format}', [ReportController::class, 'downloadReport'])->name('reports.download');
     });
 });
 

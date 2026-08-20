@@ -63,6 +63,69 @@
         text-align: center;
     }
 
+    .signatures {
+        table-layout: fixed;
+        text-align: center;
+    }
+
+    .signatures>tbody>tr>td {
+        width: 50%;
+        padding: 15px;
+        border: 1px solid #ccc;
+        font-weight: bold;
+        background-color: #e0e0e0;
+        vertical-align: top;
+    }
+
+    .signatures img {
+        width: 150px !important;
+        height: 70px !important;
+        max-width: 150px !important;
+        max-height: 70px !important;
+        margin: 0 auto;
+    }
+
+    .signature-image {
+        width: 150px !important;
+        height: 70px !important;
+        max-width: 150px !important;
+        max-height: 70px !important;
+        margin: 0 auto;
+    }
+
+    .signature-box {
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .insured-signature-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
+    }
+
+    .insured-signature-table td {
+        width: 100%;
+        padding: 0;
+        border: 0;
+        background-color: transparent;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .insured-signature-table .insured-title {
+        padding-bottom: 8px;
+    }
+
+    .insured-signature-table .insured-image {
+        height: 80px;
+        padding-bottom: 8px;
+    }
+
+    .insured-signature-table .authorized-title {
+        padding-top: 5px;
+    }
+
     footer {
         text-align: center;
         font-size: 12px;
@@ -75,8 +138,8 @@
     <div class="policy-container">
 
         <header class="policy-header">
-            <img src="{{ public_path('insurance/' . $data->insurance_company_id . '/' . $data->logo) }}" alt="Arabia Insurance Jordan" class="logo">
-            <h1>Personal Accident Insurance Contract</h1>
+            <img src="{{ public_path('insurance/' . $data->insurance_company_id . '/' . $data->logo) }}" alt="{{ $data->company_name }}" class="logo">
+            <h1>{{ $data->plan_name }}</h1>
         </header>
 
         <table class="policy-details">
@@ -121,34 +184,34 @@
 
         $columns = [];
 
-        if(!empty($plan->limit))
-        $columns['Limit'] = number_format((float)$plan->limit, 2) . ' ' . $abbr;
+        if (!empty($plan->limit))
+        $columns['Limit'] = number_format((float) $plan->limit, 2) . ' ' . $abbr;
 
-        if(!empty($purchase['net_premium']))
-        $columns['Net Premium'] = number_format((float)$purchase['net_premium'], 2) . ' ' . $abbr;
+        if (!empty($purchase['net_premium']))
+        $columns['Net Premium'] = number_format((float) $purchase['net_premium'], 2) . ' ' . $abbr;
 
         $fees_label = 'Issuance Fees' . ($feesRate > 0 ? ' (' . $feesRate . '%)' : '');
-        if(!empty($purchase['fees']))
-        $columns[$fees_label] = number_format((float)$purchase['fees'], 2) . ' ' . $abbr;
+        if (!empty($purchase['fees']))
+        $columns[$fees_label] = number_format((float) $purchase['fees'], 2) . ' ' . $abbr;
 
         $stamps_label = 'Stamps' . ($stampsRate > 0 ? ' (' . $stampsRate . '%)' : '');
-        if(!empty($purchase['stamps']))
-        $columns[$stamps_label] = number_format((float)$purchase['stamps'], 2) . ' ' . $abbr;
+        if (!empty($purchase['stamps']))
+        $columns[$stamps_label] = number_format((float) $purchase['stamps'], 2) . ' ' . $abbr;
 
         $sales_tax_label = 'Sales Tax' . ($salesTaxRate > 0 ? ' (' . $salesTaxRate . '%)' : '');
-        if(!empty($purchase['sales_tax']))
-        $columns[$sales_tax_label] = number_format((float)$purchase['sales_tax'], 2) . ' ' . $abbr;
+        if (!empty($purchase['sales_tax']))
+        $columns[$sales_tax_label] = number_format((float) $purchase['sales_tax'], 2) . ' ' . $abbr;
 
         $cbj_label = 'Contribution to the Guarantee Fund (CBJ)' . ($cbjRate > 0 ? ' (' . $cbjRate . '%)' : '');
-        if(!empty($purchase['cbj']))
-        $columns[$cbj_label] = number_format((float)$purchase['cbj'], 2) . ' ' . $abbr;
+        if (!empty($purchase['cbj']))
+        $columns[$cbj_label] = number_format((float) $purchase['cbj'], 2) . ' ' . $abbr;
 
         $cbj_tax_label = 'Sales Tax on CBJ Contribution Fund' . ($cbjTaxRate > 0 ? ' (' . $cbjTaxRate . '%)' : '');
-        if(!empty($purchase['sales_tax_cbj']))
-        $columns[$cbj_tax_label] = number_format((float)$purchase['sales_tax_cbj'], 2) . ' ' . $abbr;
+        if (!empty($purchase['sales_tax_cbj']))
+        $columns[$cbj_tax_label] = number_format((float) $purchase['sales_tax_cbj'], 2) . ' ' . $abbr;
 
-        if(!empty($purchase['gross_premium']))
-        $columns['Gross Premium'] = number_format((float)$purchase['gross_premium'], 2) . ' ' . $abbr;
+        if (!empty($purchase['gross_premium']))
+        $columns['Gross Premium'] = number_format((float) $purchase['gross_premium'], 2) . ' ' . $abbr;
         @endphp
 
         @if(count($columns) > 0)
@@ -168,6 +231,7 @@
             </table>
         </div>
         @endif
+
         @if(!empty($plan->covers) && count($plan->covers) > 0)
 
         <h4>Policy Covers</h4>
@@ -195,6 +259,7 @@
         </table>
 
         @endif
+
         <div class="policy-summary">
             {!! $data->insurance_policy_text !!}
         </div>
@@ -207,12 +272,57 @@
 
             <tr>
                 <td>
-                    Insurer <br>
-                    <img src="{{ public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp) }}" alt="" class="logo">
+                    Insurer<br>
+
+                    <div class="signature-box">
+                        <img
+                            src="{{ public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp) }}"
+                            alt="Stamp"
+                            width="150"
+                            height="70"
+                            class="signature-image">
+                    </div>
                 </td>
+
                 <td>
-                    Insured <br>
-                    <img src="{{ public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature) }}" alt="" class="logo">
+                    <table class="insured-signature-table">
+                        <tr>
+                            <td class="insured-title">
+                                Insured
+                            </td>
+                        </tr>
+
+                        {{-- User Signature --}}
+                        @if(!empty($data->user_signature) && file_exists(public_path($data->user_signature)))
+                        <tr>
+                            <td class="insured-image">
+                                <img
+                                    src="{{ public_path($data->user_signature) }}"
+                                    alt="User Signature"
+                                    width="150"
+                                    height="70"
+                                    class="signature-image">
+                            </td>
+                        </tr>
+                        @else
+                        <tr>
+                            <td class="insured-image">
+                                <img
+                                    src="{{ public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature) }}"
+                                    alt="Authorized Signature"
+                                    width="150"
+                                    height="70"
+                                    class="signature-image">
+                            </td>
+                        </tr>
+                        @endif
+
+                        <tr>
+                            <td class="authorized-title">
+                                Authorized Signature
+                            </td>
+                        </tr>
+                    </table>
                 </td>
             </tr>
         </table>

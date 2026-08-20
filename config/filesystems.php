@@ -58,6 +58,12 @@ return [
             'root'   => public_path(),
             'visibility' => 'public',
         ],
+        'chat_uploads' => [
+            'driver' => 'local',
+            'root' => public_path('uploads/chat_files'),
+            'url' => env('APP_URL').'/uploads/chat_files',
+            'visibility' => 'public',
+        ],
 
     ],
 

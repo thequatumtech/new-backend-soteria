@@ -11,6 +11,7 @@ use App\Models\InsurancePlanModels\PetPlan;
 use App\Models\InsurancePlanModels\PetPlanPolicyCover;
 use App\Models\LineOfBusiness;
 use Illuminate\Http\Request;
+use App\Models\PetBreed;
 
 class PetPlanController extends Controller
 {
@@ -33,7 +34,8 @@ class PetPlanController extends Controller
         $cities = Cities::all();
         $districts = District::all();
         $ages = Ages::all();
-        return view('admin.plan.pet-plans.add_pet_plan', compact('insurance_companies', 'line_of_businesses', 'countries', 'cities', 'districts', 'ages'));
+        $breeds = PetBreed::whereNull('deleted_at')->orderBy('type')->orderBy('breed')->get();
+        return view('admin.plan.pet-plans.add_pet_plan', compact('insurance_companies', 'line_of_businesses', 'countries', 'cities', 'districts', 'ages', 'breeds'));
     }
 
     public function edit_pet_plan(Request $request, $id)
@@ -44,14 +46,15 @@ class PetPlanController extends Controller
         $cities = Cities::all();
         $districts = District::all();
         $ages = Ages::all();
+        $breeds = PetBreed::whereNull('deleted_at')->orderBy('type')->orderBy('breed')->get();
         $plan = PetPlan::find($id);
 
-        // Decode stored country, city, district, age, and pet age IDs
         $selected_country_ids = $plan->restricted_country_ids ? json_decode($plan->restricted_country_ids, true) : [];
         $selected_city_ids = $plan->restricted_city_ids ? json_decode($plan->restricted_city_ids, true) : [];
         $selected_district_ids = $plan->restricted_district_ids ? json_decode($plan->restricted_district_ids, true) : [];
         $selected_age_ids = $plan->restricted_age_ids ? json_decode($plan->restricted_age_ids, true) : [];
         $selected_pet_age_ids = $plan->restricted_pet_age_ids ? json_decode($plan->restricted_pet_age_ids, true) : [];
+        $selected_pet_breed_ids = $plan->restricted_pet_breed_ids ? json_decode($plan->restricted_pet_breed_ids, true) : [];
 
         return view('admin.plan.pet-plans.edit_pet_plan', compact(
             'insurance_companies',
@@ -60,12 +63,14 @@ class PetPlanController extends Controller
             'cities',
             'districts',
             'ages',
+            'breeds',
             'plan',
             'selected_country_ids',
             'selected_city_ids',
             'selected_district_ids',
             'selected_age_ids',
-            'selected_pet_age_ids'
+            'selected_pet_age_ids',
+            'selected_pet_breed_ids'
         ));
     }
 
@@ -83,6 +88,7 @@ class PetPlanController extends Controller
             $pet_insurance_plan->restricted_district_ids = $request->restricted_district_ids ? json_encode($request->restricted_district_ids) : null;
             $pet_insurance_plan->restricted_age_ids = $request->restricted_age_ids ? json_encode($request->restricted_age_ids) : null;
             $pet_insurance_plan->restricted_pet_age_ids = $request->restricted_pet_age_ids ? json_encode($request->restricted_pet_age_ids) : null;
+            $pet_insurance_plan->restricted_pet_breed_ids = $request->restricted_pet_breed_ids ? json_encode($request->restricted_pet_breed_ids) : null;
             $pet_insurance_plan->limit = $request->limit;
             $pet_insurance_plan->net_premium = $request->net_premium ?? 0;
             $pet_insurance_plan->fees = $request->fees;
@@ -130,6 +136,7 @@ class PetPlanController extends Controller
             $pet_insurance_plan->restricted_district_ids = $request->restricted_district_ids ? json_encode($request->restricted_district_ids) : null;
             $pet_insurance_plan->restricted_age_ids = $request->restricted_age_ids ? json_encode($request->restricted_age_ids) : null;
             $pet_insurance_plan->restricted_pet_age_ids = $request->restricted_pet_age_ids ? json_encode($request->restricted_pet_age_ids) : null;
+            $pet_insurance_plan->restricted_pet_breed_ids = $request->restricted_pet_breed_ids ? json_encode($request->restricted_pet_breed_ids) : null;
             $pet_insurance_plan->limit = $request->limit;
             $pet_insurance_plan->net_premium = $request->net_premium ?? 0;
             $pet_insurance_plan->fees = $request->fees;

@@ -47,45 +47,59 @@ class InPatientController extends Controller
             return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage().' '.$e->getFile().' '.$e->getLine(), 'data' => array()]);
         }
     }
-    
+ private function cleanNumber($value)
+    {
+        if ($value === null) return 0;
+
+        $clean = preg_replace('/[^\d.]/', '', $value);
+
+        return is_numeric($clean) ? (float)$clean : 0;
+    }    
     public function getInPatientInsurancePlan(Request $request)
     {
         try {
-            $data = InPatientPlan::with('policy_covers','insurance_company')->where('limit','LIKE','%'.$request->limit.'%')->get();
-            $data->transform(function($item){
+            $data = InPatientPlan::with('policy_covers', 'insurance_company')
+                ->whereHas('insurance_company', function ($q) {
+                    $q->whereNull('deleted_at');
+                })
+                ->where('limit', 'LIKE', '%' . $request->limit . '%')
+                ->get();
+            $data->transform(function ($item) {
                 if (!empty($item->insurance_policy_pdf)) {
-                    $item->insurance_policy_pdf = url('uploads/insurance_plans/' .$item->id.'/' . $item->insurance_policy_pdf);
+                    $item->insurance_policy_pdf = url('uploads/insurance_plans/' . $item->id . '/' . $item->insurance_policy_pdf);
                 }
                 if (!empty($item->insurance_company->privacy_policy)) {
-                    $item->insurance_company->privacy_policy = url('insurance/' .$item->insurance_company->id.'/' . $item->insurance_company->privacy_policy);
+                    $item->insurance_company->privacy_policy = url('insurance/' . $item->insurance_company->id . '/' . $item->insurance_company->privacy_policy);
                 }
                 return $item;
             });
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get In-Patient Insurance Plan successfully','data' => $data]);
-        }
-        catch(\Exception $e)
-        {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage().' '.$e->getFile().' '.$e->getLine(), 'data' => array()]);
+            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get In-Patient Insurance Plan successfully', 'data' => $data]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => []]);
         }
     }
+
     public function getOutPatientInsurancePlan(Request $request)
     {
         try {
-            $data = InOutPatientPlan::with('policy_covers','insurance_company')->where('limit','LIKE','%'.$request->limit.'%')->get();
-            $data->transform(function($item){
+            $data = InOutPatientPlan::with('policy_covers', 'insurance_company')
+                ->whereHas('insurance_company', function ($q) {
+                    $q->whereNull('deleted_at');
+                })
+                ->where('limit', 'LIKE', '%' . $request->limit . '%')
+                ->get();
+            $data->transform(function ($item) {
                 if (!empty($item->insurance_policy_pdf)) {
-                    $item->insurance_policy_pdf = url('uploads/insurance_plans/' .$item->id.'/' . $item->insurance_policy_pdf);
+                    $item->insurance_policy_pdf = url('uploads/insurance_plans/' . $item->id . '/' . $item->insurance_policy_pdf);
                 }
                 if (!empty($item->insurance_company->privacy_policy)) {
-                    $item->insurance_company->privacy_policy = url('insurance/' .$item->insurance_company->id.'/' . $item->insurance_company->privacy_policy);
+                    $item->insurance_company->privacy_policy = url('insurance/' . $item->insurance_company->id . '/' . $item->insurance_company->privacy_policy);
                 }
                 return $item;
             });
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get In & Our Patient Insurance Plan successfully','data' => $data]);
-        }
-        catch(\Exception $e)
-        {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage().' '.$e->getFile().' '.$e->getLine(), 'data' => array()]);
+            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get In & Out Patient Insurance Plan successfully', 'data' => $data]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => []]);
         }
     }
     

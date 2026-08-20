@@ -12,5 +12,5 @@ class Ages extends Model
     use HasFactory;
     use SoftDeletes;
     
-    public $fillable = ['age'];
+    public $fillable = ['age', 'type'];
 }

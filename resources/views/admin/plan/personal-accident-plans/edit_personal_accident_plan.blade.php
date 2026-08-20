@@ -110,7 +110,7 @@
                                 </div>
                             </div>
                         </div>
-                        <h3 class="pt-5">{{__('messages.plans.personal_policy_period')}}</h3>
+                        <!-- <h3 class="pt-5">{{__('messages.plans.personal_policy_period')}}</h3>
                         <div class="row">
                             <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
                                 <div>{{__('messages.plans.insurance_period')}}</div>
@@ -121,7 +121,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                        </div>
+                        </div> -->
                         <h3 class="pt-5">{{__('messages.plans.insurance_policy_wording')}}</h3>
                         <div class="row">
                             <div class="col-12">
@@ -332,96 +332,103 @@
                             </div>
                         </div>
 
-                        <h3 class="pt-5">{{__('messages.plans.pricing_schedule')}}</h3>
-                        <table class="table-bordered" style="width: 100%;">
+
+                    <h3 class="pt-5">{{ __('messages.plans.pricing_schedule') }}</h3>
+
+                    <div style="overflow-x: auto;">
+                        <table class="table-bordered" style="width: 100%; min-width: 1000px;">
+
                             <thead>
                                 <tr>
-                                    <th colspan="5">{{__('messages.plans.pricing_schedule')}}</th>
-                                </tr>
-                                <tr>
-                                    <th width="28%">{{__('messages.plans.age_period')}}</th>
-                                    {{-- <th class="selected-period-header">{{ $insurance_periods->firstWhere('id', old('insurance_period_id', $plan->insurance_period_id))?->name ?? '' }}</th> --}}
-                                    <th id="period-th">
-                                        {{ $insurance_periods->firstWhere('id', old('insurance_period_id', $plan->insurance_period_id))?->name ?? '' }}
+                                    <th colspan="{{ count($insurance_periods) + 1 }}">
+                                        {{ __('messages.plans.pricing_schedule') }}
                                     </th>
-                                    {{-- <th>{{__('messages.plans.m_3')}}</th>
-                                    <th>{{__('messages.plans.m_6')}}</th>
-                                    <th>{{__('messages.plans.m_9')}}</th>
-                                    <th>{{__('messages.plans.m_12')}}</th> --}}
+                                </tr>
+
+                                <tr>
+                                    <th width="80px">
+                                        {{ __('messages.plans.age_period') }}
+                                    </th>
+
+                                    @foreach($insurance_periods as $period)
+                                        <th>{{ $period->name }}</th>
+                                    @endforeach
                                 </tr>
                             </thead>
-                            {{-- <tbody> --}}
-                            {{-- @for($i=1;$i<=60;$i++)
-                                @php
-                                    $matchingCondition = $plan->pricing_schedule->firstWhere('age', $i);
-                                    $m_3 = $matchingCondition ? $matchingCondition->m_3 : 0;
-                                    $m_6 = $matchingCondition ? $matchingCondition->m_6 : 0;
-                                    $m_9 = $matchingCondition ? $matchingCondition->m_9 : 0;
-                                    $m_12 = $matchingCondition ? $matchingCondition->m_12 : 0;
-                                @endphp
 
-                                <tr data-id="0">
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="pricing_schedule[{{$i}}][age]" style="border: none;" value="{{$i}}"
-                            readonly required>
+                            <tbody>
+
+                                @for ($i = 1; $i <= 60; $i++)
+
+                                    @php
+                                        $pricing = $plan->pricing_schedule->firstWhere('age', $i);
+                                    @endphp
+
+                                    <tr>
+
+                                        {{-- AGE --}}
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+
+                                                <input
+                                                    type="text"
+                                                    value="{{ $i }}"
+                                                    readonly
+                                                    style="border: none;"
+                                                >
+
+                                                <input
+                                                    type="hidden"
+                                                    name="pricing_schedule[{{ $i }}][age]"
+                                                    value="{{ $i }}"
+                                                >
+
+                                            </div>
+                                        </td>
+
+                                        {{-- MONTH VALUES --}}
+                                          @foreach($insurance_periods as $period)
+
+                                            @php
+                                                $col = 'm_' . preg_replace('/[^0-9]/', '', $period->name);
+
+                                                // Try direct column first, then fall back to json_data
+                                                $value = $pricing?->{$col} ?? '';
+                                                if ($value === '' && $pricing && $pricing->json_data) {
+                                                    $jsonData = is_array($pricing->json_data) ? $pricing->json_data : json_decode($pricing->json_data, true);
+                                                    $value = $jsonData[$col] ?? '';
+                                                }
+                                                   // Normalize: strip trailing zeros (2.00 → 2, 2.50 → 2.5)
+                                                if ($value !== '' && is_numeric($value)) {
+                                                    $value = floatval($value) + 0;
+                                                }
+                                            @endphp
+
+                                            <td>
+                                                <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+
+                                                    <input
+                                                        type="text"
+                                                        name="pricing_schedule[{{ $i }}][{{ $col }}]"
+                                                        value="{{ $value }}"
+                                                        oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');"
+                                                        style="border: none;"
+                                                        required
+                                                    >
+
+                                                </div>
+                                            </td>
+
+                                        @endforeach
+
+                                    </tr>
+
+                                @endfor
+
+                            </tbody>
+
+                        </table>
                     </div>
-                    </td>
-                    <td>
-                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                            <input type="text" name="pricing_schedule[{{$i}}][m_3]" style="border: none;" value="{{$m_3}}"
-                                required>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                            <input type="text" name="pricing_schedule[{{$i}}][m_6]" style="border: none;" value="{{$m_6}}"
-                                required>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                            <input type="text" name="pricing_schedule[{{$i}}][m_9]" style="border: none;" value="{{$m_9}}"
-                                required>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                            <input type="text" name="pricing_schedule[{{$i}}][m_12]" style="border: none;" value="{{$m_12}}"
-                                required>
-                        </div>
-                    </td>
-                    </tr>
-                    @endfor --}}
-                    <tbody id="pricing-schedule-tbody">
-                        @php
-                        $selectedPeriod = $insurance_periods->firstWhere('id', old('insurance_period_id', $plan->insurance_period_id));
-                        $month = preg_replace('/[^0-9]/', '', $selectedPeriod?->name ?? '3');
-                        $monthColumn = 'm_' . $month;
-                        @endphp
-
-                        @for ($i = 1; $i <= 60; $i++)
-                            @php
-                            $pricing=$plan->pricing_schedule->firstWhere('age', $i);
-                            $value = $pricing?->$monthColumn ?? '';
-                            @endphp
-                            <tr>
-                                <td>
-                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                        <input type="text" value="{{ $i }}" readonly style="border: none;">
-                                        <input type="hidden" name="pricing_schedule[{{ $i }}][age]" value="{{ $i }}">
-                                    </div>
-                                </td>
-                                <td class="selected-period-input">
-                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                        <input type="text" class="dynamic-input" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" name="pricing_schedule[{{ $i }}][{{ $monthColumn }}]" value="{{ $value }}" style="border: none;" required>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endfor
-                    </tbody>
-                    </table>
-
                     <h3 class="pt-5">{{__('messages.plans.premium_calculations')}}</h3>
                     <table class="table-bordered" style="width: 100%;">
                         <thead>
@@ -548,6 +555,56 @@
     var deleteIconUrl = "{{ asset('img/icon-delete.png') }}";
     $(document).ready(function() {});
 </script>
+
+<script>
+    $(document).ready(function() {
+        function fetchCBJ(companyId) {
+            if (companyId) {
+                $.ajax({
+                    url: '{{ route("get.cbj") }}',
+                    type: 'GET',
+                    data: {
+                        insurance_company_id: companyId,
+                        line_of_business_id: 9
+                    },
+                    success: function(response) {
+                        if (!$('input[name="cbj"]').val()) {
+                            $('input[name="cbj"]').val(response.cbj ?? '');
+                        }
+                        if (!$('input[name="fees"]').val()) {
+                            $('input[name="fees"]').val(response.insurance_fee ?? '');
+                        }
+                        if (!$('input[name="stamps"]').val()) {
+                            $('input[name="stamps"]').val(response.stamp ?? '');
+                        }
+                        if (!$('input[name="sales_tax"]').val()) {
+                            $('input[name="sales_tax"]').val(response.tax ?? '');
+                        }
+                        if (!$('input[name="salextaxcbj"]').val()) {
+                            $('input[name="salextaxcbj"]').val(response.sales_tax_on_cbj ?? '');
+                        }
+                        if (!$('#commission_percentage').val()) {
+                            $('#commission_percentage').val(response.commission_percentage ?? '');
+                        }
+                    },
+                    error: function() {
+                        alert('Failed to fetch values.');
+                    }
+                });
+            }
+        }
+
+        $('select[name="insurance_company_id"]').on('change', function() {
+            fetchCBJ($(this).val());
+        });
+
+        let preselectedCompanyId = $('select[name="insurance_company_id"]').val();
+        if (preselectedCompanyId) {
+            fetchCBJ(preselectedCompanyId);
+        }
+    });
+</script>
+
 <!-- <script>
     $(document).ready(function() {
         $('#restricted_country_ids').on('change', function() {
@@ -614,7 +671,7 @@
         });
     });
 </script> -->
-<script>
+<!-- <script>
     $(document).ready(function() {
         function fetchCBJ(companyId) {
             if (companyId) {
@@ -665,7 +722,7 @@
             fetchCBJ(preselectedCompanyId);
         }
     });
-</script>
+</script> -->
 <!-- old script -->
 <!-- <script>
     $(document).ready(function() {
@@ -786,7 +843,7 @@
 </script> -->
 
 <!-- updated script -->
-<script>
+<!-- <script>
     $(document).ready(function() {
 
         var pricingData = @json($plan -> pricing_schedule ?? []);
@@ -891,7 +948,7 @@
             currentMonthColumn = renderPricingTable(initialPeriodId, null);
         }
 
-    });
+    }); -->
 </script>
 <script src="{{asset('js/personal_accident_plan.js')}}"></script>
 @endsection

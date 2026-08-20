@@ -11,8 +11,12 @@ class PersonalAccidentPlanPricingSchedule extends Model
     use HasFactory;
     use SoftDeletes;
     protected $table = 'personal_accident_plan_pricing_schedules'; // Make sure this matches your table name
+    protected $casts = [
+        'json_data' => 'array',
+    ];
     protected $fillable = [
         'personal_accident_plan_id',
+        'json_data',
         'age',
         'm_1',
         'm_2',

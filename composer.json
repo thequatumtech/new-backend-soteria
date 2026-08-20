@@ -10,6 +10,7 @@
         "doctrine/dbal": "3.0",
         "fruitcake/laravel-cors": "^2.0.5",
         "guzzlehttp/guzzle": "^7.9",
+        "kreait/laravel-firebase": "^5.10",
         "laravel/framework": "^9.0",
         "laravel/passport": "^12.2",
         "laravel/sanctum": "^3.2",

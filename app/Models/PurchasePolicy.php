@@ -20,6 +20,18 @@ use App\Models\ClientDentalsInsurance;
 use App\Models\InsurancePlanModels\TravelPlan;
 use App\Models\ClientTravelInsurance;
 use App\Models\AgentModel as Agent;
+use App\Models\ClientOfficeInsurance;
+use App\Models\ClientLifeInsurance;
+use App\Models\ClientPersonalAccidentInsurance;
+use App\Models\ClientFamilyMedicalInsurance;
+use App\Models\InsurancePlanModels\OfficePlan;
+use App\Models\InsurancePlanModels\LifePlan;
+use App\Models\InsurancePlanModels\PersonalAccidentPlan;
+use App\Models\InsurancePlanModels\InPatientPlan;
+use App\Models\InsurancePlanModels\InOutPatientPlan;
+use App\Models\InsurancePlanModels\MotorInsurancePlan;
+use App\Models\IndividualPlanModel;
+
 use Illuminate\Database\Eloquent\SoftDeletes;
 class PurchasePolicy extends Model
 {
@@ -93,54 +105,166 @@ class PurchasePolicy extends Model
         $policy->save();
         return $policy;
     }
+    // public static function getAllPolicy($user_id)
+    // {
+    //     $policyTypes = [
+    //         1  => 'Home Insurance',
+    //         2  => 'Office Insurance',
+    //         3  => 'Life Insurance',
+    //         4  => 'Critical Illness Insurance',
+    //         5  => 'Personal Accident Insurance',
+    //         6  => 'Individual Medical Insurance',
+    //         7  => 'Family Medical Insurance',
+    //         8  => 'Pet Insurance',
+    //         9  => 'Dental Insurance',
+    //         10 => 'Travel Insurance',
+    //         11 => 'Marine Insurance',
+    //         12 => 'Motor Insurance'
+    //     ];
+
+    //     $policyPdf = [
+    //         1  => 'home_policy',
+    //         2  => 'office_policy',
+    //         3  => 'life_policy',
+    //         4  => 'critical_illness_policy',
+    //         5  => 'personal_accident_policy',
+    //         6  => 'individual_medical_policy',
+    //         7  => 'family_medical_policy',
+    //         8  => 'pets_policy',
+    //         9  => 'dental_policy',
+    //         10 => 'travel_policy',
+    //         11 => 'marine_policy',
+    //         12 => 'motor_policy'
+    //     ];
+
+    //     $policy = PurchasePolicy::select(
+    //         'purchase_policy.id',
+    //         'purchase_policy.client_id',
+    //         'purchase_policy.policy_id',
+    //         'purchase_policy.plan_id',
+    //         'purchase_policy.insurance_company_id',
+    //         'purchase_policy.policy_no',
+    //         'purchase_policy.policy_type',
+    //         'purchase_policy.inception_date',
+    //         'purchase_policy.expiry_date',
+    //         'purchase_policy.payment_status',
+    //         'purchase_policy.net_premium',
+    //         'purchase_policy.fees',
+    //         'purchase_policy.stamps',
+    //         'purchase_policy.sales_tax',
+    //         'purchase_policy.cbj',
+    //         'purchase_policy.sales_tax_cbj',
+    //         'purchase_policy.gross_premium',
+    //         'purchase_policy.commission_percentage',
+    //         'purchase_policy.commission_amount',
+    //         'insurance_companies.company_name',
+    //         'clients.first_name',
+    //         'clients.father_name',
+    //         'clients.grandfather_name',
+    //         'clients.surname'
+    //     )
+    //     ->leftJoin('insurance_companies', 'purchase_policy.insurance_company_id', '=', 'insurance_companies.id')
+    //     ->leftJoin('clients', 'purchase_policy.client_id', '=', 'clients.id')
+    //     ->where('purchase_policy.client_id', $user_id)
+    //     ->where('purchase_policy.payment_status', 1)
+    //     ->get();
+
+    //     foreach ($policy as $p) {
+    //         $p->policy_type_no = $p->policy_type ?? 0;
+    //         $p->policy_type    = $policyTypes[$p->policy_type] ?? 'Unknown Policy Type';
+
+    //         $folder = $policyPdf[$p->policy_type_no] ?? 'policy';
+    //         $p->pdf_url = url('insurance_pdfs/' . $folder . '/policy_' . $p->id . '.pdf');
+    //     }
+
+    //     return $policy;
+    // }
     public static function getAllPolicy($user_id)
-    {
-        $policyTypes = [
-            1  => 'Home Insurance',
-            2  => 'Office Insurance',
-            3  => 'Life Insurance',
-            4  => 'Critical Illness Insurance',
-            5  => 'Personal Accident Insurance',
-            6  => 'Individual Medical Insurance',
-            7  => 'Family Medical Insurance',
-            8  => 'Pet Insurance',
-            9  => 'Dental Insurance',
-            10 => 'Travel Insurance',
-            11 => 'Marine Insurance',
-            12 => 'Motor Insurance'
-        ];
+{
+    $policyTypes = [
+        1  => 'Home Insurance',
+        2  => 'Office Insurance',
+        3  => 'Life Insurance',
+        4  => 'Critical Illness Insurance',
+        5  => 'Personal Accident Insurance',
+        6  => 'Individual Medical Insurance',
+        7  => 'Family Medical Insurance',
+        8  => 'Pet Insurance',
+        9  => 'Dental Insurance',
+        10 => 'Travel Insurance',
+        11 => 'Marine Insurance',
+        12 => 'Motor Insurance'
+    ];
 
-        $policyPdf = [
-            1  => 'home_policy',
-            2  => 'office_policy',
-            3  => 'life_policy',
-            4  => 'critical_illness_policy',
-            5  => 'personal_accident_policy',
-            6  => 'individual_medical_policy',
-            7  => 'family_medical_policy',
-            8  => 'pets_policy',
-            9  => 'dental_policy',
-            10 => 'travel_policy',
-            11 => 'marine_policy',
-            12 => 'motor_policy'
-        ];
+    $policy = PurchasePolicy::select(
+        'purchase_policy.id',
+        'purchase_policy.client_id',
+        'purchase_policy.policy_id',
+        'purchase_policy.plan_id',
+        'purchase_policy.insurance_company_id',
+        'purchase_policy.policy_no',
+        'purchase_policy.policy_type',
+        'purchase_policy.plan_name',
+        'purchase_policy.policy_plan_limit',
+        'purchase_policy.inception_date',
+        'purchase_policy.expiry_date',
+        'purchase_policy.payment_status',
+        'purchase_policy.net_premium',
+        'purchase_policy.fees',
+        'purchase_policy.stamps',
+        'purchase_policy.sales_tax',
+        'purchase_policy.cbj',
+        'purchase_policy.sales_tax_cbj',
+        'purchase_policy.gross_premium',
+        'purchase_policy.commission_percentage',
+        'purchase_policy.commission_amount',
+        'purchase_policy.policy_pdf_url',
+        'insurance_companies.company_name',
+        'clients.first_name',
+        'clients.father_name',
+        'clients.grandfather_name',
+        'clients.surname'
+    )
+    ->leftJoin('insurance_companies', 'purchase_policy.insurance_company_id', '=', 'insurance_companies.id')
+    ->leftJoin('clients', 'purchase_policy.client_id', '=', 'clients.id')
+    ->where('purchase_policy.client_id', $user_id)
+    ->where('purchase_policy.payment_status', 1)
+    ->get();
 
-        $policy = PurchasePolicy::select('purchase_policy.*', 'insurance_companies.company_name')
-            ->leftJoin('insurance_companies', 'purchase_policy.insurance_company_id', '=', 'insurance_companies.id')
-            ->leftJoin('policy_transactions', 'policy_transactions.purchase_id', '=', 'purchase_policy.id')
-            ->where('purchase_policy.client_id', $user_id)
-            ->where('purchase_policy.payment_status', 1)
-            ->where('policy_transactions.payment_status', 1)
-            ->get();
+    foreach ($policy as $p) {
+        $p->policy_type_no = $p->policy_type ?? 0;
+        $p->policy_type    = $policyTypes[$p->policy_type] ?? 'Unknown Policy Type';
 
-        // Add policy name based on policy_type
-        foreach ($policy as $p) {
-            $p->pdf_url = url('insurance_pdfs/' . $policyPdf[$p->policy_type] . '/policy_' . $p->id . '.pdf') ?? 'Unknown Policy Type';
-            $p->policy_type_no = $p->policy_type ?? 0;
-            $p->policy_type = $policyTypes[$p->policy_type] ?? 'Unknown Policy Type';
-        }
-        return $policy;
+        // Build the correct public URL from the actual stored path
+        $p->pdf_url = self::buildPdfUrl($p->policy_pdf_url);
+
+        // Hide the raw filesystem path from the response
+        $p->makeHidden('policy_pdf_url');
     }
+
+    return $policy;
+}
+
+private static function buildPdfUrl($storedPath)
+{
+    if (!$storedPath) {
+        return null;
+    }
+
+    // Already a full URL? just return it
+    if (filter_var($storedPath, FILTER_VALIDATE_URL)) {
+        return $storedPath;
+    }
+
+    // If it's an absolute filesystem path, extract from "insurance_pdfs/" onward
+    if (str_contains($storedPath, 'insurance_pdfs/')) {
+        $relative = 'insurance_pdfs/' . explode('insurance_pdfs/', $storedPath, 2)[1];
+        return url($relative);
+    }
+
+    // Otherwise treat it as already relative
+    return url($storedPath);
+}
     public static function getPolicyCompanyByType($request)
     {
         $policy = PurchasePolicy::select('purchase_policy.*', 'insurance_companies.company_name')
@@ -212,6 +336,140 @@ class PurchasePolicy extends Model
     public function client_travel_insurance()
     {
         return $this->belongsTo(ClientTravelInsurance::class, 'policy_id');
+    }
+    public function office_plan()
+    {
+        return $this->belongsTo(OfficePlan::class, 'plan_id');
+    }
+    public function client_office_insurance()
+    {
+        return $this->belongsTo(ClientOfficeInsurance::class, 'policy_id');
+    }
+
+    public function life_plan()
+    {
+        return $this->belongsTo(LifePlan::class, 'plan_id');
+    }
+    public function client_life_insurance()
+    {
+        return $this->belongsTo(ClientLifeInsurance::class, 'policy_id');
+    }
+
+    public function personal_accident_plan()
+    {
+        return $this->belongsTo(PersonalAccidentPlan::class, 'plan_id');
+    }
+    public function client_personal_accident_insurance()
+    {
+        return $this->belongsTo(ClientPersonalAccidentInsurance::class, 'policy_id');
+    }
+
+    public function client_family_medical_insurance()
+    {
+        return $this->belongsTo(ClientFamilyMedicalInsurance::class, 'policy_id');
+    }
+
+    public function in_patient_plan()
+    {
+        return $this->belongsTo(InPatientPlan::class, 'plan_id');
+    }
+
+    public function in_out_patient_plan()
+    {
+        return $this->belongsTo(InOutPatientPlan::class, 'plan_id');
+    }
+
+    public function individual_medical_plan()
+    {
+        return $this->belongsTo(InPatientPlan::class, 'plan_id');
+    }
+
+    public function getIndividualMedicalPlanAttribute()
+    {
+        $plan = InPatientPlan::find($this->plan_id);
+        if (!$plan) {
+            $plan = InOutPatientPlan::find($this->plan_id);
+        }
+        if (!$plan) {
+            $plan = IndividualPlanModel::find($this->plan_id);
+        }
+        return $plan;
+    }
+
+    public function family_medical_plan()
+    {
+        return $this->belongsTo(InPatientPlan::class, 'plan_id');
+    }
+
+    public function getFamilyMedicalPlanAttribute()
+    {
+        $plan = InPatientPlan::find($this->plan_id);
+        if (!$plan) {
+            $plan = InOutPatientPlan::find($this->plan_id);
+        }
+        return $plan;
+    }
+
+    public function motor_plan()
+    {
+        return $this->belongsTo(MotorInsurancePlan::class, 'plan_id');
+    }
+    public function client_motor_insurance()
+    {
+        return $this->belongsTo(ClientMotorInsurance::class, 'policy_id');
+    }
+
+    public function getDetails()
+    {
+        return self::getCombinedPolicyDetails($this);
+    }
+
+    public static function getCombinedPolicyDetails($purchasePolicy)
+    {
+        if (!$purchasePolicy) {
+            return null;
+        }
+
+        $policyType = (int) $purchasePolicy->policy_type;
+        $policyId   = $purchasePolicy->policy_id;
+
+        switch ($policyType) {
+            case 1:
+                return ClientHomeInsurance::getHomeInsuranceDetails($policyId);
+            case 2:
+                return ClientOfficeInsurance::getOfficeInsuranceDetails($policyId);
+            case 3:
+                return ClientLifeInsurance::getLifeInsuranceDetails($policyId);
+            case 4:
+                return CriticalIllnessInsurance::getCriticalIllnessInsuranceDetails($policyId);
+            case 5:
+                return ClientPersonalAccidentInsurance::getClientPersonalAccidentInsuranceDetails($policyId);
+            case 6:
+            case 7:
+                $clientMedical = ClientFamilyMedicalInsurance::find($policyId);
+                if ($clientMedical) {
+                    $dataArr = [
+                        'policy_id'      => $policyId,
+                        'birth_date'     => $clientMedical->birth_date ?? optional($purchasePolicy->client)->birth_date,
+                        'gender'         => ($clientMedical->gender == 1 || strtolower($clientMedical->gender ?? '') === 'male') ? 'male' : 'female',
+                        'insurance_type' => $clientMedical->insurance_type ?? 1,
+                    ];
+                    return ClientFamilyMedicalInsurance::getClientFamilyMedicalInsuranceDetails($dataArr);
+                }
+                return null;
+            case 8:
+                return ClientPetsInsurance::getPetsInsuranceDetails($policyId);
+            case 9:
+                return ClientDentalsInsurance::getDentalsInsuranceDetails($policyId);
+            case 10:
+                return ClientTravelInsurance::getTravelsInsuranceDetails($policyId);
+            case 11:
+                return ClientMarineInsurance::getMarineInsuranceDetails($policyId);
+            case 12:
+                return ClientMotorInsurance::getMotorInsuranceDetails($policyId);
+            default:
+                return null;
+        }
     }
     public static function getFilterAllPolicy($filters = [], $groupBy = 'insurance_company')
     {
@@ -463,13 +721,18 @@ class PurchasePolicy extends Model
             $groupedPolicies[$groupKey]['policies'][] = $policy;
 
             // Accumulate totals
-            $groupedPolicies[$groupKey]['totals']['policy_limit'] += $policy->policy_limit;
-            $groupedPolicies[$groupKey]['totals']['net_premium_before'] += $policy->net_premium_before;
-            $groupedPolicies[$groupKey]['totals']['commission'] += $policy->commission;
-            $groupedPolicies[$groupKey]['totals']['net_premium_after'] += $policy->net_premium_after;
-            $groupedPolicies[$groupKey]['totals']['total_net_premium'] += $policy->net_premium;
-            $groupedPolicies[$groupKey]['totals']['total_gross_premium'] += $policy->gross_premium;
-        }
+            // $groupedPolicies[$groupKey]['totals']['policy_limit'] += $policy->policy_limit;
+            // $groupedPolicies[$groupKey]['totals']['net_premium_before'] += $policy->net_premium_before;
+            // $groupedPolicies[$groupKey]['totals']['commission'] += $policy->commission;
+            // $groupedPolicies[$groupKey]['totals']['net_premium_after'] += $policy->net_premium_after;
+            // $groupedPolicies[$groupKey]['totals']['total_net_premium'] += $policy->net_premium;
+            // $groupedPolicies[$groupKey]['totals']['total_gross_premium'] += $policy->gross_premium;
+        
+          // Accumulate totals
+            $groupedPolicies[$groupKey]['totals']['total_net_premium'] += (float)($policy->net_premium ?? 0);
+            $groupedPolicies[$groupKey]['totals']['total_gross_premium'] += (float)($policy->gross_premium ?? 0);
+     
+            }
 
         return $groupedPolicies;
     }
@@ -483,6 +746,7 @@ class PurchasePolicy extends Model
             'clients.first_name as client_name',
             'countries.name as distination',
             DB::raw('TIMESTAMPDIFF(YEAR, clients.birth_date, CURDATE()) as client_age'),
+            DB::raw('CONCAT(COALESCE(client_travel_insurances.travel_days, DATEDIFF(purchase_policy.expiry_date, purchase_policy.inception_date)), " Days") as period_of_travel')
         )
             ->leftJoin('insurance_companies', 'purchase_policy.insurance_company_id', '=', 'insurance_companies.id')
             ->leftJoin('clients', 'purchase_policy.client_id', '=', 'clients.id')

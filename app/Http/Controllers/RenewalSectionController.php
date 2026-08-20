@@ -237,144 +237,619 @@ class RenewalSectionController extends Controller
         ]);
     }
 
-    public function notify_renewal(Request $request, $id = null)
-    {
-        $policy_id = $id ?: $request->policy_id;
+    // public function notify_renewal(Request $request, $id = null)
+    // {
+    //     $policy_id = $id ?: $request->policy_id;
 
-        $validator = Validator::make(['policy_id' => $policy_id], [
-            'policy_id' => 'required|exists:purchase_policy,id',
-        ]);
+    //     $validator = Validator::make(['policy_id' => $policy_id], [
+    //         'policy_id' => 'required|exists:purchase_policy,id',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+    //     }
+
+    //     try {
+    //         $policy  = PurchasePolicy::with(['client', 'insurance_company'])->findOrFail($policy_id);
+    //         $client  = $policy->client;
+    //         $agent   = null;
+
+    //         if ($client && !empty($client->agent_id)) {
+    //             $agent = AgentModel::where('agent_code', $client->agent_id)->first();
+    //         }
+
+    //         $daysLeft = (int) now()->diffInDays($policy->expiry_date, false);
+
+    //         $replacements = [
+    //             '[CLIENT_NAME]'           => $client->full_name ?? 'Valued Client',
+    //             '[CLIENT_FIRST_NAME]'     => $client->first_name ?? '',
+    //             '[CLIENT_SURNAME]'        => $client->surname ?? '',
+    //             '[AGENT_NAME]'            => $agent ? ($agent->first_name ?? 'Agent') : 'Agent',
+    //             '[PLAN_NAME]'             => $policy->plan_name ?? $policy->policy_no,
+    //             '[POLICY_NO]'             => $policy->policy_no,
+    //             '[EXPIRY_DATE_FORMATTED]' => Carbon::parse($policy->expiry_date)->toFormattedDateString(),
+    //             '[EXPIRY_DATE_SHORT]'     => Carbon::parse($policy->expiry_date)->toDateString(),
+    //             '[DAYS_LEFT]'             => abs($daysLeft),
+    //             '[APP_NAME]'              => env('APP_NAME', 'Insurance System'),
+    //             '[YEAR]'                  => date('Y'),
+    //         ];
+
+    //         $emailsSent  = [];
+    //         $clientContent = null;
+    //         $agentContent  = null;
+
+    //         if ($client && !empty($client->email_id)) {
+    //             $clientTemplate = MailTemplate::where('type', 'client')->first();
+    //             if ($clientTemplate) {
+    //                 $clientContent = str_replace(
+    //                     array_keys($replacements),
+    //                     array_values($replacements),
+    //                     $clientTemplate->content
+    //                 );
+    //                 try {
+    //                     Mail::html($clientContent, function ($message) use ($client) {
+    //                         $message->to($client->email_id)
+    //                             ->subject('Policy Renewal Reminder');
+    //                     });
+    //                     $emailsSent[] = 'client';
+    //                 } catch (\Exception $e) {
+    //                 }
+    //             }
+    //         }
+
+    //         if ($agent && !empty($agent->agent_email)) {
+    //             $agentTemplate = MailTemplate::where('type', 'agent')->first();
+    //             if ($agentTemplate) {
+    //                 $agentContent = str_replace(
+    //                     array_keys($replacements),
+    //                     array_values($replacements),
+    //                     $agentTemplate->content
+    //                 );
+    //                 try {
+    //                     Mail::html($agentContent, function ($message) use ($agent) {
+    //                         $message->to($agent->agent_email)
+    //                             ->subject('Client Policy Renewal Reminder');
+    //                     });
+    //                     $emailsSent[] = 'agent';
+    //                 } catch (\Exception $e) {
+    //                 }
+    //             }
+    //         }
+
+    //         $log = new PolicyMailLog();
+    //         $log->purchase_policy_id = $policy->id;
+    //         $log->client_id          = $client->id;
+    //         $log->client_mail        = $clientContent;
+    //         $log->agent_mail         = $agentContent;
+    //         $log->save();
+    //         $messageText = Carbon::parse($policy->expiry_date)->isPast()
+    //             ? __('messages.renewal_section.policy_has_expired', ['date' => $policy->expiry_date])
+    //             : __('messages.renewal_section.policy_about_to_expire', ['date' => $policy->expiry_date]);
+
+    //         $client_message          = new ClientMessage();
+    //         $client_message->client_id = $client->id;
+    //         $client_message->message   = $messageText;
+    //         $client_message->save();
+
+    //         $successMessage = count($emailsSent) > 0
+    //             ? 'Notification sent successfully to ' . implode(' and ', $emailsSent) . '.'
+    //             : 'Notification processed but no emails were sent.';
+
+    //         if ($request->ajax() || $request->isMethod('post')) {
+    //             return response()->json(['status' => 'success', 'message' => $successMessage]);
+    //         }
+    //         return back()->with('success', $successMessage);
+    //     } catch (\Exception $e) {
+    //         if ($request->ajax() || $request->isMethod('post')) {
+    //             return response()->json(['status' => 'error', 'message' => 'Failed to send notification: ' . $e->getMessage()], 500);
+    //         }
+    //         return back()->with('error', 'Failed to send notification: ' . $e->getMessage());
+    //     }
+    // }
+     public function notify_renewal(Request $request, $id = null)
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | Get Policy IDs
+        |--------------------------------------------------------------------------
+        */
+
+        $policyIds = $request->input('policy_ids', []);
+
+        // Support old single policy URL: /notify-renewal/{id}
+        if ($id) {
+            $policyIds = [$id];
+        }
+
+        // Support old single policy_id request
+        if (empty($policyIds) && $request->filled('policy_id')) {
+            $policyIds = [$request->policy_id];
+        }
+
+        $policyIds = array_values(
+            array_unique(
+                array_filter($policyIds)
+            )
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate
+        |--------------------------------------------------------------------------
+        */
+
+        $validator = Validator::make(
+            ['policy_ids' => $policyIds],
+            [
+                'policy_ids' => 'required|array|min:1',
+                'policy_ids.*' => 'required|integer|exists:purchase_policy,id',
+            ]
+        );
 
         if ($validator->fails()) {
-            return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors(),
+            ], 422);
         }
 
-        try {
-            $policy  = PurchasePolicy::with(['client', 'insurance_company'])->findOrFail($policy_id);
-            $client  = $policy->client;
-            $agent   = null;
+        /*
+        |--------------------------------------------------------------------------
+        | Counters
+        |--------------------------------------------------------------------------
+        */
 
-            if ($client && !empty($client->agent_id)) {
-                $agent = AgentModel::where('agent_code', $client->agent_id)->first();
-            }
+        $successCount = 0;
+        $failedCount = 0;
 
-            $daysLeft = (int) now()->diffInDays($policy->expiry_date, false);
+        $results = [];
 
-            $replacements = [
-                '[CLIENT_NAME]'           => $client->full_name ?? 'Valued Client',
-                '[CLIENT_FIRST_NAME]'     => $client->first_name ?? '',
-                '[CLIENT_SURNAME]'        => $client->surname ?? '',
-                '[AGENT_NAME]'            => $agent ? ($agent->first_name ?? 'Agent') : 'Agent',
-                '[PLAN_NAME]'             => $policy->plan_name ?? $policy->policy_no,
-                '[POLICY_NO]'             => $policy->policy_no,
-                '[EXPIRY_DATE_FORMATTED]' => Carbon::parse($policy->expiry_date)->toFormattedDateString(),
-                '[EXPIRY_DATE_SHORT]'     => Carbon::parse($policy->expiry_date)->toDateString(),
-                '[DAYS_LEFT]'             => abs($daysLeft),
-                '[APP_NAME]'              => env('APP_NAME', 'Insurance System'),
-                '[YEAR]'                  => date('Y'),
-            ];
+        /*
+        |--------------------------------------------------------------------------
+        | Process Every Selected Policy
+        |--------------------------------------------------------------------------
+        */
 
-            $emailsSent  = [];
-            $clientContent = null;
-            $agentContent  = null;
+        foreach ($policyIds as $policyId) {
 
-            if ($client && !empty($client->email_id)) {
-                $clientTemplate = MailTemplate::where('type', 'client')->first();
-                if ($clientTemplate) {
-                    $clientContent = str_replace(
-                        array_keys($replacements),
-                        array_values($replacements),
-                        $clientTemplate->content
-                    );
-                    try {
-                        Mail::html($clientContent, function ($message) use ($client) {
-                            $message->to($client->email_id)
-                                ->subject('Policy Renewal Reminder');
-                        });
-                        $emailsSent[] = 'client';
-                    } catch (\Exception $e) {
+            try {
+
+                $policy = PurchasePolicy::with([
+                    'client',
+                    'insurance_company'
+                ])->findOrFail($policyId);
+
+                $client = $policy->client;
+
+                /*
+                |--------------------------------------------------------------------------
+                | Client Check
+                |--------------------------------------------------------------------------
+                */
+
+                if (!$client) {
+
+                    $failedCount++;
+
+                    $results[] = [
+                        'policy_id' => $policyId,
+                        'status' => 'failed',
+                        'message' => 'Client not found.',
+                    ];
+
+                    continue;
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Agent
+                |--------------------------------------------------------------------------
+                */
+
+                $agent = null;
+
+                if (!empty($client->agent_id)) {
+                    $agent = AgentModel::where(
+                        'agent_code',
+                        $client->agent_id
+                    )->first();
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Days Left
+                |--------------------------------------------------------------------------
+                */
+
+                $daysLeft = (int) now()->diffInDays(
+                    $policy->expiry_date,
+                    false
+                );
+
+                /*
+                |--------------------------------------------------------------------------
+                | Replacements
+                |--------------------------------------------------------------------------
+                */
+
+                $replacements = [
+
+                    '[CLIENT_NAME]' =>
+                        $client->full_name ?? 'Valued Client',
+
+                    '[CLIENT_FIRST_NAME]' =>
+                        $client->first_name ?? '',
+
+                    '[CLIENT_SURNAME]' =>
+                        $client->surname ?? '',
+
+                    '[AGENT_NAME]' =>
+                        $agent
+                        ? ($agent->first_name ?? 'Agent')
+                        : 'Agent',
+
+                    '[PLAN_NAME]' =>
+                        $policy->plan_name ?? $policy->policy_no,
+
+                    '[POLICY_NO]' =>
+                        $policy->policy_no,
+
+                    '[EXPIRY_DATE_FORMATTED]' =>
+                        Carbon::parse(
+                            $policy->expiry_date
+                        )->toFormattedDateString(),
+
+                    '[EXPIRY_DATE_SHORT]' =>
+                        Carbon::parse(
+                            $policy->expiry_date
+                        )->toDateString(),
+
+                    '[DAYS_LEFT]' =>
+                        abs($daysLeft),
+
+                    '[APP_NAME]' =>
+                        env(
+                            'APP_NAME',
+                            'Insurance System'
+                        ),
+
+                    '[YEAR]' =>
+                        date('Y'),
+                ];
+
+                /*
+                |--------------------------------------------------------------------------
+                | Email Variables
+                |--------------------------------------------------------------------------
+                */
+
+                $emailsSent = [];
+
+                $clientContent = null;
+                $agentContent = null;
+
+                /*
+                |--------------------------------------------------------------------------
+                | Client Mail
+                |--------------------------------------------------------------------------
+                */
+
+                if (!empty($client->email_id)) {
+
+                    $clientTemplate = MailTemplate::where(
+                        'type',
+                        'client'
+                    )->first();
+
+                    if ($clientTemplate) {
+
+                        $clientContent = str_replace(
+                            array_keys($replacements),
+                            array_values($replacements),
+                            $clientTemplate->content
+                        );
+
+                        try {
+
+                            Mail::html(
+                                $clientContent,
+                                function ($message) use ($client) {
+
+                                    $message
+                                        ->to($client->email_id)
+                                        ->subject(
+                                            'Policy Renewal Reminder'
+                                        );
+                                }
+                            );
+
+                            $emailsSent[] = 'client';
+
+                        } catch (\Exception $e) {
+
+                            \Log::error(
+                                'Client renewal email failed',
+                                [
+                                    'policy_id' => $policy->id,
+                                    'error' => $e->getMessage(),
+                                ]
+                            );
+                        }
                     }
                 }
-            }
 
-            if ($agent && !empty($agent->agent_email)) {
-                $agentTemplate = MailTemplate::where('type', 'agent')->first();
-                if ($agentTemplate) {
-                    $agentContent = str_replace(
-                        array_keys($replacements),
-                        array_values($replacements),
-                        $agentTemplate->content
-                    );
-                    try {
-                        Mail::html($agentContent, function ($message) use ($agent) {
-                            $message->to($agent->agent_email)
-                                ->subject('Client Policy Renewal Reminder');
-                        });
-                        $emailsSent[] = 'agent';
-                    } catch (\Exception $e) {
+                /*
+                |--------------------------------------------------------------------------
+                | Agent Mail
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    $agent &&
+                    !empty($agent->agent_email)
+                ) {
+
+                    $agentTemplate = MailTemplate::where(
+                        'type',
+                        'agent'
+                    )->first();
+
+                    if ($agentTemplate) {
+
+                        $agentContent = str_replace(
+                            array_keys($replacements),
+                            array_values($replacements),
+                            $agentTemplate->content
+                        );
+
+                        try {
+
+                            Mail::html(
+                                $agentContent,
+                                function ($message) use ($agent) {
+
+                                    $message
+                                        ->to($agent->agent_email)
+                                        ->subject(
+                                            'Client Policy Renewal Reminder'
+                                        );
+                                }
+                            );
+
+                            $emailsSent[] = 'agent';
+
+                        } catch (\Exception $e) {
+
+                            \Log::error(
+                                'Agent renewal email failed',
+                                [
+                                    'policy_id' => $policy->id,
+                                    'error' => $e->getMessage(),
+                                ]
+                            );
+                        }
                     }
                 }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Save Policy Mail Log
+                |--------------------------------------------------------------------------
+                */
+
+                $log = new PolicyMailLog();
+
+                $log->purchase_policy_id = $policy->id;
+                $log->client_id = $client->id;
+                $log->client_mail = $clientContent;
+                $log->agent_mail = $agentContent;
+
+                $log->save();
+
+                /*
+                |--------------------------------------------------------------------------
+                | Client Message
+                |--------------------------------------------------------------------------
+                */
+
+                $messageText = Carbon::parse(
+                    $policy->expiry_date
+                )->isPast()
+
+                    ? __(
+                        'messages.renewal_section.policy_has_expired',
+                        [
+                            'date' => $policy->expiry_date
+                        ]
+                    )
+
+                    : __(
+                        'messages.renewal_section.policy_about_to_expire',
+                        [
+                            'date' => $policy->expiry_date
+                        ]
+                    );
+
+                $clientMessage = new ClientMessage();
+
+                $clientMessage->client_id = $client->id;
+                $clientMessage->message = $messageText;
+
+                $clientMessage->save();
+
+                /*
+                |--------------------------------------------------------------------------
+                | Success
+                |--------------------------------------------------------------------------
+                */
+
+                $successCount++;
+
+                $results[] = [
+                    'policy_id' => $policy->id,
+                    'client_id' => $client->id,
+                    'status' => 'success',
+                    'emails_sent' => $emailsSent,
+                ];
+
+            } catch (\Exception $e) {
+
+                $failedCount++;
+
+                \Log::error(
+                    'Renewal notification failed',
+                    [
+                        'policy_id' => $policyId,
+                        'error' => $e->getMessage(),
+                    ]
+                );
+
+                $results[] = [
+                    'policy_id' => $policyId,
+                    'status' => 'failed',
+                    'message' => $e->getMessage(),
+                ];
             }
-
-            $log = new PolicyMailLog();
-            $log->purchase_policy_id = $policy->id;
-            $log->client_id          = $client->id;
-            $log->client_mail        = $clientContent;
-            $log->agent_mail         = $agentContent;
-            $log->save();
-            $messageText = Carbon::parse($policy->expiry_date)->isPast()
-                ? __('messages.renewal_section.policy_has_expired', ['date' => $policy->expiry_date])
-                : __('messages.renewal_section.policy_about_to_expire', ['date' => $policy->expiry_date]);
-
-            $client_message          = new ClientMessage();
-            $client_message->client_id = $client->id;
-            $client_message->message   = $messageText;
-            $client_message->save();
-
-            $successMessage = count($emailsSent) > 0
-                ? 'Notification sent successfully to ' . implode(' and ', $emailsSent) . '.'
-                : 'Notification processed but no emails were sent.';
-
-            if ($request->ajax() || $request->isMethod('post')) {
-                return response()->json(['status' => 'success', 'message' => $successMessage]);
-            }
-            return back()->with('success', $successMessage);
-        } catch (\Exception $e) {
-            if ($request->ajax() || $request->isMethod('post')) {
-                return response()->json(['status' => 'error', 'message' => 'Failed to send notification: ' . $e->getMessage()], 500);
-            }
-            return back()->with('error', 'Failed to send notification: ' . $e->getMessage());
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Final Message
+        |--------------------------------------------------------------------------
+        */
+
+        if ($failedCount === 0) {
+
+            $message =
+                $successCount .
+                ' notification(s) sent successfully.';
+
+        } elseif ($successCount > 0) {
+
+            $message =
+                $successCount .
+                ' notification(s) sent successfully and ' .
+                $failedCount .
+                ' failed.';
+
+        } else {
+
+            $message =
+                'Failed to process selected notifications.';
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Response
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $request->ajax() ||
+            $request->isMethod('post')
+        ) {
+
+            return response()->json([
+                'status' => $successCount > 0
+                    ? 'success'
+                    : 'error',
+
+                'message' => $message,
+
+                'total' => count($policyIds),
+
+                'success_count' => $successCount,
+
+                'failed_count' => $failedCount,
+
+                'results' => $results,
+            ]);
+        }
+
+        return back()->with(
+            'success',
+            $message
+        );
     }
 
-    public function cancel_policy(Request $request, $id = null)
-    {
-        $policy_id = $id ?: $request->policy_id;
+    // public function cancel_policy(Request $request, $id = null)
+    // {
+    //     $policy_id = $id ?: $request->policy_id;
 
-        $validator = Validator::make(['policy_id' => $policy_id], [
-            'policy_id' => 'required|exists:purchase_policy,id'
+    //     $validator = Validator::make(['policy_id' => $policy_id], [
+    //         'policy_id' => 'required|exists:purchase_policy,id'
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+    //     }
+
+    //     try {
+    //         $policy = PurchasePolicy::findOrFail($policy_id);
+    //         $policy->cancelled_at = now();
+    //         $policy->save();
+
+    //         if ($request->ajax() || $request->isMethod('post')) {
+    //             return response()->json(['status' => 'success', 'message' => 'Policy cancelled successfully.']);
+    //         }
+    //         return back()->with('success', 'Policy cancelled successfully.');
+    //     } catch (\Exception $e) {
+    //         logger()->error($e->getTraceAsString());
+    //         if ($request->ajax() || $request->isMethod('post')) {
+    //             return response()->json(['status' => 'error', 'message' => 'Failed to cancel policy: ' . $e->getMessage()], 500);
+    //         }
+    //         return back()->with('error', 'Failed to cancel policy: ' . $e->getMessage());
+    //     }
+    // }
+      public function cancel_policy(Request $request)
+    {
+
+    // dd($request->all());
+
+
+        $validator = Validator::make($request->all(), [
+            'policy_ids' => 'required|array|min:1',
+            'policy_ids.*' => 'required|integer|exists:purchase_policy,id',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors(),
+            ], 422);
         }
 
-        try {
-            $policy = PurchasePolicy::findOrFail($policy_id);
-            $policy->cancelled_at = now();
-            $policy->save();
+        $cancelled = [];
+        $errors = [];
 
-            if ($request->ajax() || $request->isMethod('post')) {
-                return response()->json(['status' => 'success', 'message' => 'Policy cancelled successfully.']);
+        foreach ($request->policy_ids as $policy_id) {
+
+            try {
+
+                $policy = PurchasePolicy::findOrFail($policy_id);
+
+                $policy->cancelled_at = now();
+                $policy->save();
+
+                $cancelled[] = $policy->id;
+
+            } catch (\Exception $e) {
+
+                logger()->error($e->getMessage());
+
+                $errors[] = [
+                    'policy_id' => $policy_id,
+                    'message' => $e->getMessage(),
+                ];
             }
-            return back()->with('success', 'Policy cancelled successfully.');
-        } catch (\Exception $e) {
-            logger()->error($e->getTraceAsString());
-            if ($request->ajax() || $request->isMethod('post')) {
-                return response()->json(['status' => 'error', 'message' => 'Failed to cancel policy: ' . $e->getMessage()], 500);
-            }
-            return back()->with('error', 'Failed to cancel policy: ' . $e->getMessage());
         }
+
+        return response()->json([
+            'status' => count($errors) > 0 ? 'partial' : 'success',
+            'message' => count($cancelled) . ' policy(s) cancelled successfully.',
+            'cancelled_policy_ids' => $cancelled,
+            'errors' => $errors,
+        ]);
     }
     public function previewMail(Request $request)
     {

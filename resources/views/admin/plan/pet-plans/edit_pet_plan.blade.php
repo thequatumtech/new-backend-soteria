@@ -204,7 +204,18 @@
                                     @foreach($ages as $single)
                                     <option value="{{$single->id}}"
                                         {{(old('restricted_pet_age_ids') && in_array($single->id, old('restricted_pet_age_ids'))) ? 'selected' : (isset($selected_pet_age_ids) && in_array($single->id, $selected_pet_age_ids) ? 'selected' : '')}}>
-                                        {{$single->age}}
+                                        {{$single->age}} {{ $single->type == 'year' ? __('messages.age.age_year') : __('messages.age.age_month') }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                <div>{{__('messages.plans.pet_breed_restriction')}}</div>
+                                <select name="restricted_pet_breed_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
+                                    @foreach($breeds as $single)
+                                    <option value="{{$single->id}}"
+                                        {{(old('restricted_pet_breed_ids') && in_array($single->id, old('restricted_pet_breed_ids'))) ? 'selected' : (isset($selected_pet_breed_ids) && in_array($single->id, $selected_pet_breed_ids) ? 'selected' : '')}}>
+                                        {{$single->breed}}
                                     </option>
                                     @endforeach
                                 </select>
