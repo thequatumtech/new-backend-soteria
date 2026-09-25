@@ -11,6 +11,7 @@ use App\Models\Client;
 use Carbon\Carbon;
 use App\Models\Currency;
 use App\Models\InsuranceCompany;
+use App\Models\RenewalPolicy;
 use App\Helpers\InsurancePlanHelper;
 
 class HomeInsuranceController extends Controller
@@ -74,6 +75,7 @@ class HomeInsuranceController extends Controller
 
     public function storeHomeInsurance(Request $request)
     {
+
         try {
 
             $data = $request->validate([
@@ -119,7 +121,12 @@ class HomeInsuranceController extends Controller
                 'property_document' => 'nullable',
                 'content_document' => 'nullable',
                 'payment_status' => 'nullable',
+
+                'old_policy_id_for_renew' => 'nullable|integer',
+                'renew' => 'nullable|boolean',
             ]);
+
+
 
             if (isset($data['birth_date'])) {
                 $data['birth_date'] = $this->normalizeDate($data['birth_date']);
@@ -235,18 +242,7 @@ class HomeInsuranceController extends Controller
                     return $this->restrictionError('protection_system');
                 }
             }
-            // if (!empty($restrictedHomeAges) && !empty($data['home_age'])) {
-            //     $clientHomeAges = $this->normalizeRestricted($data['home_age']);
-
-            //     $hasMatch = !empty(array_intersect(
-            //         array_map('intval', $clientHomeAges),
-            //         array_map('intval', $restrictedHomeAges)
-            //     ));
-
-            //     if ($hasMatch) {
-            //         return $this->restrictionError('home_age');
-            //     }
-            // }
+           
             if (!empty($restrictedHomeAges) && isset($data['home_age']) && $data['home_age'] !== '') {
                     $clientHomeAges = array_map('intval', $this->normalizeRestricted($data['home_age']));
 
@@ -269,6 +265,27 @@ class HomeInsuranceController extends Controller
                         }
                     }
                 }
+
+
+            $oldPolicyForRenewal = null;
+
+            if ($request->boolean('renew')) {
+
+                $oldPolicyForRenewal = PurchasePolicy::find(
+                    $request->old_policy_id_for_renew
+                );
+
+                if (!$oldPolicyForRenewal) {
+                    return response()->json([
+                        'status' => false,
+                        'status_code' => 422,
+                        'message' => __('messages.api.policy_not_found'),
+                        'data' => [],
+                    ], 422);
+                }
+            }
+
+
             $existingHome = PurchasePolicy::find($request->purchase_id ?? 0);
 
             if ($existingHome) {
@@ -296,7 +313,17 @@ class HomeInsuranceController extends Controller
                 $data['inception_date'] = $data['effective_date'];
 
                 $home = PurchasePolicy::savePurchasePolicy($data);
+
+                 if ($request->boolean('renew')) {
+
+                    RenewalPolicy::create([
+                        'old_policy_id' => $oldPolicyForRenewal->id,
+                        'new_policy_id' => $home->id,
+                    ]);
+                }
             }
+
+           
 
             $data = ClientHomeInsurance::getHomeInsuranceDetails($data['policy_id']);
 
@@ -410,6 +437,9 @@ class HomeInsuranceController extends Controller
                 'data' => $data
             ]);
         } catch (\Exception $e) {
+
+
+         
             return response()->json([
                 'status' => false,
                 'status_code' => 500,
@@ -418,86 +448,6 @@ class HomeInsuranceController extends Controller
             ]);
         }
     }
-
-    // public function getHomeInsurancePlan(Request $request)
-    // {
-    //     try {
-    //         // $data = HomePlan::with('policy_covers', 'insurance_company')
-    //         //     ->whereHas('insurance_company', function ($q) {
-    //         //         $q->whereNull('deleted_at');
-    //         //     })
-    //         //     ->where('plan_name', 'LIKE', '%' . $request->limit . '%')
-    //         //     ->get();
-    //          $query = HomePlan::with([
-    //             'policy_covers',
-    //             'insurance_company',
-    //             'insurance_company.currency'
-    //         ]);
-
-    //         // Filter according to client's currency
-    //         $query = InsurancePlanHelper::filterByClientCurrency(
-    //             $query,
-    //             $request->user_id
-    //         );
-
-    //         // Filter by HomePlan limit if supplied
-    //         if ($request->filled('limit')) {
-    //             $query->where('limit', $request->limit);
-    //         }
-
-    //         $data = $query->get();
-
-    //         if ($data->isEmpty()) {
-    //             // Only show "no plans for your country" when the result is empty
-    //             // due to the country/currency filter — not because of a limit mismatch.
-    //             // Check if any plans exist for this client's country (ignoring limit).
-    //             if ($request->filled('limit')) {
-    //                 $countryQuery = HomePlan::whereHas('insurance_company', function ($q) {
-    //                     $q->whereNull('deleted_at');
-    //                 });
-
-    //                 InsurancePlanHelper::filterByClientCurrency($countryQuery, $request->user_id);
-    //                 $plansExistForCountry = $countryQuery->exists();
-
-    //                 if ($plansExistForCountry) {
-    //                     // Plans exist for the country but none match the given limit — return empty normally.
-    //                     return response()->json([
-    //                         'status'      => false,
-    //                         'status_code' => 404,
-    //                         'message'     => 'No home insurance plans are available for your country at this time. Please contact us for further information.',
-    //                         'data'        => []
-    //                     ], 404);
-    //                 }
-    //             }
-
-    //         }
-
-    //         $data->transform(function ($item) {
-    //             if (!empty($item->insurance_policy_pdf)) {
-    //                 $item->insurance_policy_pdf = url('uploads/insurance_plans/' . $item->id . '/' . $item->insurance_policy_pdf);
-    //             }
-    //             if (!empty($item->insurance_company->privacy_policy)) {
-    //                 $item->insurance_company->privacy_policy = url('insurance/' . $item->insurance_company->id . '/' . $item->insurance_company->privacy_policy);
-    //             }
-    //             return $item;
-    //         });
-
-    //         return response()->json([
-    //             'status' => true,
-    //             'status_code' => 200,
-    //             'message' => 'Get Home Insurance Plan successfully',
-    //             'data' => $data,
-    //         ]);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'status' => false,
-    //             'status_code' => 500,
-    //             'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
-    //             'data' => []
-    //         ]);
-    //     }
-    // }
-
     public function getHomeInsurancePlan(Request $request)
     {
         try {

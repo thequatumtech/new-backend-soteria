@@ -64,4 +64,7 @@ return [
     'home_restriction_age' => 'العمر',
 
     'country_contact' => ' يرجى الاتصال بنا لمزيد من المعلومات.',
+
+
+
 ];

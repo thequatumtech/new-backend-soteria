@@ -12,7 +12,7 @@ use App\Models\ClientMessage;
 use App\Models\InsuranceCompany;
 use App\Models\Country;
 use App\Models\District;
-use App\Models\Nationality;
+use App\Models\RenewalPolicy;
 use App\Models\Occupations;
 use App\Rules\AdultRule;
 use Illuminate\Http\Request;
@@ -884,7 +884,239 @@ class ClientController extends Controller
         }
     }
 
-    public function saveSignature(Request $request)
+    public function check_policy_renewal(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'purchase_policy_id' => 'required|integer',
+            'client_id' => 'required|integer|exists:clients,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'can_renew' => false,
+                'message' => __('messages.api.validation_failed'),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        /*------------Check purchase policy exists ---------------------*/
+
+        $purchasePolicy = PurchasePolicy::with([
+            'client',
+            'agent',
+            'insurance_company',
+            'finalPolicyPdf',
+            'home_plan',
+            'office_plan',
+            'life_plan',
+            'critical_illness_plan',
+            'personal_accident_plan',
+            'in_patient_plan',
+            'in_out_patient_plan',
+            'pet_plan',
+            'dental_plan',
+            'travel_plan',
+            'marine_plan',
+            'motor_plan',
+        ])
+            ->where('id', $request->purchase_policy_id)
+            ->first();
+
+        if (!$purchasePolicy) {
+            return response()->json([
+                'status' => false,
+                'can_renew' => false,
+                'message' => __('messages.api.policy_not_found'),
+
+            ], 404);
+        }
+
+
+        if ((int) $purchasePolicy->client_id !== (int) $request->client_id) {
+            return response()->json([
+                'status' => false,
+                'can_renew' => false,
+                'message' => __('messages.api.policy_not_belong_client'),
+
+
+            ], 403);
+        }
+
+        
+
+        if ((int) $purchasePolicy->payment_status !== 1) {
+            return response()->json([
+                'status' => false,
+                'can_renew' => false,
+                'message' => __('messages.api.policy_payment_not_completed'),
+            ], 200);
+        }
+
+        if (!$purchasePolicy->insurance_company) {
+            return response()->json([
+                'status' => false,
+                'can_renew' => false,
+                  'message' => __('messages.api.policy_insurance_company_not_found'),
+            ], 200);
+        }
+
+
+        if (!$purchasePolicy->plan_id) {
+            return response()->json([
+                'status' => false,
+                'can_renew' => false,
+                   'message' => __('messages.api.policy_plan_missing'),
+            ], 200);
+        }
+
+        if (!$purchasePolicy->planExists()) {
+            return response()->json([
+                'status' => false,
+                'can_renew' => false,
+                'message' => __('messages.api.policy_plan_not_found'),
+            ], 200);
+        }
+
+        if (!$purchasePolicy->expiry_date) {
+            return response()->json([
+                'status' => false,
+                'can_renew' => false,
+                'message' => __('messages.api.policy_expiry_date_missing'),
+            ], 200);
+        }
+
+        $policyTypes = [
+            1 => 'Home Insurance',
+            2 => 'Office Insurance',
+            3 => 'Life Insurance',
+            4 => 'Critical Illness Insurance',
+            5 => 'Personal Accident Insurance',
+            6 => 'Individual Medical Insurance',
+            7 => 'Family Medical Insurance',
+            8 => 'Pet Insurance',
+            9 => 'Dental Insurance',
+            10 => 'Travel Insurance',
+            11 => 'Marine Insurance',
+            12 => 'Motor Insurance',
+        ];
+
+        $plan = null;
+
+        switch ((int) $purchasePolicy->policy_type) {
+
+            case 1:
+                $plan = $purchasePolicy->home_plan;
+                break;
+
+            case 2:
+                $plan = $purchasePolicy->office_plan;
+                break;
+
+            case 3:
+                $plan = $purchasePolicy->life_plan;
+                break;
+
+            case 4:
+                $plan = $purchasePolicy->critical_illness_plan;
+                break;
+
+            case 5:
+                $plan = $purchasePolicy->personal_accident_plan;
+                break;
+
+            case 6:
+                // Individual medical
+                $plan = $purchasePolicy->individual_medical_plan;
+                break;
+
+            case 7:
+                // Family medical
+                $plan = $purchasePolicy->family_medical_plan;
+                break;
+
+            case 8:
+                $plan = $purchasePolicy->pet_plan;
+                break;
+
+            case 9:
+                $plan = $purchasePolicy->dental_plan;
+                break;
+
+            case 10:
+                $plan = $purchasePolicy->travel_plan;
+                break;
+
+            case 11:
+                $plan = $purchasePolicy->marine_plan;
+                break;
+
+            case 12:
+                $plan = $purchasePolicy->motor_plan;
+                break;
+        }
+
+        $policyDetails = PurchasePolicy::getCombinedPolicyDetails(
+            $purchasePolicy
+        );
+
+        $draftPdfUrl = PurchasePolicy::buildPdfUrl(
+            $purchasePolicy->policy_pdf_url
+        );
+
+        $finalPdfUrl = $purchasePolicy->finalPolicyPdf
+            ? PurchasePolicy::buildPdfUrl(
+                $purchasePolicy->finalPolicyPdf->final_pdf_url
+            )
+            : null;
+
+
+        return response()->json([
+            'status' => true,
+            'can_renew' => true,
+           'message' => __('messages.api.policy_can_be_renewed'),
+
+            'data' => [
+
+                'purchase_policy' => $purchasePolicy,
+
+                'policy_type' => [
+                    'id' => $purchasePolicy->policy_type,
+                    'name' => $policyTypes[$purchasePolicy->policy_type]
+                        ?? 'Unknown Policy Type',
+                ],
+
+                'client' => $purchasePolicy->client,
+
+              
+                'agent' => $purchasePolicy->agent,
+
+             
+                'insurance_company' => $purchasePolicy->insurance_company,
+
+                'plan' => $plan,
+
+                'policy_details' => $policyDetails,
+
+                'documents' => [
+                    'draft_pdf_url' => $draftPdfUrl,
+                    'final_pdf_url' => $finalPdfUrl,
+                ],
+
+                'renewal' => [
+                    'old_policy_id' => $purchasePolicy->id,
+                    'client_id' => $purchasePolicy->client_id,
+                    'insurance_company_id' => $purchasePolicy->insurance_company_id,
+                    'plan_id' => $purchasePolicy->plan_id,
+                    'expiry_date' => $purchasePolicy->expiry_date,
+                    'can_renew' => true,
+                ],
+            ],
+        ], 200);
+    }
+
+
+     public function saveSignature(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'purchase_policy_id' => 'required|integer|exists:purchase_policy,id',

@@ -10,6 +10,7 @@ use PDF;
 use App\Models\Client;
 use Carbon\Carbon;
 use App\Models\Currency;
+use App\Models\RenewalPolicy;
 
 class ClientFamilyMedicalInsuranceController extends Controller
 {
@@ -169,7 +170,30 @@ class ClientFamilyMedicalInsuranceController extends Controller
                 'insurance_limit' => 'nullable',
                 'insurance_type_status' => 'nullable',
                 'plan_id' => 'nullable',
+
+                'old_policy_id_for_renew' => 'nullable|integer',
+                'renew' => 'nullable|boolean',
+
             ]);
+
+
+            $oldPolicyForRenewal = null;
+
+            if ($request->boolean('renew')) {
+
+                $oldPolicyForRenewal = PurchasePolicy::find(
+                    $request->old_policy_id_for_renew
+                );
+
+                if (!$oldPolicyForRenewal) {
+                    return response()->json([
+                        'status' => false,
+                        'status_code' => 422,
+                        'message' => __('messages.api.policy_not_found'),
+                        'data' => [],
+                    ], 422);
+                }
+            }
 
             $existingMedical = PurchasePolicy::find($request->purchase_id ?? 0);
             if ($data['insurance_type'] == 1) {
@@ -292,6 +316,15 @@ class ClientFamilyMedicalInsuranceController extends Controller
                 }
                 $data['policy_id'] = $Medical->id;
                 $Medical = PurchasePolicy::savePurchasePolicy($data);
+
+                if ($request->boolean('renew')) {
+
+                    RenewalPolicy::create([
+                        'old_policy_id' => $oldPolicyForRenewal->id,
+                        'new_policy_id' => $Medical->id,
+                    ]);
+                }
+
             }
             $data = ClientFamilyMedicalInsurance::getClientFamilyMedicalInsuranceDetails($data);
             if (!$data) {
@@ -319,41 +352,7 @@ class ClientFamilyMedicalInsuranceController extends Controller
                 $path = $directory . '/' . $filename;
             }
 
-            // ---------------------- CALCULATE PREMIUMS ----------------------
-            //    $clientGender = ($data['gender'] ?? $client->gender) == 'Male' ? 1 : 2;
-            // $clientAge = Carbon::parse($data['birth_date'] ?? $client->birth_date)->age;
-
-            // $basePremium = 0;
-            // $pricing = null;
-
-            // if ($data['insurance_type'] == 1) {
-            //     $pricing = InPatientPlanPricingSchedule::where('in_patient_plan_id', $data['plan_id'])
-            //         ->where('gender', $clientGender)
-            //         ->where('lower_age', '<=', $clientAge)
-            //         ->where('upper_age', '>=', $clientAge)
-            //         ->first();
-            // } else {
-            //     $pricing = InOutPatientPlanPricingSchedule::where('in_out_patient_plan_id', $data['plan_id'])
-            //         ->where('gender', $clientGender)
-            //         ->where('lower_age', '<=', $clientAge)
-            //         ->where('upper_age', '>=', $clientAge)
-            //         ->first();
-            // }
-
-            // if ($pricing) {
-            //     switch ($data['insurance_class']) {
-            //         case 'VIP Class':
-            //             $basePremium = $pricing->vip_class;
-            //             break;
-            //         case 'First Class':
-            //             $basePremium = $pricing->first_class;
-            //             break;
-            //         case 'Second Class':
-            //             $basePremium = $pricing->second_class;
-            //             break;
-            //         case 'Third Class':
-            //             $basePremium = $pricing->third_class;
-            //             break;
+            
             $totalNetPremium = 0;
 
             // 1. Calculate Main Client Premium

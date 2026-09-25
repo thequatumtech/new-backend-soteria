@@ -2103,6 +2103,23 @@ return [
         'get_social_media_successfully' => 'تم جلب منصات التواصل الاجتماعي بنجاح',
         // Terms
         'terms_no_record_found' => 'لم يتم العثور على سجل',
+
+
+
+
+    'policy_payment_not_completed' => 'لا يمكن تجديد هذه الوثيقة لأن الدفع لم يكتمل.',
+
+    'policy_insurance_company_not_found' => 'لا يمكن تجديد هذه الوثيقة لأنه لم يتم العثور على شركة التأمين.',
+
+    'policy_plan_missing' => 'لا يمكن تجديد هذه الوثيقة لأن الخطة مفقودة.',
+
+    'policy_plan_not_found' => 'لا يمكن تجديد هذه الوثيقة لأن الخطة المحددة غير موجودة.',
+
+    'policy_expiry_date_missing' => 'لا يمكن تجديد هذه الوثيقة لأن تاريخ انتهاء الصلاحية مفقود.',
+
+    'policy_can_be_renewed' => 'يمكن تجديد هذه الوثيقة.',
+
+    
     ],
     'general_error' => 'حدث خطأ ما، يرجى المحاولة مرة أخرى',
     'validation' => [

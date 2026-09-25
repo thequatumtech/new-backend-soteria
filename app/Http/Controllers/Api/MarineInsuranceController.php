@@ -11,6 +11,7 @@ use App\Models\Client;
 use Carbon\Carbon;
 use App\Models\Currency;
 use App\Helpers\InsurancePlanHelper;
+use App\Models\RenewalPolicy;
 
 class MarineInsuranceController extends Controller
 {
@@ -146,6 +147,10 @@ class MarineInsuranceController extends Controller
                 'payment_status' => 'nullable',
                 'trans_shipped_third_country' => 'nullable',
                 'dangerous_activities' => 'nullable',
+
+                'old_policy_id_for_renew' => 'nullable|integer',
+                'renew' => 'nullable|boolean',
+
             ]);
 
             if ($request->has('dangerous_activities')) {
@@ -236,6 +241,24 @@ class MarineInsuranceController extends Controller
                 }
             }
 
+            $oldPolicyForRenewal = null;
+
+            if ($request->boolean('renew')) {
+
+                $oldPolicyForRenewal = PurchasePolicy::find(
+                    $request->old_policy_id_for_renew
+                );
+
+                if (!$oldPolicyForRenewal) {
+                    return response()->json([
+                        'status' => false,
+                        'status_code' => 422,
+                        'message' => __('messages.api.policy_not_found'),
+                        'data' => [],
+                    ], 422);
+                }
+            }
+
             $existingMarine = PurchasePolicy::find($request->purchase_id ?? 0);
 
             if ($existingMarine) {
@@ -259,6 +282,15 @@ class MarineInsuranceController extends Controller
                 $data['inception_date'] = $data['effective_date'];
 
                 $Marine = PurchasePolicy::savePurchasePolicy($data);
+
+                 if ($request->boolean('renew')) {
+
+                    RenewalPolicy::create([
+                        'old_policy_id' => $oldPolicyForRenewal->id,
+                        'new_policy_id' => $Marine->id,
+                    ]);
+                    
+                }
             }
 
             $data = ClientMarineInsurance::getMarineInsuranceDetails($data['policy_id']);

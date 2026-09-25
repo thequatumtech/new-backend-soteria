@@ -2091,6 +2091,20 @@ return [
         'get_social_media_successfully' => 'Get Social Media successfully',
         // Terms
         'terms_no_record_found' => 'No record found',
+
+
+        'policy_payment_not_completed' => 'This policy cannot be renewed because the payment has not been completed.',
+
+        'policy_insurance_company_not_found' => 'This policy cannot be renewed because the insurance company does not exist.',
+
+        'policy_plan_missing' => 'This policy cannot be renewed because the plan is missing.',
+
+        'policy_plan_not_found' => 'This policy cannot be renewed because the selected plan does not exist.',
+
+        'policy_expiry_date_missing' => 'This policy cannot be renewed because the expiry date is missing.',
+
+        'policy_can_be_renewed' => 'This policy can be renewed.',
+
     ],
     'general_error' => 'An error occurred, please try again',
     'validation' => [

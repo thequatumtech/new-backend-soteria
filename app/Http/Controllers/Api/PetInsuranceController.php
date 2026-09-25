@@ -14,6 +14,7 @@ use App\Helpers\InsurancePlanHelper;
 use Illuminate\Support\Facades\Log;
 use App\Models\Ages;
 use App\Models\PetBreed;
+use App\Models\RenewalPolicy;
 
 class PetInsuranceController extends Controller
 {
@@ -116,6 +117,10 @@ class PetInsuranceController extends Controller
                 'personal_picture_documents' => 'nullable',
                 'pets_permit' => 'nullable',
                 'payment_status' => 'nullable',
+
+
+                'old_policy_id_for_renew' => 'nullable|integer',
+                'renew' => 'nullable|boolean',
             ]);
 
             // $plan_data = PetPlan::find($data['plan_id']);
@@ -235,6 +240,26 @@ class PetInsuranceController extends Controller
                     ->format('Y-m-d');
             }
 
+            $oldPolicyForRenewal = null;
+
+            if ($request->boolean('renew')) {
+
+                $oldPolicyForRenewal = PurchasePolicy::find(
+                    $request->old_policy_id_for_renew
+                );
+
+                if (!$oldPolicyForRenewal) {
+                    return response()->json([
+                        'status' => false,
+                        'status_code' => 422,
+                        'message' => __('messages.api.policy_not_found'),
+                        'data' => [],
+                    ], 422);
+                }
+            }
+
+
+
             $existingPet = PurchasePolicy::find($request->purchase_id ?? 0);
 
             if ($existingPet) {
@@ -259,6 +284,15 @@ class PetInsuranceController extends Controller
                 $data['policy_id'] = $pet->id;
 
                 $pet = PurchasePolicy::savePurchasePolicy($data);
+
+
+                if ($request->boolean('renew')) {
+
+                    RenewalPolicy::create([
+                        'old_policy_id' => $oldPolicyForRenewal->id,
+                        'new_policy_id' => $pet->id,
+                    ]);
+                }
             }
 
             $data = ClientPetsInsurance::getPetsInsuranceDetails($data['policy_id']);

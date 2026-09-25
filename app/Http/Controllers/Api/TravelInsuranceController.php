@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\DB;
 use App\Models\TravelPlanPricingSchedule;
 use App\Helpers\InsurancePlanHelper;
 
+use App\Models\RenewalPolicy;
+
+
 class TravelInsuranceController extends Controller
 {
     private function normalizeRestricted($value)
@@ -95,6 +98,8 @@ class TravelInsuranceController extends Controller
                 'payment_status' => 'nullable',
                 'multiple_destination' => 'nullable',
                 'dangerous_activities' => 'nullable',
+                'old_policy_id_for_renew' => 'nullable|integer',
+                'renew' => 'nullable|boolean',
             ]);
 
             if ($request->has('dangerous_activities')) {
@@ -245,6 +250,25 @@ class TravelInsuranceController extends Controller
             $grossPremium = $netPremium + $feesAmount + $stampsAmount + $salesTaxAmount + $cbjContribution + $cbjSalesTaxAmount;
             // ------------------------------------------------
 
+            
+            $oldPolicyForRenewal = null;
+
+            if ($request->boolean('renew')) {
+
+                $oldPolicyForRenewal = PurchasePolicy::find(
+                    $request->old_policy_id_for_renew
+                );
+
+                if (!$oldPolicyForRenewal) {
+                    return response()->json([
+                        'status' => false,
+                        'status_code' => 422,
+                        'message' => __('messages.api.policy_not_found'),
+                        'data' => [],
+                    ], 422);
+                }
+            }
+
             $existingtravel = PurchasePolicy::find($request->purchase_id ?? 0);
 
             if ($existingtravel) {
@@ -269,6 +293,16 @@ class TravelInsuranceController extends Controller
                 $data['inception_date'] = $data['effective_date'];
 
                 $travel = PurchasePolicy::savePurchasePolicy($data);
+
+
+                if ($request->boolean('renew')) {
+
+                    RenewalPolicy::create([
+                        'old_policy_id' => $oldPolicyForRenewal->id,
+                        'new_policy_id' => $travel->id,
+                    ]);
+                }
+
             }
 
             $data = ClientTravelInsurance::getTravelsInsuranceDetails($data['policy_id']);

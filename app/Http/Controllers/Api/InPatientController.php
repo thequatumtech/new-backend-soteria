@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use App\Helpers\InsurancePlanHelper;
 use App\Models\InsurancePlanModels\{InPatientPlan, InOutPatientPlan};
 use Illuminate\Http\Request;
+use App\Models\RenewalPolicy;
 
 class InPatientController extends Controller
 {

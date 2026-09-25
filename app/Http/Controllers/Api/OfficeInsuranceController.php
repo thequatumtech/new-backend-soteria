@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Models\Client;
 use Carbon\Carbon;
 use App\Models\Currency;
+use App\Models\RenewalPolicy;
 use App\Helpers\InsurancePlanHelper;
 
 class OfficeInsuranceController extends Controller
@@ -132,6 +133,10 @@ class OfficeInsuranceController extends Controller
                 'practice_documents' => 'nullable',
                 'company_tax_certi_documents' => 'nullable',
                 'plan_id' => 'required',
+
+                'old_policy_id_for_renew' => 'nullable|integer',
+                'renew' => 'nullable|boolean',
+
             ]);
 
             if (isset($data['birth_date'])) {
@@ -292,6 +297,26 @@ class OfficeInsuranceController extends Controller
                     }
                 }
             }
+
+            
+            $oldPolicyForRenewal = null;
+
+            if ($request->boolean('renew')) {
+
+                $oldPolicyForRenewal = PurchasePolicy::find(
+                    $request->old_policy_id_for_renew
+                );
+
+                if (!$oldPolicyForRenewal) {
+                    return response()->json([
+                        'status' => false,
+                        'status_code' => 422,
+                        'message' => __('messages.api.policy_not_found'),
+                        'data' => [],
+                    ], 422);
+                }
+            }
+
             $existingPolicy = PurchasePolicy::find($request->purchase_id ?? 0);
 
             if ($existingPolicy) {
@@ -317,6 +342,15 @@ class OfficeInsuranceController extends Controller
                 $data['inception_date'] = $data['effective_date'];
 
                 $office = PurchasePolicy::savePurchasePolicy($data);
+
+                if ($request->boolean('renew')) {
+
+                    RenewalPolicy::create([
+                        'old_policy_id' => $oldPolicyForRenewal->id,
+                        'new_policy_id' => $office->id,
+                    ]);
+                }
+
             }
 
             $data = ClientOfficeInsurance::getOfficeInsuranceDetails($data['policy_id']);

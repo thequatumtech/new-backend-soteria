@@ -53,7 +53,7 @@ Route::post('register-otp-send', [ClientController::class, 'sendRegisterOtp']);
 */
 
 Route::group(['middleware' => ['apitoken']], function () {
-    
+
     Route::post('/change-language', [ClientController::class, 'changeLanguage']);
     Route::post('/save-signature', [ClientController::class, 'saveSignature']);
     Route::post('/generate-final-pdf', [ClientController::class, 'generate_final_pdf']);
@@ -71,7 +71,7 @@ Route::group(['middleware' => ['apitoken']], function () {
     Route::delete('/device-token', [DeviceTokenController::class, 'destroy']);
     //end device token
 
-    //write by digvijay notification 
+    //write by digvijay notification
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
@@ -169,6 +169,10 @@ Route::group(['middleware' => ['apitoken']], function () {
 
     // getPolicyDetails
     Route::get('/getPolicyDetails', [ClientController::class, 'getPolicyDetails']);
+
+    
+
+    Route::post('/check-policy-renewal', [ClientController::class, 'check_policy_renewal']);
 
     // Transaction
     Route::post('/store-transaction', [ClientController::class, 'storeTransaction']);

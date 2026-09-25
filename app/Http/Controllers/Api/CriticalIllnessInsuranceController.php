@@ -9,6 +9,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use App\Models\Client;
 use Carbon\Carbon;
+use App\Models\RenewalPolicy;
 use App\Models\Currency;
 use App\Helpers\InsurancePlanHelper;
 
@@ -127,6 +128,10 @@ class CriticalIllnessInsuranceController extends Controller
                 'insured_documents' => 'nullable',
                 'plan_id' => 'nullable',
                 'payment_status' => 'nullable',
+
+                'old_policy_id_for_renew' => 'nullable|integer',
+                'renew' => 'nullable|boolean',
+
             ]);
 
             // $plan_data = CriticalIllnessPlan::find($data['plan_id']);
@@ -200,6 +205,24 @@ class CriticalIllnessInsuranceController extends Controller
                 }
             }
 
+            $oldPolicyForRenewal = null;
+
+            if ($request->boolean('renew')) {
+
+                $oldPolicyForRenewal = PurchasePolicy::find(
+                    $request->old_policy_id_for_renew
+                );
+
+                if (!$oldPolicyForRenewal) {
+                    return response()->json([
+                        'status' => false,
+                        'status_code' => 422,
+                        'message' => __('messages.api.policy_not_found'),
+                        'data' => [],
+                    ], 422);
+                }
+            }
+
             $existing = PurchasePolicy::find($request->purchase_id ?? 0);
 
             if ($existing) {
@@ -223,6 +246,14 @@ class CriticalIllnessInsuranceController extends Controller
                 $data['inception_date'] = $data['inception_date'];
 
                 $critical = PurchasePolicy::savePurchasePolicy($data);
+
+                if ($request->boolean('renew')) {
+
+                    RenewalPolicy::create([
+                        'old_policy_id' => $oldPolicyForRenewal->id,
+                        'new_policy_id' => $critical->id,
+                    ]);
+                }
             }
 
             $data = CriticalIllnessInsurance::getCriticalIllnessInsuranceDetails($data['policy_id']);
