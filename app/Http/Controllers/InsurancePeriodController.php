@@ -14,7 +14,8 @@ class InsurancePeriodController extends Controller
     //list data
     public function index()
     {
-        $insurance_period = InsurancePeriod::withTrashed()->get();
+        $insurance_period = InsurancePeriod::withTrashed()->orderByRaw('CAST(SUBSTRING_INDEX(name, " ", 1) AS UNSIGNED) ASC')->get();
+        // dd($insurance_period);
         return view('admin.insurance_period.insurance_period', ['insurance_period' => $insurance_period]);
     }
 
@@ -42,8 +43,8 @@ class InsurancePeriodController extends Controller
 
     //update data
     public function update(Request $request,InsurancePeriod $insurance_period)
-    {  
-        
+    {
+
         try {
             $request->validate([
                 'name' => [
@@ -57,17 +58,17 @@ class InsurancePeriodController extends Controller
             $insurance_period = InsurancePeriod::findOrFail($request->cd_id);
             $insurance_period->update($request->all());
 
-            return redirect()->route('insurance_period.list')->with('success', __('messages.insurance_period.edit_created'));        
+            return redirect()->route('insurance_period.list')->with('success', __('messages.insurance_period.edit_created'));
             // Validation passed, handle the validated data
             // You can access the validated data via $validatedData array
-        
+
         } catch (ValidationException $e) {
             // Validation failed, handle the error
             $errors = $e->validator->errors()->all();
             return redirect()->route('insurance_period.list')->with('error', __('messages.insurance_period.error'));
             // Handle errors here
         }
-        
+
     }
 
     public function destroy(Request $request)

@@ -33,7 +33,7 @@ class Claim extends Model
             ->leftJoin('insurance_companies','claims.insurance_company_id','insurance_companies.id')
             ->where('claims.client_id', $user_id)
             ->get();
-    
+
         // Add policy name based on policy_type
         foreach ($policy as $p) {
             $p->policy_type = $policyTypes[$p->policy_type] ?? 'Unknown Policy Type';
@@ -79,7 +79,7 @@ class Claim extends Model
             $policies = $policies->get();
 
             $groupedPolicies = [];
-            
+
             foreach ($policies as $policy) {
                 $policy->policy_type_no = $policy->policy_type ?? 0;
                 $policy->policy_type = $policyTypes[$policy->policy_type] ?? 'Unknown Policy Type';
@@ -118,7 +118,7 @@ class Claim extends Model
 
             return $groupedPolicies;
     }
-    
+
     public function client()
     {
         return $this->belongsTo(Client::class, 'client_id');
@@ -128,4 +128,5 @@ class Claim extends Model
     {
         return $this->belongsTo(InsuranceCompany::class, 'insurance_company_id');
     }
+
 }

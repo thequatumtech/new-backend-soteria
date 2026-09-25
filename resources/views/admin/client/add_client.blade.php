@@ -834,10 +834,12 @@
 @endsection
 
 @section('script')
+    
     <script>
         let checkMobileUrl = "{{ route('client.check_mobile') }}";
         let checkEmailUrl = "{{ route('client.check_email') }}";
     </script>
-<script src="{{asset('js/client.js?v=1')}}"></script>
+    <script src="{{asset('js/client.js?v=1.4')}}">
+
 @endsection
 

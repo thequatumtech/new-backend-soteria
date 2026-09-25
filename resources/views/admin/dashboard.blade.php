@@ -26,7 +26,7 @@
                     </div>
                     <div class="col-4 card-container d-flex flex-column gap-2 bg-white align-items-center py-5 px-5" style="cursor: pointer;">
                         <div class="card-img-container d-flex align-items-center justify-content-center">
-                            <img src="img/card-2.png" alt="">
+                            <img src="img/card-1.png" alt="">
                         </div>
                         <div class="figures">
                             {{$last_month_purchased_policy}}

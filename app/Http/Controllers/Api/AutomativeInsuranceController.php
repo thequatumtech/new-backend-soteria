@@ -32,15 +32,19 @@ class AutomativeInsuranceController extends Controller
             'insurance_amount' => 'nullable|numeric',
         ]);
 
-        // Create a new marine insurance record
+        // Create a new marine insurance record 
         $automativeInsurance = AutomativeInsuranceModel::create($validatedData);
 
-        // Return a response indicating success
-        return response()->json(['message' => 'Automative insurance record created successfully', 'data' => $automativeInsurance], 201);
+        // Return a response indicating success 
+        return response()->json([
+            'message' => __('messages.api.automative_insurance_created_successfully'),
+            'data' => $automativeInsurance
+        ], 201);
     }
+
     public function update(Request $request, $id)
     {
-        // Validate the incoming request data
+        // Validate the incoming request data 
         $validatedData = $request->validate([
             'vahicle_type' => 'required|string|max:255',
             'vahicle_brand' => 'required|string|max:255',
@@ -62,13 +66,16 @@ class AutomativeInsuranceController extends Controller
             'insurance_amount' => 'nullable|numeric',
         ]);
 
-        // Find the marine insurance record by ID
+        // Find the marine insurance record by ID 
         $automativeInsurance = AutomativeInsuranceModel::findOrFail($id);
 
-        // Update the record with the validated data
+        // Update the record with the validated data 
         $automativeInsurance->update($validatedData);
 
-        // Return a response indicating success
-        return response()->json(['message' => 'Automative insurance record updated successfully', 'data' => $automativeInsurance], 200);
+        // Return a response indicating success 
+        return response()->json([
+            'message' => __('messages.api.automative_insurance_updated_successfully'),
+            'data' => $automativeInsurance
+        ], 200);
     }
 }

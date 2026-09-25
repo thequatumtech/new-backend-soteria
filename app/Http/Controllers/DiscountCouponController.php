@@ -17,7 +17,17 @@ class DiscountCouponController extends Controller
 
     public function index(Request $request)
     {
-        $coupons = DiscountCoupon::all();
+        // $coupons = DiscountCoupon::all();
+         $coupons = DiscountCoupon::with([
+            'insurance_company',
+            'line_of_business',
+        ])
+            ->whereNotNull('line_of_business_id')
+            ->whereHas('insurance_company', function ($query) {
+                $query->whereNotNull('line_of_business_id');
+            })
+            ->get();
+
         return view('admin.coupons.index', compact('coupons'));
     }
 
@@ -92,6 +102,7 @@ class DiscountCouponController extends Controller
                         $client_coupon->attachment = $coupon->attachment; // Store the filename in the database
                         $client_coupon->status = $coupon->status ?? 1;
                         $client_coupon->save();
+                        
                     }
                 }
                 $pending_clients = ClientDiscountCoupon::where('coupon_id', $coupon->id)
@@ -106,6 +117,15 @@ class DiscountCouponController extends Controller
                     }
                     $client_coupon_record->is_sent = '1';
                     $client_coupon_record->save();
+                    
+                        // Trigger the CouponSent event after sending the coupon by rajput digvijay
+                        event(new \App\Events\CouponSent(
+                            recipientUserId: $client_coupon_record->client_id,
+                            couponId: $client_coupon_record->coupon_id,
+                            couponCode: $client_coupon_record->coupon_code,
+                            percentage: $client_coupon_record->percentage
+                        ));
+                        // End of event trigger
                 }
                 $message = __('messages.discount_coupons.send_success');
             } else {
@@ -163,6 +183,7 @@ class DiscountCouponController extends Controller
                         $client_coupon->attachment = $coupon->attachment; // Store the filename in the database
                         $client_coupon->status = $coupon->status ?? 1;
                         $client_coupon->save();
+                        
                     }
                 }
                 $pending_clients = ClientDiscountCoupon::where('coupon_id', $coupon->id)
@@ -170,6 +191,8 @@ class DiscountCouponController extends Controller
                     ->where('is_sent', '0')
                     ->where('status', '1')
                     ->get();
+                    
+                    
                 foreach ($pending_clients as $client_coupon_record) {
                     $found = Client::where('id', $client_coupon_record->client_id)->first();
                     if ($found) {
@@ -177,6 +200,14 @@ class DiscountCouponController extends Controller
                     }
                     $client_coupon_record->is_sent = '1';
                     $client_coupon_record->save();
+                    
+                    // Trigger the CouponSent event after sending the coupon by rajput digvijay
+                    event(new \App\Events\CouponSent(
+                        recipientUserId: $client_coupon_record->client_id,
+                        couponId: $client_coupon_record->coupon_id,
+                        couponCode: $client_coupon_record->coupon_code,
+                        percentage: $client_coupon_record->percentage
+                    ));
                 }
                 $message = __('messages.discount_coupons.send_success');
             } else {

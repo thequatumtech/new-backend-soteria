@@ -8,10 +8,13 @@ use App\Models\InsurancePlanModels\TravelPlan;
 use App\Models\{ClientTravelInsurance, FamilyTravelInsuranceMember, PurchasePolicy};
 use PDF;
 use App\Models\Client;
+use App\Models\InsuranceCompany;
 use Carbon\Carbon;
 use App\Models\Currency;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use App\Models\TravelPlanPricingSchedule;
+use App\Helpers\InsurancePlanHelper;
 
 class TravelInsuranceController extends Controller
 {
@@ -35,10 +38,12 @@ class TravelInsuranceController extends Controller
 
     private function restrictionError($type)
     {
-        $message = "You are not eligible for this plan due to {$type} restriction.";
+        $message = __('messages.api.travel_restriction_message', [
+            'type' => __('messages.api.travel_restriction_' . $type)
+        ]);
 
         if ($type === 'country') {
-            $message .= ' Please contact us for further information.';
+            $message .= __('messages.api.country_contact');
         }
 
         return response()->json([
@@ -81,6 +86,7 @@ class TravelInsuranceController extends Controller
                 'destination_country_id' => 'nullable',
                 'additional_destination_country_id' => 'nullable',
                 'geographical_countries' => 'nullable',
+                'geographical_area_id' => 'nullable',
                 'effective_date' => 'nullable',
                 'travel_days' => 'nullable',
                 'expiry_date' => 'nullable',
@@ -119,7 +125,9 @@ class TravelInsuranceController extends Controller
 
             $data['inception_date'] = $data['effective_date'] ?? null;
 
-            $plan_data = TravelPlan::find($data['plan_id']);
+            // $plan_data = TravelPlan::find($data['plan_id']);
+            $plan_data = TravelPlan::with('insurance_company.currency')->find($data['plan_id']);
+
             $data['insurance_company_id'] = $plan_data->insurance_company_id ?? 0;
 
             $client = Client::find($request->user_id);
@@ -127,7 +135,7 @@ class TravelInsuranceController extends Controller
                 return response()->json([
                     'status' => false,
                     'status_code' => 422,
-                    'message' => 'Client not found.',
+                    'message' => __('messages.api.client_not_found'),
                     'data' => []
                 ], 422);
             }
@@ -143,7 +151,7 @@ class TravelInsuranceController extends Controller
             $restrictedDistricts = $this->normalizeRestricted($plan_data->restricted_district_ids);
             $restrictedAges      = $this->normalizeRestricted($plan_data->restricted_age_ids);
             $restrictedDangerousActivities = $this->normalizeRestricted($plan_data->restricted_dangerous_activities_ids ?? null);
-
+            $restrictedDestinationCountries = $this->normalizeRestricted($plan_data->restricted_destination_country_ids ?? null);
             if ($clientCountry && in_array($clientCountry, $restrictedCountries)) {
                 return $this->restrictionError('country');
             }
@@ -163,10 +171,14 @@ class TravelInsuranceController extends Controller
             }
             foreach ($userDangerousActivities as $activityId) {
                 if (in_array(trim($activityId), $restrictedDangerousActivities)) {
-                    return $this->restrictionError('dangerous activity');
+                    return $this->restrictionError('dangerous_activity');
                 }
             }
-
+            if (!empty($restrictedDestinationCountries) && !empty($data['destination_country_id'])) {
+                if (in_array((int)$data['destination_country_id'], array_map('intval', $restrictedDestinationCountries))) {
+                    return $this->restrictionError('destination_country');
+                }
+            }
             foreach ($restrictedAges as $range) {
                 $range = str_replace(' ', '', $range);
                 if (str_contains($range, '-')) {
@@ -197,7 +209,7 @@ class TravelInsuranceController extends Controller
                 return response()->json([
                     'status' => false,
                     'status_code' => 422,
-                    'message' => 'No pricing available for selected travel duration.',
+                    'message' => __('messages.api.travel_no_pricing_available'),
                     'data' => []
                 ], 422);
             }
@@ -292,6 +304,8 @@ class TravelInsuranceController extends Controller
             PurchasePolicy::updatePurchasePolicy($purchase);
 
             $data->purchase_id = $travel->id;
+            $data->purchase_policy_id = $travel->id;
+
             $plan_for_pdf = clone $plan_data;
             $plan_for_pdf->net_premium_amount = $netPremium;
             $plan_for_pdf->fees_amount = $feesAmount;
@@ -303,8 +317,18 @@ class TravelInsuranceController extends Controller
             if (!isset($plan_for_pdf->cbj)) $plan_for_pdf->cbj = $cbjTaxPercentage;
             if (!isset($plan_for_pdf->sales_tax_cbj)) $plan_for_pdf->sales_tax_cbj = $cbjSalesTaxPercentage;
 
+            // $client = Client::with('country.currency')->find($request->user_id);
+            // $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
             $client = Client::with('country.currency')->find($request->user_id);
-            $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
+            // Get insurance company currency first
+            $insuranceCompany = $plan_data->insurance_company;
+            if ($insuranceCompany && $insuranceCompany->currency) {
+                $abbr = $insuranceCompany->currency->abbreviation;
+            } else {
+                // Fallback to client's country currency
+                $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
+            }
+
 
             $pdf = PDF::loadView('pdf/travel_policy', [
                 'data' => $data,
@@ -322,6 +346,8 @@ class TravelInsuranceController extends Controller
             $data->fees = number_format($purchase['fees'], 2) . ' ' . $abbr;
             $data->gross_premium = number_format($purchase['gross_premium'], 2) . ' ' . $abbr;
             $data->sales_tax = number_format($purchase['sales_tax'], 2) . ' ' . $abbr;
+            $data->cbj = number_format($purchase['cbj'], 2) . ' ' . $abbr;
+            $data->sales_tax_cbj = number_format($purchase['sales_tax_cbj'], 2) . ' ' . $abbr;
             $data->stamps = number_format($purchase['stamps'], 2) . ' ' . $abbr;
             $data->commission_amount = number_format($purchase['commission_amount'], 2) . ' ' . $abbr;
 
@@ -348,7 +374,7 @@ class TravelInsuranceController extends Controller
             return response()->json([
                 'status' => true,
                 'status_code' => 200,
-                'message' => 'Add Travel Insurance Plan successfully',
+                'message' => __('messages.api.add_travel_insurance_plan_successfully'),
                 'data' => $data
             ]);
         } catch (\Exception $e) {
@@ -361,63 +387,422 @@ class TravelInsuranceController extends Controller
         }
     }
 
+    // public function getTravelInsurancePlan(Request $request)
+    // {
+    //     try {
+    //         $data = TravelPlan::with('policy_covers', 'insurance_company')
+    //             ->whereHas('insurance_company', function ($q) {
+    //                 $q->whereNull('deleted_at');
+    //             });
+    //             // ->where('plan_name', 'LIKE', '%' . $request->plan . '%');
+    //             if ($request->has('plan') && !empty($request->plan)) {
+    //             $data->where('plan_name', 'LIKE', '%' . $request->plan . '%');
+    //         }
+
+    //         if ($request->has('destination_country_id') && !empty($request->destination_country_id)) {
+    //             $data->where(function ($query) use ($request) {
+    //                 $query->whereJsonContains('countries', (string)$request->destination_country_id)
+    //                 ->orWhereJsonContains('countries', (int)$request->destination_country_id)
+    //                       ->orWhereHas('geographical_area', function ($q) use ($request) {
+    //                           $q->whereJsonContains('countries', (string)$request->destination_country_id)
+
+    //                       ->orWhereJsonContains('countries', (int)$request->destination_country_id);
+    //             });
+    //            });
+    //         }
+
+    //         if ($request->has('departure_from_country_id') && !empty($request->departure_from_country_id)) {
+    //             $data->where(function ($query) use ($request) {
+    //                 $query->whereNull('restricted_country_ids')
+    //                       ->orWhere(function($q) use ($request) {
+    //                           $q->whereJsonDoesntContain('restricted_country_ids', (string)$request->departure_from_country_id)
+    //                             ->whereJsonDoesntContain('restricted_country_ids', (int)$request->departure_from_country_id);
+    //                       });
+    //             });
+    //         }
+    //         $data = $data->get();
+    //         $data->transform(function ($item) {
+    //             if (!empty($item->insurance_policy_pdf)) {
+    //                 $item->insurance_policy_pdf = url('uploads/insurance_plans/' . $item->id . '/' . $item->insurance_policy_pdf);
+    //             }
+    //             if (!empty($item->insurance_company->privacy_policy)) {
+    //                 $item->insurance_company->privacy_policy = url('insurance/' . $item->insurance_company->id . '/' . $item->insurance_company->privacy_policy);
+    //             }
+    //             return $item;
+    //         });
+
+    //         return response()->json([
+    //             'status' => true,
+    //             'status_code' => 200,
+    //             'message' => 'Get Travel Insurance Plan successfully',
+    //             'data' => $data
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'status_code' => 500,
+    //             'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+    //             'data' => []
+    //         ]);
+    //     }
+    // }
+
     public function getTravelInsurancePlan(Request $request)
     {
         try {
-            $data = TravelPlan::with('policy_covers', 'insurance_company')
+
+            $client = Client::find($request->user_id);
+
+            if (!$client) {
+                return response()->json([
+                    'status' => false,
+                    'status_code' => 404,
+                    'message' => __('messages.api.client_not_found'),
+                    'data' => [],
+                    'total' => 0,
+                ]);
+            }
+
+
+            $currency = Currency::where(
+                'country_id',
+                $client->country_id
+            )->first();
+
+            if (!$currency) {
+                return response()->json([
+                    'status' => true,
+                    'status_code' => 200,
+                    'message' => __('messages.api.no_currency_found'),
+                    'data' => [],
+                    'total' => 0,
+                    'currency' => null,
+                ]);
+            }
+
+
+            // $data = TravelPlan::with('policy_covers', 'insurance_company', 'geographical_area')
+            //     ->whereHas('insurance_company', function ($q) {
+            //         $q->whereNull('deleted_at');
+            //     });
+
+            /*
+            |--------------------------------------------------------------------------
+            | Plan Name
+            |--------------------------------------------------------------------------
+            */
+            // if ($request->filled('plan')) {
+            //     $data->where(
+            //         'plan_name',
+            //         'LIKE',
+            //         '%' . $request->plan . '%'
+            //     );
+            // }
+            $data = TravelPlan::with(
+                'policy_covers',
+                'insurance_company',
+                'insurance_company.currency',
+                'geographical_area'
+            )
                 ->whereHas('insurance_company', function ($q) {
                     $q->whereNull('deleted_at');
                 });
-                // ->where('plan_name', 'LIKE', '%' . $request->plan . '%');
-                if ($request->has('plan') && !empty($request->plan)) {
-                $data->where('plan_name', 'LIKE', '%' . $request->plan . '%');
-            }
 
-            if ($request->has('destination_country_id') && !empty($request->destination_country_id)) {
-                $data->where(function ($query) use ($request) {
-                    $query->whereJsonContains('countries', (string)$request->destination_country_id)
-                    ->orWhereJsonContains('countries', (int)$request->destination_country_id)
-                          ->orWhereHas('geographical_area', function ($q) use ($request) {
-                              $q->whereJsonContains('countries', (string)$request->destination_country_id)
-                          
-                          ->orWhereJsonContains('countries', (int)$request->destination_country_id);
+
+
+            // Filter according to client's currency
+            $data = InsurancePlanHelper::filterByClientCurrency(
+                $data,
+                $request->user_id
+            );
+
+
+
+            if ($request->filled('plan_id')) {
+                $data->where('id', $request->plan_id);
+            }
+            /*
+            |--------------------------------------------------------------------------
+            | Destination Country
+            |--------------------------------------------------------------------------
+            */
+            if ($request->filled('destination_country_id')) {
+
+                $destinationCountryId = $request->destination_country_id;
+
+                $data->where(function ($query) use ($destinationCountryId) {
+
+                    $query->whereJsonContains(
+                        'countries',
+                        (string) $destinationCountryId
+                    )
+                        ->orWhereJsonContains(
+                            'countries',
+                            (int) $destinationCountryId
+                        )
+                        ->orWhereHas('geographical_area', function ($q) use ($destinationCountryId) {
+
+                            $q->whereJsonContains(
+                                'countries',
+                                (string) $destinationCountryId
+                            )
+                                ->orWhereJsonContains(
+                                    'countries',
+                                    (int) $destinationCountryId
+                                );
+                        });
                 });
-               });
             }
 
-            if ($request->has('departure_from_country_id') && !empty($request->departure_from_country_id)) {
-                $data->where(function ($query) use ($request) {
+            /*
+            |--------------------------------------------------------------------------
+            | Departure Country Restriction
+            |--------------------------------------------------------------------------
+            */
+            if ($request->filled('departure_from_country_id')) {
+
+                $departureCountryId = $request->departure_from_country_id;
+
+                $data->where(function ($query) use ($departureCountryId) {
+
                     $query->whereNull('restricted_country_ids')
-                          ->orWhere(function($q) use ($request) {
-                              $q->whereJsonDoesntContain('restricted_country_ids', (string)$request->departure_from_country_id)
-                                ->whereJsonDoesntContain('restricted_country_ids', (int)$request->departure_from_country_id);
-                          });
+                        ->orWhere(function ($q) use ($departureCountryId) {
+
+                            $q->whereJsonDoesntContain(
+                                'restricted_country_ids',
+                                (string) $departureCountryId
+                            )
+                                ->whereJsonDoesntContain(
+                                    'restricted_country_ids',
+                                    (int) $departureCountryId
+                                );
+                        });
                 });
             }
+
             $data = $data->get();
-            $data->transform(function ($item) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | Travel Days
+            |--------------------------------------------------------------------------
+            */
+            $travelDays = null;
+
+            if ($request->filled('travel_days')) {
+                $travelDays = (int) $request->travel_days;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Transform Plans
+            |--------------------------------------------------------------------------
+            */
+            $data->transform(function ($item) use ($travelDays) {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Default Premium Values
+                |--------------------------------------------------------------------------
+                */
+                $item->travel_days = $travelDays;
+                $item->pricing_schedule_id = null;
+
+                $item->net_premium = null;
+                $item->fees_amount = null;
+                $item->stamps_amount = null;
+                $item->sales_tax_amount = null;
+                $item->cbj_amount = null;
+                $item->sales_tax_cbj_amount = null;
+                $item->gross_premium = null;
+
+                /*
+                |--------------------------------------------------------------------------
+                | Calculate Premium According To Travel Days
+                |--------------------------------------------------------------------------
+                */
+                if ($travelDays !== null) {
+
+                    $pricing = TravelPlanPricingSchedule::where(
+                        'travel_plan_id',
+                        $item->id
+                    )
+                        ->where('min_days', '<=', $travelDays)
+                        ->where('max_days', '>=', $travelDays)
+                        ->first();
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Pricing Found
+                    |--------------------------------------------------------------------------
+                    */
+                    if ($pricing) {
+
+                        $netPremium = (float) $pricing->price;
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Calculate All Premium Values
+                        |--------------------------------------------------------------------------
+                        */
+                        $premium = $this->calculateTravelPremium(
+                            $netPremium,
+                            $item
+                        );
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Add Premium Data To Response
+                        |--------------------------------------------------------------------------
+                        */
+                        $item->pricing_schedule_id = $pricing->id;
+
+                        $item->net_premium = $premium['net_premium'];
+                        $item->fees_amount = $premium['fees'];
+                        $item->stamps_amount = $premium['stamps'];
+                        $item->sales_tax_amount = $premium['sales_tax'];
+                        $item->cbj_amount = $premium['cbj'];
+                        $item->sales_tax_cbj_amount = $premium['sales_tax_cbj'];
+                        $item->gross_premium = $premium['gross_premium'];
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Optional: Percentage Values
+                        |--------------------------------------------------------------------------
+                        */
+                        $item->fees_percentage = $premium['fees_percentage'];
+                        $item->stamps_percentage = $premium['stamps_percentage'];
+                        $item->sales_tax_percentage = $premium['sales_tax_percentage'];
+                        $item->cbj_percentage = $premium['cbj_percentage'];
+                        $item->sales_tax_cbj_percentage =
+                            $premium['sales_tax_cbj_percentage'];
+                    } else {
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | No Pricing Found
+                        |--------------------------------------------------------------------------
+                        */
+                        $item->pricing_message =
+                            __('messages.api.travel_no_pricing_available_days', [
+                                'days' => $travelDays
+                            ]);
+                    }
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Insurance Policy PDF
+                |--------------------------------------------------------------------------
+                */
                 if (!empty($item->insurance_policy_pdf)) {
-                    $item->insurance_policy_pdf = url('uploads/insurance_plans/' . $item->id . '/' . $item->insurance_policy_pdf);
+
+                    $item->insurance_policy_pdf = url(
+                        'uploads/insurance_plans/' .
+                            $item->id .
+                            '/' .
+                            $item->insurance_policy_pdf
+                    );
                 }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Insurance Company Privacy Policy
+                |--------------------------------------------------------------------------
+                */
                 if (!empty($item->insurance_company->privacy_policy)) {
-                    $item->insurance_company->privacy_policy = url('insurance/' . $item->insurance_company->id . '/' . $item->insurance_company->privacy_policy);
+
+                    $item->insurance_company->privacy_policy = url(
+                        'insurance/' .
+                            $item->insurance_company->id .
+                            '/' .
+                            $item->insurance_company->privacy_policy
+                    );
                 }
+
                 return $item;
             });
 
+            /*
+            |--------------------------------------------------------------------------
+            | Response
+            |--------------------------------------------------------------------------
+            */
             return response()->json([
                 'status' => true,
                 'status_code' => 200,
-                'message' => 'Get Travel Insurance Plan successfully',
+                'message' => __('messages.api.get_travel_insurance_plan_successfully'),
                 'data' => $data
             ]);
         } catch (\Exception $e) {
+
             return response()->json([
                 'status' => false,
                 'status_code' => 500,
-                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'message' => $e->getMessage(),
                 'data' => []
             ]);
         }
+    }
+
+    private function calculateTravelPremium(
+        float $netPremium,
+        $plan
+    ): array {
+        $feesPercentage = (float) ($plan->fees ?? 0);
+        $stampsPercentage = (float) ($plan->stamps ?? 0);
+        $taxPercentage = (float) ($plan->sales_tax ?? 0);
+        $cbjTaxPercentage = (float) ($plan->cbj ?? 0);
+        $cbjSalesTaxPercentage = (float) ($plan->sales_tax_cbj ?? 0);
+
+        // Fees
+        $feesAmount = ($netPremium * $feesPercentage) / 100;
+
+        // Stamps
+        $stampsAmount = ($netPremium * $stampsPercentage) / 100;
+
+        // Sales Tax
+        $taxAmount = (
+            ($netPremium + $feesAmount)
+            * $taxPercentage
+        ) / 100;
+
+        // CBJ Contribution
+        $cbjContribution = (
+            $netPremium
+            * $cbjTaxPercentage
+        ) / 100;
+
+        // CBJ Sales Tax
+        $cbjSalesTaxAmount = (
+            $cbjContribution
+            * $cbjSalesTaxPercentage
+        ) / 100;
+
+        // Gross Premium
+        $grossPremium =
+            $netPremium
+            + $feesAmount
+            + $stampsAmount
+            + $taxAmount
+            + $cbjContribution
+            + $cbjSalesTaxAmount;
+
+        return [
+            'net_premium' => round($netPremium, 2),
+            'fees' => round($feesAmount, 2),
+            'stamps' => round($stampsAmount, 2),
+            'sales_tax' => round($taxAmount, 2),
+            'cbj' => round($cbjContribution, 2),
+            'sales_tax_cbj' => round($cbjSalesTaxAmount, 2),
+            'gross_premium' => round($grossPremium, 2),
+
+            // Percentages
+            'fees_percentage' => $feesPercentage,
+            'stamps_percentage' => $stampsPercentage,
+            'sales_tax_percentage' => $taxPercentage,
+            'cbj_percentage' => $cbjTaxPercentage,
+            'sales_tax_cbj_percentage' => $cbjSalesTaxPercentage,
+        ];
     }
 }

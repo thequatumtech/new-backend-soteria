@@ -191,7 +191,7 @@
                                     @foreach($ages as $single)
                                     <option value="{{$single->id}}"
                                         {{ in_array($single->id, old('restricted_age_ids', !empty($plan->restricted_age_ids) ? json_decode($plan->restricted_age_ids) : [])) ? 'selected' : '' }}>
-                                        {{$single->age}}
+                                        {{$single->age}} {{$single->type}}
                                     </option>
                                     @endforeach
                                 </select>

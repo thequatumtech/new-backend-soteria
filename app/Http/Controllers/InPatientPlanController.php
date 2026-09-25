@@ -17,6 +17,7 @@ use App\Models\InsurancePlanModels\InPatientPlanPricingSchedule;
 use App\Models\LineOfBusiness;
 use App\Models\MedicalNetwork;
 use App\Models\Occupations;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Http\Request;
 
 class InPatientPlanController extends Controller
@@ -35,9 +36,9 @@ class InPatientPlanController extends Controller
     {
         $insurance_companies = InsuranceCompany::where('line_of_business_id','like','%"5"%')->get();
         $line_of_businesses = LineOfBusiness::where('id',self::line_of_business_id)->first()->name;
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
         $occupations = Occupations::all();
         $chronics = ChronicDisease::all();
@@ -49,41 +50,30 @@ class InPatientPlanController extends Controller
 
     public function edit_in_patient_plan(Request $request, $id)
     {
+
+
+$decryptedId = Crypt::decrypt($id);
+
         $insurance_companies = InsuranceCompany::where('line_of_business_id','like','%"5"%')->get();
         $line_of_businesses = LineOfBusiness::all();
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
         $occupations = Occupations::all();
         $chronics = ChronicDisease::all();
         $dangerous_activities = DangerousActivities::all();
         $in_patient_deductibles = InPatientDeductible::all();
         $medical_networks = MedicalNetwork::all();
-        $plan = InPatientPlan::find($id);
-/*        if($plan->restricted_country_ids) {
-            $cities = Cities::whereIn('country_id', json_decode($plan->restricted_country_ids))->get();
-            if($plan->restricted_city_ids) {
-                $districts = District::whereIn('city_id', json_decode($plan->restricted_city_ids))->get();
-            } else {
-                $districts = [];
-            }
-        } else {
-            $cities = $districts = [];
-        }*/
+        
+        $plan = InPatientPlan::find($decryptedId);
+
          // Decode stored country and city IDs
         $selected_country_ids = $plan->restricted_country_ids ? json_decode($plan->restricted_country_ids, true) : [];
         $selected_city_ids = $plan->restricted_city_ids ? json_decode($plan->restricted_city_ids, true) : [];
         $selected_district_ids = $plan->restricted_district_ids ? json_decode($plan->restricted_district_ids, true) : [];
 
-        // Load only related cities and districts
-        // $cities = count($selected_country_ids) > 0
-        //     ? Cities::whereIn('country_id', $selected_country_ids)->get()
-        //     : collect(); // empty collection
 
-        // $districts = count($selected_city_ids) > 0
-        //     ? District::whereIn('city_id', $selected_city_ids)->get()
-        //     : collect(); // empty collection
         return view('admin.plan.in-patient-plans.edit_in_patient_plan',compact('insurance_companies','line_of_businesses','countries','cities','districts','ages','plan','dangerous_activities','in_patient_deductibles','medical_networks','occupations','chronics','selected_country_ids','selected_city_ids','selected_district_ids'));
     }
 
@@ -112,7 +102,7 @@ class InPatientPlanController extends Controller
             $in_patient_insurance_plan->sales_tax = $request->sales_tax;
             $in_patient_insurance_plan->cbj = $request->cbj;
             $in_patient_insurance_plan->sales_tax_cbj = $request->salextaxcbj;
-       
+
             $in_patient_insurance_plan->gross_premium = 0;
             $in_patient_insurance_plan->commission_percentage = $request->commission_percentage;
             $in_patient_insurance_plan->commission_amount = 0;
@@ -179,7 +169,7 @@ class InPatientPlanController extends Controller
             $message = __('messages.plans.add_success');
         } else if($request->form_type == 'edit'){
             $plan_id = $request->plan_id;
-            
+
             $in_patient_insurance_plan = InPatientPlan::find($plan_id);
             $in_patient_insurance_plan->insurance_company_id = $request->insurance_company_id;
             $in_patient_insurance_plan->plan_name = $request->plan_name;
@@ -201,7 +191,7 @@ class InPatientPlanController extends Controller
             $in_patient_insurance_plan->sales_tax = $request->sales_tax;
             $in_patient_insurance_plan->cbj = $request->cbj;
             $in_patient_insurance_plan->sales_tax_cbj = $request->salextaxcbj;
-         
+
             $in_patient_insurance_plan->gross_premium = 0;
             $in_patient_insurance_plan->commission_percentage = $request->commission_percentage;
             $in_patient_insurance_plan->commission_amount = 0;

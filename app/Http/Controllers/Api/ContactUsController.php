@@ -23,14 +23,14 @@ class ContactUsController extends Controller
                         return response()->json([
                             'status' => true, 
                             'status_code' => 200,
-                            'message' => 'Contact Us Fetched Successfully',
+                            'message' => __('messages.api.contact_us_fetched_successfully'),
                             'data' => $contact_us,
                         ]);
                     }
                     return response()->json([
                         'status' => true, 
                         'status_code' => 200,
-                        'message' => 'Contact Us Fetched Successfully',
+                        'message' => __('messages.api.contact_us_fetched_successfully'),
                         'data' => array()
                     ]);
                 }
@@ -47,7 +47,7 @@ class ContactUsController extends Controller
                         return response()->json([
                             'status' => true, 
                             'status_code' => 200,
-                            'message' => 'Messages Fetched Successfully',
+                            'message' => __('messages.api.messages_fetched_successfully'),
                             'data' => [
                                 'messages' => $messages,
                                 'client_name' => $messages[0]->client->first_name,
@@ -58,7 +58,7 @@ class ContactUsController extends Controller
                     return response()->json([
                             'status' => true, 
                             'status_code' => 200,
-                            'message' => 'Messages Fetched Successfully',
+                            'message' => __('messages.api.messages_fetched_successfully'),
                             'data' => array()
                         ]);
                 }
@@ -97,7 +97,7 @@ class ContactUsController extends Controller
         return response()->json([
             'status' => true,
             'status_code' => 200,
-            'message' => 'Message Sent Successfully',
+            'message' => __('messages.api.message_sent_successfully'),
             'data' => $contact_us_message
         ]);
     }
@@ -117,7 +117,7 @@ class ContactUsController extends Controller
             $contact_us_message->save();
         }
         return response()->json([
-            'success' => 'File Uploaded Successfully',
+            'success' => __('messages.api.file_uploaded_successfully'),
             'status' => 200,
             'message' => [
                 'contact_us_message' => $contact_us_message,

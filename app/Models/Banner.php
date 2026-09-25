@@ -10,7 +10,9 @@ class Banner extends Model
         'title',
         'image',
         'redirect_url',
-        'is_active'
+        'is_active',
+         'runtime',
+
     ];
 
     protected $casts = [

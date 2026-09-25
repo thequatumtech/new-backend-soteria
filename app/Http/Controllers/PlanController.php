@@ -29,6 +29,7 @@ use App\Models\VehicleBrand;
 use App\Models\VehicleCategory;
 use App\Models\VehicleType;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 
 class PlanController extends Controller
 {
@@ -56,9 +57,9 @@ class PlanController extends Controller
         // $line_of_businesses = LineOfBusiness::all();
         $line_of_businesses = LineOfBusiness::where('id', self::line_of_business_id)->first()->name;
         $motor_plans = MotorPlan::all();
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
         $vehicle_types = VehicleType::all();
         $vehicle_brands = VehicleBrand::all();
@@ -82,9 +83,9 @@ class PlanController extends Controller
         // $line_of_businesses = LineOfBusiness::all();
         $line_of_businesses = LineOfBusiness::where('id', self::line_of_business_id)->first()->name;
         $motor_plans = MotorPlan::all();
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
         $vehicle_types = VehicleType::all();
         $vehicle_brands = VehicleBrand::all();
@@ -109,9 +110,9 @@ class PlanController extends Controller
         // $line_of_businesses = LineOfBusiness::all();
         $line_of_businesses = LineOfBusiness::where('id', self::line_of_business_id)->first()->name;
         $motor_plans = MotorPlan::all();
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
         $vehicle_types = VehicleType::all();
         $vehicle_brands = VehicleBrand::all();
@@ -135,9 +136,9 @@ class PlanController extends Controller
         // $line_of_businesses = LineOfBusiness::all();
         $line_of_businesses = LineOfBusiness::where('id', self::line_of_business_id)->first()->name;
         $motor_plans = MotorPlan::all();
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
         $vehicle_types = VehicleType::all();
         $vehicle_brands = VehicleBrand::all();
@@ -160,9 +161,9 @@ class PlanController extends Controller
         $insurance_companies = InsuranceCompany::where('line_of_business_id', 'like', '%"6"%')->get();
         $line_of_businesses = LineOfBusiness::where('id', self::line_of_business_id)->first()->name;
         $motor_plans = MotorPlan::all();
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
         $vehicle_types = VehicleType::all();
         $vehicle_brands = VehicleBrand::all();
@@ -186,9 +187,9 @@ class PlanController extends Controller
         // $line_of_businesses = LineOfBusiness::all();
         $line_of_businesses = LineOfBusiness::where('id', self::line_of_business_id)->first()->name;
         $motor_plans = MotorPlan::all();
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
         $vehicle_types = VehicleType::all();
         $vehicle_brands = VehicleBrand::all();
@@ -685,16 +686,18 @@ class PlanController extends Controller
 
     public function edit_motor_plan(Request $request, $id)
     {
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $decryptedId = Crypt::decrypt($id);
+        // dd($decryptedId);
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
         $vehicle_types = VehicleType::all();
         $vehicle_brands = VehicleBrand::all();
         $vehicle_categories = VehicleCategory::all();
         $engine_types = EngineType::all();
         $claim_deductibles = ClaimDeductible::all();
-        $plan = MotorInsurancePlan::find($id);
+        $plan = MotorInsurancePlan::find($decryptedId);
         $motor_comprehensive_plans = MotorInsurancePlanComprehensiveCoverPremium::where('motor_insurance_plan_id', $id)->get();
         $commission_schedules = MotorInsurancePlansCommissionScheduleCalculation::where('motor_insurance_plan_id', $plan->id)->get();
         // Decode stored country and city IDs

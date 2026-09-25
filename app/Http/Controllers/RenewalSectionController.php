@@ -167,19 +167,29 @@ class RenewalSectionController extends Controller
 
     public function renew_update(Request $request, $id)
     {
-        $request->validate([
-            'inception_date' => 'required|date',
-            'expiry_date' => 'required|date|after:inception_date',
-        ]);
+        $request->validate(
+            [
+                'inception_date' => 'required|date',
+                'expiry_date' => 'required|date|after:inception_date',
+            ],
+            [
+                'expiry_date.after' => 'Expiry date must be greater than the inception date.',
+            ]
+        );
 
         $policy = PurchasePolicy::findOrFail($id);
+
         $policy->inception_date = $request->inception_date;
         $policy->expiry_date = $request->expiry_date;
         $policy->renewed = 1;
         $policy->save();
 
         $redirectUrl = $request->input('redirect_to', route('active_policies'));
-        return redirect($redirectUrl)->with('success', 'Policy renewed successfully!');
+
+        return redirect($redirectUrl)->with(
+            'success',
+            'Policy renewed successfully!'
+        );
     }
 
     public function search_expired_policies(Request $request)
@@ -346,7 +356,7 @@ class RenewalSectionController extends Controller
     //         return back()->with('error', 'Failed to send notification: ' . $e->getMessage());
     //     }
     // }
-     public function notify_renewal(Request $request, $id = null)
+    public function notify_renewal(Request $request, $id = null)
     {
         /*
         |--------------------------------------------------------------------------
@@ -475,46 +485,46 @@ class RenewalSectionController extends Controller
                 $replacements = [
 
                     '[CLIENT_NAME]' =>
-                        $client->full_name ?? 'Valued Client',
+                    $client->full_name ?? 'Valued Client',
 
                     '[CLIENT_FIRST_NAME]' =>
-                        $client->first_name ?? '',
+                    $client->first_name ?? '',
 
                     '[CLIENT_SURNAME]' =>
-                        $client->surname ?? '',
+                    $client->surname ?? '',
 
                     '[AGENT_NAME]' =>
-                        $agent
+                    $agent
                         ? ($agent->first_name ?? 'Agent')
                         : 'Agent',
 
                     '[PLAN_NAME]' =>
-                        $policy->plan_name ?? $policy->policy_no,
+                    $policy->plan_name ?? $policy->policy_no,
 
                     '[POLICY_NO]' =>
-                        $policy->policy_no,
+                    $policy->policy_no,
 
                     '[EXPIRY_DATE_FORMATTED]' =>
-                        Carbon::parse(
-                            $policy->expiry_date
-                        )->toFormattedDateString(),
+                    Carbon::parse(
+                        $policy->expiry_date
+                    )->toFormattedDateString(),
 
                     '[EXPIRY_DATE_SHORT]' =>
-                        Carbon::parse(
-                            $policy->expiry_date
-                        )->toDateString(),
+                    Carbon::parse(
+                        $policy->expiry_date
+                    )->toDateString(),
 
                     '[DAYS_LEFT]' =>
-                        abs($daysLeft),
+                    abs($daysLeft),
 
                     '[APP_NAME]' =>
-                        env(
-                            'APP_NAME',
-                            'Insurance System'
-                        ),
+                    env(
+                        'APP_NAME',
+                        'Insurance System'
+                    ),
 
                     '[YEAR]' =>
-                        date('Y'),
+                    date('Y'),
                 ];
 
                 /*
@@ -564,7 +574,6 @@ class RenewalSectionController extends Controller
                             );
 
                             $emailsSent[] = 'client';
-
                         } catch (\Exception $e) {
 
                             \Log::error(
@@ -617,7 +626,6 @@ class RenewalSectionController extends Controller
                             );
 
                             $emailsSent[] = 'agent';
-
                         } catch (\Exception $e) {
 
                             \Log::error(
@@ -691,7 +699,6 @@ class RenewalSectionController extends Controller
                     'status' => 'success',
                     'emails_sent' => $emailsSent,
                 ];
-
             } catch (\Exception $e) {
 
                 $failedCount++;
@@ -723,7 +730,6 @@ class RenewalSectionController extends Controller
             $message =
                 $successCount .
                 ' notification(s) sent successfully.';
-
         } elseif ($successCount > 0) {
 
             $message =
@@ -731,7 +737,6 @@ class RenewalSectionController extends Controller
                 ' notification(s) sent successfully and ' .
                 $failedCount .
                 ' failed.';
-
         } else {
 
             $message =
@@ -801,10 +806,10 @@ class RenewalSectionController extends Controller
     //         return back()->with('error', 'Failed to cancel policy: ' . $e->getMessage());
     //     }
     // }
-      public function cancel_policy(Request $request)
+    public function cancel_policy(Request $request)
     {
 
-    // dd($request->all());
+        // dd($request->all());
 
 
         $validator = Validator::make($request->all(), [
@@ -832,7 +837,6 @@ class RenewalSectionController extends Controller
                 $policy->save();
 
                 $cancelled[] = $policy->id;
-
             } catch (\Exception $e) {
 
                 logger()->error($e->getMessage());

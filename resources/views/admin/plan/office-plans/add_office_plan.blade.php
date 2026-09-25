@@ -211,7 +211,29 @@
                                 <div>{{__('messages.plans.policy_holder_age_restriction')}}</div>
                                 <select name="restricted_age_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
                                     @foreach($ages as $single)
-                                    <option value="{{$single->id}}" {{in_array($single->id,old('restricted_age_ids',[]))}}>{{$single->age}}</option>
+                                    <option value="{{$single->id}}" {{in_array($single->id,old('restricted_age_ids',[]))}}>{{$single->age}} {{$single->type}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                <div>{{__('messages.plans.policy_holder_protection_system_restriction')}}</div>
+                                <select name="restricted_protection_system_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
+                                    @foreach($protection_systems as $single)
+                                    <option value="{{$single->id}}" {{ in_array($single->id, old('restricted_protection_system_ids', [])) ? 'selected' : '' }}>
+                                        {{$single->name}}
+                                    </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                <div>{{__('messages.plans.policy_holder_office_age_restriction')}}</div>
+                                <select name="restricted_office_age_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
+                                    @foreach($ages as $single)
+                                    <option value="{{$single->id}}" {{ in_array($single->id, old('restricted_office_age_ids', [])) ? 'selected' : '' }}>
+                                        {{$single->age}} {{$single->type}}
+                                    </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -488,9 +510,8 @@
                     url: '{{ route("get.cbj") }}',
                     type: 'GET',
                     data: {
-                        insurance_company_id: companyId
-                        ,
-                        line_of_business_id:4
+                        insurance_company_id: companyId,
+                        line_of_business_id: 4
                     },
                     success: function(response) {
                         $('input[name="cbj"]').val(response.cbj ?? '');

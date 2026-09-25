@@ -59,66 +59,67 @@
                     <div class="container">
                         <div class="row">
                             <div class="col-12 col-lg-12 pt-4 d-flex flex-column">
-                                <label for="grouptype">Group Report By</label>
-                                <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="grouptype" id="grouptype" onchange="toggleDateFields()">
-                                    <option value="insurance_company" {{ request('grouptype')=='insurance_company' ? 'selected' : ''}}>Commission report by Insurance Company</option>
-                                    <option value="policy_type" {{ request('grouptype')=='policy_type' ? 'selected' : ''}}>Commissions report by policy type.</option>
-                                    <option value="agent_name" {{ request('grouptype')=='agent_name' ? 'selected' : ''}}>Commissions report by Agent Name.</option>
+                              <label for="grouptype">{{__('messages.policy_commission_report.group_report_by')}}</label>
+                               <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="grouptype" id="grouptype" onchange="toggleDateFields()">
+                                    <option value="insurance_company" {{ request('grouptype')=='insurance_company' ? 'selected' : ''}}>{{__('messages.policy_commission_report.grouptype_by_insurance_company')}}</option>
+                                    <option value="policy_type" {{ request('grouptype')=='policy_type' ? 'selected' : ''}}>{{__('messages.policy_commission_report.grouptype_by_policy_type')}}</option>
+                                    <option value="agent_name" {{ request('grouptype')=='agent_name' ? 'selected' : ''}}>{{__('messages.policy_commission_report.grouptype_by_agent_name')}}</option>
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="insurance_company">Paid by Insurance Company</label>
+                                <label for="insurance_company">{{__('messages.policy_commission_report.paid_by_insurance_company')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="insurance_company" id="insurance_company">
-                                    <option value="">Select Company</option>
+                                    <option value="">{{__('messages.policy_commission_report.select_company')}}</option>
                                     @foreach ($insuranceCompanies as $company)
                                     <option value="{{ $company->id }}" {{ request('insurance_company')==$company->id ? 'selected' : ''}}>{{ $company->company_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="issue_date">From Date</label>
+                                <label for="issue_date">{{__('messages.policy_commission_report.from_date')}}</label>
                                 <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                     <input type="date" name="issue_date" id="issue_date" value="{{request('issue_date')}}">
                                 </div>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="expiry_date">To Date</label>
+                                    <label for="expiry_date">{{__('messages.policy_commission_report.to_date')}}</label>
                                 <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                     <input type="date" name="expiry_date" id="expiry_date" value="{{request('expiry_date')}}">
                                 </div>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="agent_name">Agent Name</label>
+                                <label for="agent_name">{{__('messages.policy_commission_report.agent_name')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="agent_name" id="agent_name">
-                                    <option value="">Select Agent</option>
+                                        <option value="">{{__('messages.policy_commission_report.select_agent')}}</option>
                                     @foreach ($agents as $agent)
                                     <option value="{{ $agent->id }}" {{ request('agent_name')==$agent->id ? 'selected' : ''}}>{{ $agent->first_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="policy_type">Policy Type</label>
+                                <label for="policy_type">{{__('messages.policy_commission_report.policy_type')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="policy_type" id="policy_type">
-                                    <option value="">Select Policy Type</option>
+                                <option value="">{{__('messages.policy_commission_report.select_policy_type')}}</option>
                                     @foreach ($policyTypes as $type)
                                     <option value="{{ $type['id'] }}" {{ request('policy_type')==$type['id'] ? 'selected' : ''}}>{{ $type['name'] }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="policy_plan">Policy Plan</label>
+                                <label for="policy_plan">{{__('messages.policy_commission_report.policy_plan')}}</label>
                                 <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                     <input type="text" name="policy_plan" id="policy_plan" value="{{request('policy_plan')}}">
                                 </div>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="total_commission">Total Commission</label>
+                                <label for="total_commission">{{__('messages.policy_commission_report.total_commission')}}</label>
                                 <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                     <input type="number" name="total_commission" id="total_commission" value="{{request('total_commission')}}">
                                 </div>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <button type="submit" class="btn rounded-1 text-white opacity-50 p-2" style="background-color: #EF7C00;">Generate Report</button>
+                                <button type="submit" class="btn rounded-1 text-white opacity-50 p-2" style="background-color: #EF7C00;">{{__('messages.policy_commission_report.generate_report')}}</button>
+                                <!-- <button type="submit" class="btn rounded-1 text-white opacity-50 p-2" style="background-color: #EF7C00;">Generate Report</button> -->
                             </div>
                         </div>
                     </div>
@@ -128,23 +129,24 @@
         <div class="m-2 text-center">
             <img class="p-3" src="{{asset('img/DashboardSotariaLogo.png')}}" alt="">
             <h4>
-                @php
-                switch(request('grouptype'))
-                {
-                case 'insurance_company':
-                echo "Commission by Insurance Company";
-                break;
-                case 'policy_type':
-                echo "Commissions by Policy Type";
-                break;
-                case 'agent_name':
-                echo "Commissions By Agent Name";
-                break;
-                default:
-                echo "Commission By Insurance Company";
-                break;
-                }
-                @endphp</h4>
+         @php
+            switch(request('grouptype'))
+            {
+            case 'insurance_company':
+            echo __('messages.policy_commission_report.heading_by_insurance_company');
+            break;
+            case 'policy_type':
+            echo __('messages.policy_commission_report.heading_by_policy_type');
+            break;
+            case 'agent_name':
+            echo __('messages.policy_commission_report.heading_by_agent_name');
+            break;
+            default:
+            echo __('messages.policy_commission_report.heading_by_insurance_company');
+            break;
+            }
+            @endphp</h4>
+        <p>{{__('messages.policy_commission_report.from')}} {{ request('issue_date') ?? __('messages.policy_commission_report.no_date') }} {{__('messages.policy_commission_report.to')}} {{ request('expiry_date') ?? __('messages.policy_commission_report.no_date') }}</p>
             <p>From: {{ request('issue_date') ?? '--' }} To: {{ request('expiry_date') ?? '--' }}</p>
         </div>
         <div class="body bg-white py-4 px-4 d-flex flex-column gap-3 pb-5">
@@ -178,8 +180,8 @@
                 </tbody>
             </table>
             @endforeach
-            @else
-            <h4 class="text-center">No Record Found</h4>
+           @else
+            <h4 class="text-center">{{__('messages.policy_commission_report.no_record')}}</h4>
             @endif
         </div>
     </div>

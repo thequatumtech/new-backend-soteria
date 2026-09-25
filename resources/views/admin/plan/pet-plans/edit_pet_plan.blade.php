@@ -189,9 +189,9 @@
                                 <div>{{__('messages.plans.policy_holder_age_restriction')}}</div>
                                 <select name="restricted_age_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
                                     @foreach($ages as $single)
-                                    <option value="{{$single->id}}"
+                                    <option value="{{ $single->id }}"
                                         {{ in_array($single->id, old('restricted_age_ids', !empty($plan->restricted_age_ids) ? json_decode($plan->restricted_age_ids) : [])) ? 'selected' : '' }}>
-                                        {{$single->age}}
+                                        {{ $single->age }} {{ $single->type == 'year' ? __('messages.age.age_year') : __('messages.age.age_month') }}
                                     </option>
                                     @endforeach
                                 </select>
@@ -615,7 +615,7 @@
                     type: 'GET',
                     data: {
                         insurance_company_id: companyId,
-                        line_of_business_id:11
+                        line_of_business_id: 11
                     },
                     success: function(response) {
                         $('input[name="cbj"]').val(response.cbj ?? '');

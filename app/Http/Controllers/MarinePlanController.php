@@ -14,6 +14,7 @@ use App\Models\InsuredItemSubCategory;
 use App\Models\LineOfBusiness;
 use App\Models\TypeOfCover;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 
 class MarinePlanController extends Controller
 {
@@ -32,9 +33,9 @@ class MarinePlanController extends Controller
     {
         $insurance_companies = InsuranceCompany::where('line_of_business_id', 'like', '%"8"%')->get();
         $line_of_businesses = LineOfBusiness::where('id', self::line_of_business_id)->first()->name;
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
         $type_of_covers = TypeOfCover::all();
         $categories = InsuredItemCategory::all();
@@ -44,13 +45,17 @@ class MarinePlanController extends Controller
 
     public function edit_marine_plan(Request $request, $id)
     {
+
+        $decryptedId = Crypt::decrypt($id);
+
+
         $insurance_companies = InsuranceCompany::where('line_of_business_id', 'like', '%"8"%')->get();
         $line_of_businesses = LineOfBusiness::all();
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
-        $plan = MarinePlan::find($id);
+        $plan = MarinePlan::find($decryptedId);
         $type_of_covers = TypeOfCover::all();
         $categories = InsuredItemCategory::all();
         $sub_categories = InsuredItemSubCategory::all();
@@ -59,32 +64,12 @@ class MarinePlanController extends Controller
         $selected_city_ids = $plan->restricted_city_ids ? json_decode($plan->restricted_city_ids, true) : [];
         $selected_district_ids = $plan->restricted_district_ids ? json_decode($plan->restricted_district_ids, true) : [];
 
-        // Load only related cities and districts
-        // $cities = count($selected_country_ids) > 0
-        //     ? Cities::whereIn('country_id', $selected_country_ids)->get()
-        //     : collect(); // empty collection
-
-        // $districts = count($selected_city_ids) > 0
-        //     ? District::whereIn('city_id', $selected_city_ids)->get()
-        //     : collect(); // empty collection
-
         return view('admin.plan.marine-plans.edit_marine_plan', compact('insurance_companies', 'line_of_businesses', 'countries', 'cities', 'districts', 'ages', 'plan', 'type_of_covers', 'categories', 'sub_categories', 'selected_country_ids', 'selected_city_ids', 'selected_district_ids'));
     }
 
     public function save_marine_plan(Request $request)
     {
-        /*        $category_allowed = $request->category_allowed;
-        if($category_allowed) {
-            $category_allowed_arr = explode(',', $category_allowed);
-            $sub_category_allowed = null;
-            if (!empty($category_allowed_arr)) {
-                $sub_category_allowed_arr = [];
-                foreach ($category_allowed_arr as $single) {
-                    $sub_category_allowed_arr[$single] = json_encode(explode(',', $request->sub_category[$single]));
-                }
-                $sub_category_allowed = json_encode($sub_category_allowed_arr);
-            }
-        }*/
+       
         // dd($request->all());
         if ($request->form_type == 'add') {
             $marine_insurance_plan = new MarinePlan();

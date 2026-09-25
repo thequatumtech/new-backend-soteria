@@ -4,12 +4,25 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use App\Models\{ClientMotorInsurance, PurchasePolicy, MotorPlan};
-use App\Models\InsurancePlanModels\{MotorInsurancePlan, MotorInsurancePlanNoClaimDiscount, MotorInsurancePlanNetPremiumIncreasePercentage, MotorInsurancePlanCondition, MotorInsurancePlansCommissionScheduleCalculation, MotorInsurancePlanComprehensiveCoverPremium, MotorInsurancePlan3MonthsCompulsoryPremium, MotorInsurancePlan6MonthsCompulsoryPremium, MotorInsurancePlan9MonthsCompulsoryPremium, MotorInsurancePlan12MonthsCompulsoryPremium, MotorInsurancePlanTotalLossPremium};
+use App\Models\InsurancePlanModels\{
+    MotorInsurancePlan,
+    MotorInsurancePlanNoClaimDiscount,
+    MotorInsurancePlanNetPremiumIncreasePercentage,
+    MotorInsurancePlanCondition,
+    MotorInsurancePlansCommissionScheduleCalculation,
+    MotorInsurancePlanComprehensiveCoverPremium,
+    MotorInsurancePlan3MonthsCompulsoryPremium,
+    MotorInsurancePlan6MonthsCompulsoryPremium,
+    MotorInsurancePlan9MonthsCompulsoryPremium,
+    MotorInsurancePlan12MonthsCompulsoryPremium,
+    MotorInsurancePlanTotalLossPremium
+};
 use PDF;
 use Illuminate\Http\Request;
 use App\Models\Client;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use App\Helpers\InsurancePlanHelper;
 
 class MotorInsuranceController extends Controller
 {
@@ -28,15 +41,31 @@ class MotorInsuranceController extends Controller
         if (is_numeric($value)) {
             return [(int)$value];
         }
+
         return [];
     }
 
     private function restrictionError($type)
     {
-        $message = "You are not eligible for this plan due to {$type} restriction.";
+        $restrictionTypes = [
+            'country' => __('messages.api.motor_restriction_country'),
+            'city' => __('messages.api.motor_restriction_city'),
+            'district' => __('messages.api.motor_restriction_district'),
+            'age' => __('messages.api.motor_restriction_age'),
+            'vehicle type' => __('messages.api.motor_restriction_vehicle_type'),
+            'vehicle brand' => __('messages.api.motor_restriction_vehicle_brand'),
+            'vehicle category' => __('messages.api.motor_restriction_vehicle_category'),
+            'engine type' => __('messages.api.motor_restriction_engine_type'),
+        ];
+
+        $restrictionType = $restrictionTypes[$type] ?? $type;
+
+        $message = __('messages.api.motor_restriction_message', [
+            'type' => $restrictionType
+        ]);
 
         if ($type === 'country') {
-            $message .= ' Please contact us for further information.';
+            $message .= __('messages.api.motor_country_contact');
         }
 
         return response()->json([
@@ -46,6 +75,7 @@ class MotorInsuranceController extends Controller
             'data' => []
         ], 422);
     }
+
     private function normalizeDate($date)
     {
         if (!$date) return null;
@@ -56,6 +86,7 @@ class MotorInsuranceController extends Controller
 
         return $date;
     }
+
     public function storeMotorInsurance(Request $request)
     {
         try {
@@ -123,13 +154,15 @@ class MotorInsuranceController extends Controller
                 'fees',
                 'commissionSchedules',
                 'policy_covers',
-                'additional_benefits'
+                'additional_benefits',
+                'insurance_company.currency'
             ])->find($data['plan_id']);
+
             if (!$plan) {
                 return response()->json([
                     'status' => false,
                     'status_code' => 404,
-                    'message' => 'Motor Insurance Plan not found',
+                    'message' => __('messages.api.motor_plan_not_found'),
                     'data' => []
                 ]);
             }
@@ -137,11 +170,12 @@ class MotorInsuranceController extends Controller
             $data['insurance_company_id'] = $plan->insurance_company_id ?? 0;
 
             $client = Client::find($request->user_id);
+
             if (!$client) {
                 return response()->json([
                     'status' => false,
                     'status_code' => 422,
-                    'message' => 'Client not found.',
+                    'message' => __('messages.api.client_not_found'),
                     'data' => []
                 ], 422);
             }
@@ -151,14 +185,14 @@ class MotorInsuranceController extends Controller
             $clientDistrict = $client->district_id;
             $clientAge = Carbon::parse($client->birth_date)->age;
 
-            $restrictedCountries   = $this->normalizeRestricted($plan->restricted_country_ids);
-            $restrictedCities      = $this->normalizeRestricted($plan->restricted_city_ids);
-            $restrictedDistricts   = $this->normalizeRestricted($plan->restricted_district_ids);
-            $restrictedAges        = $this->normalizeRestricted($plan->restricted_age_ids);
-            $restrictedVehicleTypes      = $this->normalizeRestricted($plan->restricted_vehicle_type_ids);
-            $restrictedVehicleBrands     = $this->normalizeRestricted($plan->restricted_vehicle_brand_ids);
+            $restrictedCountries = $this->normalizeRestricted($plan->restricted_country_ids);
+            $restrictedCities = $this->normalizeRestricted($plan->restricted_city_ids);
+            $restrictedDistricts = $this->normalizeRestricted($plan->restricted_district_ids);
+            $restrictedAges = $this->normalizeRestricted($plan->restricted_age_ids);
+            $restrictedVehicleTypes = $this->normalizeRestricted($plan->restricted_vehicle_type_ids);
+            $restrictedVehicleBrands = $this->normalizeRestricted($plan->restricted_vehicle_brand_ids);
             $restrictedVehicleCategories = $this->normalizeRestricted($plan->restricted_vehicle_category_ids);
-            $restrictedEngineTypes       = $this->normalizeRestricted($plan->restricted_engine_type_ids);
+            $restrictedEngineTypes = $this->normalizeRestricted($plan->restricted_engine_type_ids);
 
             if ($clientCountry && in_array($clientCountry, $restrictedCountries)) {
                 return $this->restrictionError('country');
@@ -177,6 +211,7 @@ class MotorInsuranceController extends Controller
 
                 if (str_contains($range, '-')) {
                     [$min, $max] = explode('-', $range);
+
                     if ($clientAge >= (int)$min && $clientAge <= (int)$max) {
                         return $this->restrictionError('age');
                     }
@@ -190,15 +225,19 @@ class MotorInsuranceController extends Controller
             if (!empty($data['vahicle_type_id']) && in_array($data['vahicle_type_id'], $restrictedVehicleTypes)) {
                 return $this->restrictionError('vehicle type');
             }
+
             if (!empty($data['vahicle_brand_id']) && in_array($data['vahicle_brand_id'], $restrictedVehicleBrands)) {
                 return $this->restrictionError('vehicle brand');
             }
+
             if (!empty($data['vahicle_category_id']) && in_array($data['vahicle_category_id'], $restrictedVehicleCategories)) {
                 return $this->restrictionError('vehicle category');
             }
+
             if (!empty($data['engine_type_id']) && in_array($data['engine_type_id'], $restrictedEngineTypes)) {
                 return $this->restrictionError('engine type');
             }
+
             if (!empty($data['inception_date'])) {
                 $inceptionDate = Carbon::parse($this->normalizeDate($data['inception_date']));
             } else {
@@ -211,12 +250,16 @@ class MotorInsuranceController extends Controller
                     ->addDays((int)$plan_data->policy_period)
                     ->format('Y-m-d');
             }
+
             $existingMotor = PurchasePolicy::find($request->purchase_id ?? 0);
+
             if ($existingMotor) {
                 $motor = ClientMotorInsurance::find($existingMotor->policy_id);
+
                 if ($motor) {
                     $motor->update($data);
                 }
+
                 $data['purchase_id'] = $existingMotor->id;
                 $motor = PurchasePolicy::updatePurchasePolicy($data);
                 $data['policy_id'] = $motor->policy_id;
@@ -235,12 +278,16 @@ class MotorInsuranceController extends Controller
             $data = ClientMotorInsurance::getMotorInsuranceDetails($data['policy_id']);
 
             $directory = public_path('insurance_pdfs/motor_policy');
+
             if (!file_exists($directory)) {
                 mkdir($directory, 0755, true);
             }
+
             $filename = uniqid() . '_policy_' . $motor->id . '.pdf';
             $path = $directory . '/' . $filename;
+
             $net_premium = $plan->fees->net_premium ?? 0;
+
             // $feesPercentage = $plan->fees->fees;
             // $stampsPercentage = $plan->fees->stamps;
             // $salesTaxPercentage = $plan->fees->sales_tax;
@@ -248,9 +295,11 @@ class MotorInsuranceController extends Controller
             // $feesPercentage = $plan->fees->fees;
             // $stampsPercentage = $plan->fees->stamps;
             // $salesTaxPercentage = $plan->fees->sales_tax;
+
             $commission_percentage = $plan->fees->commission_percentage ?? 0;
 
             if ($plan->motor_plan_id == 1) {
+
                 // Determine Net Premium from Comprehensive Schedule
                 $vehicle_brand_id = $data['vahicle_brand_id'] ?? null;
                 $vehicle_category_id = $data['vahicle_category_id'] ?? null;
@@ -259,6 +308,7 @@ class MotorInsuranceController extends Controller
                 $premium_record = MotorInsurancePlanComprehensiveCoverPremium::where('motor_insurance_plan_id', $plan->id)
                     ->get()
                     ->filter(function ($record) use ($vehicle_brand_id, $vehicle_category_id, $vehicle_value) {
+
                         $brands = json_decode($record->vehicle_brand_id, true) ?: [];
                         $categories = json_decode($record->vehicle_category_id, true) ?: [];
 
@@ -269,32 +319,27 @@ class MotorInsuranceController extends Controller
                         return $brand_match && $category_match && $value_match;
                     })
                     ->first();
-                // dd($data);
+
                 Log::info('Matching Debug', [
-                    'request_brand' => $vehicle_brand_id, // check if this is null
+                    'request_brand' => $vehicle_brand_id,
                     'request_val' => $vehicle_value,
                     'db_plan_id' => $plan->id
                 ]);
 
-                //  if ($premium_record) {
-                //     $net_premium = (float)($premium_record->premium ?? $net_premium);
-                // }
-                // dd($premium_record);
                 if (!$premium_record) {
                     return response()->json([
                         'status' => false,
                         'status_code' => 422,
-                        'message' => 'Vehicle value does not match any insured value range for this plan.'
+                        'message' => __('messages.api.motor_vehicle_value_not_match')
                     ], 422);
                 }
 
                 if ($premium_record) {
+
                     // Check if the premium is a fixed amount (type 1) or a rate/percentage
                     if (isset($premium_record->premium_type) && $premium_record->premium_type == 1) {
-                        // dd('3');
                         $net_premium = (float)$premium_record->premium;
                     } else {
-                        // dd('4');
                         // Default to percentage calculation: (Rate / 100) * Vehicle Value
                         $net_premium = ($vehicle_value * (float)($premium_record->premium ?? 0)) / 100;
                     }
@@ -302,7 +347,11 @@ class MotorInsuranceController extends Controller
 
                 // Determine Commission from Commission Schedule
                 $vehicle_type_id = $data['vahicle_type_id'] ?? null;
-                $commission_record = MotorInsurancePlansCommissionScheduleCalculation::where('motor_insurance_plan_id', $plan->id)
+
+                $commission_record = MotorInsurancePlansCommissionScheduleCalculation::where(
+                    'motor_insurance_plan_id',
+                    $plan->id
+                )
                     ->when($vehicle_type_id, function ($query) use ($vehicle_type_id) {
                         return $query->where('vehicle_type_id', $vehicle_type_id);
                     })
@@ -325,6 +374,7 @@ class MotorInsuranceController extends Controller
                     $point_record = MotorInsurancePlanCondition::where('motor_insurance_plan_id', $plan->id)
                         ->where('no_of_points', $no_of_points)
                         ->first();
+
                     if ($point_record) {
                         $total_adjustment_percentage += (float)$point_record->increase_in_net_premium;
                     }
@@ -332,18 +382,22 @@ class MotorInsuranceController extends Controller
 
                 // 2. Accident-based adjustment
                 if ($no_of_accidents > 0) {
-                    // Increase based on accidents (using third year increase as per user request for 3 years)
+
+                    // Increase based on accidents
                     $accident_record = MotorInsurancePlanNetPremiumIncreasePercentage::where('motor_insurance_plan_id', $plan->id)
                         ->where('no_of_accidents', $no_of_accidents)
                         ->first();
+
                     if ($accident_record) {
                         $total_adjustment_percentage += (float)$accident_record->third_year_increase;
                     }
                 } else {
-                    // Discount for no claims (using 3 years discount)
+
+                    // Discount for no claims
                     $discount_record = MotorInsurancePlanNoClaimDiscount::where('motor_insurance_plan_id', $plan->id)
                         ->where('year', 3)
                         ->first();
+
                     if ($discount_record) {
                         $total_adjustment_percentage -= (float)$discount_record->discount;
                     }
@@ -366,8 +420,14 @@ class MotorInsuranceController extends Controller
             $cbjContribution = ($net_premium * $cbjTaxPercentage) / 100;
             $salesTaxAmount = (($net_premium + $issuanceFees) * $salesTaxPercentage) / 100;
             $cbjSalesTaxAmount = ($cbjContribution * $cbjSalesTaxPercentage) / 100;
-            $grossPremium = $net_premium + $issuanceFees + $stampAmount + $salesTaxAmount + $cbjContribution + $cbjSalesTaxAmount;
 
+            $grossPremium =
+                $net_premium
+                + $issuanceFees
+                + $stampAmount
+                + $salesTaxAmount
+                + $cbjContribution
+                + $cbjSalesTaxAmount;
 
             // $purchase = [
             //     'net_premium'          => $plan->fees->net_premium,
@@ -386,6 +446,7 @@ class MotorInsuranceController extends Controller
             //     'commission_percentage' => $data['commission_percentage'] ?? 0,
             //     'policy_pdf_url'       => $path,
             // ];
+
             $purchase = [
                 'net_premium'          => $net_premium,
                 'fees'                 => $issuanceFees,
@@ -409,6 +470,8 @@ class MotorInsuranceController extends Controller
             PurchasePolicy::updatePurchasePolicy($purchase);
 
             $data->purchase_id = $motor->id;
+            $data->purchase_policy_id = $motor->id;
+
             $plan->net_premium_amount = $net_premium;
             $plan->fees_amount = $issuanceFees;
             $plan->stamps_amount = $stampAmount;
@@ -419,32 +482,28 @@ class MotorInsuranceController extends Controller
             $plan->commission_amount = ($net_premium * $commission_percentage) / 100;
 
             $client = Client::with('country.currency')->find($request->user_id);
-            $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
 
+            // Get the insurance company from the selected motor plan
+            $insuranceCompany = $plan->insurance_company;
+
+            // Insurance company currency has priority
+            if ($insuranceCompany && $insuranceCompany->currency) {
+                $abbr = $insuranceCompany->currency->abbreviation;
+            } else {
+                // Fallback to client's country currency
+                $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
+            }
 
             $pdf = PDF::loadView('pdf.motor_policy', [
                 'data' => $data,
                 'abbr' => $abbr,
                 'plan' => $plan
             ]);
+
             $pdf->save($path);
 
-            // $url = url('insurance_pdfs/motor_policy/' . $filename);
-            // $data['url'] = $url;
             $data['url'] = url('insurance_pdfs/motor_policy/' . $filename);
-            // $data->net_premium = $data->net_premium . '%';
-            // $data->fees = $data->fees . '%';
-            // $data->gross_premium = $data->gross_premium . '%';
-            // $data->sales_tax = $data->sales_tax . '%';
-            // $data->stamps = $data->stamps . '%';
-            // $data->commission_percentage = $data->commission_percentage . '%';
 
-            // $data->net_premium = $purchase['net_premium'];
-            // $data->fees = $purchase['fees'];
-            // $data->gross_premium = $purchase['gross_premium'];
-            // $data->sales_tax = $purchase['sales_tax'];
-            // $data->stamps = $purchase['stamps'];
-            // $data->commission_amount = $purchase['commission_amount'];
             $data->net_premium       = number_format($purchase['net_premium'], 2) . ' ' . $abbr;
             $data->fees              = number_format($purchase['fees'], 2) . ' ' . $abbr;
             $data->gross_premium     = number_format($purchase['gross_premium'], 2) . ' ' . $abbr;
@@ -453,19 +512,22 @@ class MotorInsuranceController extends Controller
             $data->cbj               = number_format($purchase['cbj'], 2) . ' ' . $abbr;
             $data->sales_tax_cbj     = number_format($purchase['sales_tax_cbj'], 2) . ' ' . $abbr;
             $data->commission_amount = number_format($purchase['commission_amount'], 2) . ' ' . $abbr;
+
             return response()->json([
                 'status' => true,
                 'status_code' => 200,
-                'message' => 'Motor Insurance Plan added successfully',
+                'message' => __('messages.api.motor_insurance_plan_added_successfully'),
                 'data' => $data
             ]);
         } catch (\Exception $e) {
+
             Log::error('API Error', [
                 'message' => $e->getMessage(),
                 'file'    => $e->getFile(),
                 'line'    => $e->getLine(),
                 'trace'   => $e->getTraceAsString(),
             ]);
+
             return response()->json([
                 'status' => false,
                 'status_code' => 500,
@@ -478,78 +540,223 @@ class MotorInsuranceController extends Controller
     public function getComprehensivePlan(Request $request)
     {
         try {
-            $data = array();
-            $data = MotorInsurancePlan::whereHas('insurance_company', function ($q) {
-                $q->whereNull('deleted_at');
-            })
-            ->where('motor_plan_id', 1)->get();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Motor Insurance Comprehensive Plan successfully', 'data' => $data]);
+
+            $query = MotorInsurancePlan::with([
+                'insurance_company',
+                'insurance_company.currency'
+            ])
+                ->whereHas('insurance_company', function ($q) {
+                    $q->whereNull('deleted_at');
+                })
+                ->where('motor_plan_id', 1);
+
+            $query = InsurancePlanHelper::filterByClientCurrency(
+                $query,
+                $request->user_id
+            );
+
+            $data = $query->get();
+
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_motor_comprehensive_plan_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getCompulsory3MonthsPlan(Request $request)
     {
         try {
-            $data = MotorInsurancePlan::whereHas('insurance_company', function ($q) {
-                $q->whereNull('deleted_at');
-            })
-            ->where('motor_plan_id', 2)->get();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Motor Insurance Plan 3 Months successfully', 'data' => $data]);
+
+            $query = MotorInsurancePlan::with([
+                'insurance_company',
+                'insurance_company.currency'
+            ])
+                ->whereHas('insurance_company', function ($q) {
+                    $q->whereNull('deleted_at');
+                })
+                ->where('motor_plan_id', 2);
+
+            $query = InsurancePlanHelper::filterByClientCurrency(
+                $query,
+                $request->user_id
+            );
+
+            $data = $query->get();
+
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_motor_3_months_plan_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getCompulsory6MonthsPlan(Request $request)
     {
         try {
 
-            $data = MotorInsurancePlan::whereHas('insurance_company', function ($q) {
-                $q->whereNull('deleted_at');
-            })
-            ->where('motor_plan_id', 3)->get();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Motor Insurance Plan 6 Months successfully', 'data' => $data]);
+            $query = MotorInsurancePlan::with([
+                'insurance_company',
+                'insurance_company.currency'
+            ])
+                ->whereHas('insurance_company', function ($q) {
+                    $q->whereNull('deleted_at');
+                })
+                ->where('motor_plan_id', 3);
+
+            $query = InsurancePlanHelper::filterByClientCurrency(
+                $query,
+                $request->user_id
+            );
+
+            $data = $query->get();
+
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_motor_6_months_plan_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getCompulsory9MonthsPlan(Request $request)
     {
         try {
 
-            $data = MotorInsurancePlan::whereHas('insurance_company', function ($q) {
-                $q->whereNull('deleted_at');
-            })
-            ->where('motor_plan_id', 4)->get();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Motor Insurance Plan 9 Months successfully', 'data' => $data]);
+            $query = MotorInsurancePlan::with([
+                'insurance_company',
+                'insurance_company.currency'
+            ])
+                ->whereHas('insurance_company', function ($q) {
+                    $q->whereNull('deleted_at');
+                })
+                ->where('motor_plan_id', 4);
+
+            $query = InsurancePlanHelper::filterByClientCurrency(
+                $query,
+                $request->user_id
+            );
+
+            $data = $query->get();
+
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_motor_9_months_plan_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getCompulsory12MonthsPlan(Request $request)
     {
         try {
 
-            $data = MotorInsurancePlan::whereHas('insurance_company', function ($q) {
-                $q->whereNull('deleted_at');
-            })
-            ->where('motor_plan_id', 5)->get();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Motor Insurance Plan 12 Months successfully', 'data' => $data]);
+            $query = MotorInsurancePlan::with([
+                'insurance_company',
+                'insurance_company.currency'
+            ])
+                ->whereHas('insurance_company', function ($q) {
+                    $q->whereNull('deleted_at');
+                })
+                ->where('motor_plan_id', 5);
+
+            $query = InsurancePlanHelper::filterByClientCurrency(
+                $query,
+                $request->user_id
+            );
+
+            $data = $query->get();
+
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_motor_12_months_plan_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function MotorInsurancePlanTotalLossPremium(Request $request)
     {
         try {
 
-            $data = MotorInsurancePlan::whereHas('insurance_company', function ($q) {
-                $q->whereNull('deleted_at');
-            })
-            ->where('motor_plan_id', 6)->get();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Motor Insurance Plan Total Loss Premium successfully', 'data' => $data]);
+            $query = MotorInsurancePlan::with([
+                'insurance_company',
+                'insurance_company.currency'
+            ])
+                ->whereHas('insurance_company', function ($q) {
+                    $q->whereNull('deleted_at');
+                })
+                ->where('motor_plan_id', 6);
+
+            $query = InsurancePlanHelper::filterByClientCurrency(
+                $query,
+                $request->user_id
+            );
+
+            $data = $query->get();
+
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_motor_total_loss_plan_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
 }
+

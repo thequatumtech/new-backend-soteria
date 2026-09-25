@@ -16,7 +16,7 @@ class DistrictController extends Controller
     public function index()
     {
         $district = District::withTrashed()->orderBy('name')->get();
-        $cities = Cities::all();
+        $cities = Cities::orderBy('name', 'asc')->get();
         return view('admin.district.district', ['district' => $district,'all_cities' => $cities]);
     }
 

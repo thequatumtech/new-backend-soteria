@@ -13,6 +13,7 @@ use App\Models\InsurancePlanModels\CriticalIllnessPlanPolicyCover;
 use App\Models\LineOfBusiness;
 use App\Models\Occupations;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 
 class CriticalIllnessPlanController extends Controller
 {
@@ -29,9 +30,9 @@ class CriticalIllnessPlanController extends Controller
     {
         $insurance_companies = InsuranceCompany::where('line_of_business_id','like','%"1"%')->get();
         $line_of_businesses = LineOfBusiness::find(self::line_of_business_id)->name;
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
         $occupations = Occupations::all();
         $chronics = ChronicDisease::all();
@@ -40,23 +41,16 @@ class CriticalIllnessPlanController extends Controller
 
     public function edit_critical_illness_plan(Request $request, $id)
     {
+        $decryptedId = Crypt::decrypt($id);
+
         $insurance_companies = InsuranceCompany::where('line_of_business_id','like','%"1"%')->get();
         $line_of_businesses = LineOfBusiness::find(self::line_of_business_id)->name;
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
-        $plan = CriticalIllnessPlan::find($id);
-/*        if($plan->restricted_country_ids) {
-            $cities = Cities::whereIn('country_id', json_decode($plan->restricted_country_ids))->get();
-            if($plan->restricted_city_ids) {
-                $districts = District::whereIn('city_id', json_decode($plan->restricted_city_ids))->get();
-            } else {
-                $districts = [];
-            }
-        } else {
-            $cities = $districts = [];
-        }*/
+        $plan = CriticalIllnessPlan::find($decryptedId);
+
           // Decode stored country and city IDs
         $selected_country_ids = $plan->restricted_country_ids ? json_decode($plan->restricted_country_ids, true) : [];
         $selected_city_ids = $plan->restricted_city_ids ? json_decode($plan->restricted_city_ids, true) : [];
@@ -100,7 +94,7 @@ class CriticalIllnessPlanController extends Controller
             $critical_illness_insurance_plan->sales_tax = $request->sales_tax;
             $critical_illness_insurance_plan->cbj = $request->cbj;
             $critical_illness_insurance_plan->sales_tax_cbj = $request->salextaxcbj;
-            
+
             $critical_illness_insurance_plan->gross_premium = $request->gross_premium;
             $critical_illness_insurance_plan->commission_percentage = $request->commission_percentage;
             $critical_illness_insurance_plan->commission_amount = $request->commission_amount;
@@ -122,7 +116,7 @@ class CriticalIllnessPlanController extends Controller
                 $critical_illness_insurance_plan_policy_covers->critical_illness_plan_id = $critical_illness_insurance_plan->id;
                 $critical_illness_insurance_plan_policy_covers->cover_name = $single['cover_name'];
                 // $critical_illness_insurance_plan_policy_covers->cover_limit = $single['cover_limit'];
-                $critical_illness_insurance_plan_policy_covers->cover_limit = str_replace(',', '', $single['cover_limit']); 
+                $critical_illness_insurance_plan_policy_covers->cover_limit = str_replace(',', '', $single['cover_limit']);
                 $critical_illness_insurance_plan_policy_covers->cover_deductible = $single['cover_deductible'];
                 $critical_illness_insurance_plan_policy_covers->cover_premium = $single['cover_premium'];
                 $critical_illness_insurance_plan_policy_covers->save();
@@ -148,7 +142,7 @@ class CriticalIllnessPlanController extends Controller
             $critical_illness_insurance_plan->sales_tax = $request->sales_tax;
             $critical_illness_insurance_plan->cbj = $request->cbj;
             $critical_illness_insurance_plan->sales_tax_cbj = $request->salextaxcbj;
-          
+
             $critical_illness_insurance_plan->gross_premium = $request->gross_premium;
             $critical_illness_insurance_plan->commission_percentage = $request->commission_percentage;
             $critical_illness_insurance_plan->commission_amount = $request->commission_amount;
@@ -161,7 +155,7 @@ class CriticalIllnessPlanController extends Controller
                 $newFilename = $file."_file_" . time() . "." .$uploadedFile->getClientOriginalExtension(); // New filename with timestamp
                 $uploadedFile->move(public_path('uploads/insurance_plans/' . $critical_illness_insurance_plan->id), $newFilename);
 
-                $critical_illness_insurance_plan->$file = $newFilename; 
+                $critical_illness_insurance_plan->$file = $newFilename;
                 $critical_illness_insurance_plan->save();
             }
             // CriticalIllnessPlanPolicyCover::where('critical_illness_plan_id',$plan_id)->delete();
@@ -179,7 +173,7 @@ class CriticalIllnessPlanController extends Controller
                 // $critical_illness_insurance_plan_policy_covers = new CriticalIllnessPlanPolicyCover();
                 // $critical_illness_insurance_plan_policy_covers->critical_illness_plan_id = $plan_id;
                 // $critical_illness_insurance_plan_policy_covers->cover_name = $single['cover_name'];
-                // $critical_illness_insurance_plan_policy_covers->cover_limit = str_replace(',', '', $single['cover_limit']); 
+                // $critical_illness_insurance_plan_policy_covers->cover_limit = str_replace(',', '', $single['cover_limit']);
                 // $critical_illness_insurance_plan_policy_covers->cover_deductible = $single['cover_deductible'];
                 // $critical_illness_insurance_plan_policy_covers->cover_premium = $single['cover_premium'];
                 // $critical_illness_insurance_plan_policy_covers->save();
@@ -188,9 +182,9 @@ class CriticalIllnessPlanController extends Controller
                     if ($cover) {
                         $cover->update([
                             'cover_name' => $single['cover_name'],
-                            'cover_limit' => str_replace(',', '', $single['cover_limit']),       
+                            'cover_limit' => str_replace(',', '', $single['cover_limit']),
                             'cover_deductible' => $single['cover_deductible'],
-                            'cover_premium' => $single['cover_premium'],                 
+                            'cover_premium' => $single['cover_premium'],
                         ]);
                     }
                 } else {
@@ -199,7 +193,7 @@ class CriticalIllnessPlanController extends Controller
                         'cover_name' => $single['cover_name'],
                         'cover_limit' => str_replace(',', '', $single['cover_limit']),
                         'cover_deductible' => $single['cover_deductible'],
-                        'cover_premium' => $single['cover_premium'],   
+                        'cover_premium' => $single['cover_premium'],
                     ]);
                 }
             }

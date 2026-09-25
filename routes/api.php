@@ -5,20 +5,35 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\Api\NotificationController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
 |
 | Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
+| routes are loaded by the RouteServiceProvider within a group which is
+| assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+Route::get('/terms-and-conditions', [TermsController::class, 'getTerms']);
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+
+/*
+|--------------------------------------------------------------------------
+| Client Public APIs
+|--------------------------------------------------------------------------
+|
+| SetLocale is now included in the global API middleware group in Kernel.php.
+| Therefore all API routes automatically use the selected language.
+|
+*/
 
 // login
 Route::post('/login', [ClientController::class, 'Login']);
@@ -28,11 +43,18 @@ Route::post('/updateProfile', [ClientController::class, 'updateProfile']);
 Route::post('forgot-otp-send', [ClientController::class, 'sendForgotOtp']);
 Route::post('forgot-password', [ClientController::class, 'forgotPassword']);
 
-
 Route::post('register-otp-send', [ClientController::class, 'sendRegisterOtp']);
+
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated Client APIs
+|--------------------------------------------------------------------------
+*/
 
 Route::group(['middleware' => ['apitoken']], function () {
     
+    Route::post('/change-language', [ClientController::class, 'changeLanguage']);
     Route::post('/save-signature', [ClientController::class, 'saveSignature']);
     Route::post('/generate-final-pdf', [ClientController::class, 'generate_final_pdf']);
 
@@ -43,6 +65,19 @@ Route::group(['middleware' => ['apitoken']], function () {
     Route::post('/chat/{chatId}/mark-read', [ChatController::class, 'markAsRead']);
     Route::get('/chat/list', [ChatController::class, 'chatList']);
     //end live chat
+
+    //write by digvijay device token
+    Route::post('/device-token', [DeviceTokenController::class, 'store']);
+    Route::delete('/device-token', [DeviceTokenController::class, 'destroy']);
+    //end device token
+
+    //write by digvijay notification 
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+    //end notification
+
     Route::get('/getProfile', [ClientController::class, 'getProfileDetail']);
 
     Route::get('/logout', [ClientController::class, 'Logout']);
@@ -51,8 +86,9 @@ Route::group(['middleware' => ['apitoken']], function () {
     Route::get('/customer/{id}', [CustomerController::class, 'getCustomer']);
     Route::post('/customer', [CustomerController::class, 'createCustomer']);
     Route::put('/customer/{id}', [CustomerController::class, 'updateCustomer']);
-    
+
     Route::post('/check-blacklist', [BlackListController::class, 'checkBlackList']);
+
     // MarineInsurance
     Route::post('/marine-insurance', [MarineInsuranceController::class, 'store']);
     Route::put('/marine-insurance/{id}', [MarineInsuranceController::class, 'update']);
@@ -162,13 +198,20 @@ Route::group(['middleware' => ['apitoken']], function () {
     // discount-coupons
     Route::get('/get-discount-coupons', [DiscountCouponController::class, 'getDiscountCoupons']);
     Route::post('/get-discount-amount', [DiscountCouponController::class, 'getDiscountAmount']);
+
     Route::post('/change-password', [ClientController::class, 'changePassword']);
 
     // terms
-    Route::get('/terms-and-conditions', [TermsController::class, 'getTerms']);
+    // Route::get('/terms-and-conditions', [TermsController::class, 'getTerms']);
 });
 
-// admin basic
+
+/*
+|--------------------------------------------------------------------------
+| Admin Basic / Public APIs
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/get-banner', [BannersController::class, 'getBanner']);
 Route::get('/get-ages', [AdminbasicController::class, 'getAges']);
 Route::get('/get-occupations', [AdminbasicController::class, 'getOccupations']);
@@ -204,4 +247,3 @@ Route::post('/check-dangerous-activity', [AdminbasicController::class, 'checkDan
 
 Route::get('/pet-breeds', [PetBreedController::class, 'index']);
 Route::get('/pet-breeds/{id}', [PetBreedController::class, 'show']);
-

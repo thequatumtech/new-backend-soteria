@@ -72,6 +72,7 @@ class ClientPersonalAccidentInsurance extends Model
             'insurance_companies.company_name',
             'insurance_company_documents.company_stamp',
             'insurance_company_documents.logo',
+            'insurance_company_documents.letterhead',
             'insurance_company_documents.authorized_signature',
             'insurance_companies.id as insurance_company_id',
 
@@ -84,7 +85,9 @@ class ClientPersonalAccidentInsurance extends Model
             'purchase_policy.gross_premium',
             'purchase_policy.plan_name as purchase_plan_name',
             'purchase_policy.policy_plan_limit',
-            'purchase_policy.policy_pdf_url'
+            'purchase_policy.policy_pdf_url',
+            'purchase_policy.id as purchase_policy_id',
+
         )
             ->leftJoin('personal_accident_plans', 'client_personal_accident_insurances.plan_id', '=', 'personal_accident_plans.id')
             ->leftJoin('insurance_companies', 'personal_accident_plans.insurance_company_id', '=', 'insurance_companies.id')

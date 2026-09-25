@@ -72,474 +72,474 @@
 @endsection
 
 @section('content')
-<main class="flex-grow-1 pt-5">
-    <div class="container-fluid">
-        <div class="header d-flex justify-content-between p-3 py-2 align-items-center">
-            <div class="text-white group-title fw-bold">
-                @if(isset($plan))
-                {{__('messages.plans.edit_in_patient_plan')}}
-                @else
-                {{__('messages.plans.add_in_patient_plan')}}
-                @endif
+    <main class="flex-grow-1 pt-5">
+        <div class="container-fluid">
+            <div class="header d-flex justify-content-between p-3 py-2 align-items-center">
+                <div class="text-white group-title fw-bold">
+                    @if(isset($plan))
+                    {{__('messages.plans.edit_in_patient_plan')}}
+                    @else
+                    {{__('messages.plans.add_in_patient_plan')}}
+                    @endif
+                </div>
             </div>
-        </div>
-        <form action="{{route('in_patient_plan.save')}}" id="add_motor_plan" method="post" enctype="multipart/form-data">
-            @csrf
-            <input type="hidden" name="plan_id" value="{{isset($plan)?$plan->id:null}}">
-            <input type="hidden" id="form_type" name="form_type" value="{{isset($plan)?'edit':'add'}}">
-            <div class="body bg-white py-4 px-4 d-flex flex-column gap-3 pb-5">
-                <div class="row p-3" style="color: #92959A;">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
-                                <div>{{__('messages.plans.insurance_company')}}</div>
-                                <select name="insurance_company_id" class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" required>
-                                    <option value="" disabled {{(!old('insurance_company_id') && !isset($plan->insurance_company_id) ? 'selected' : '')}} hidden>--Select--</option>
-                                    @foreach($insurance_companies as $single)
-                                    <option value="{{$single->id}}" {{(old('insurance_company_id') && old('insurance_company_id') == $single->id) ? 'selected':(isset($plan->insurance_company_id) && $plan->insurance_company_id == $single->id? 'selected':'')}}>{{$single->company_name}}</option>
+            <form action="{{route('in_patient_plan.save')}}" id="add_motor_plan" method="post" enctype="multipart/form-data">
+                @csrf
+                <input type="hidden" name="plan_id" value="{{isset($plan) ? $plan->id : null}}">
+                <input type="hidden" id="form_type" name="form_type" value="{{isset($plan) ? 'edit' : 'add'}}">
+                <div class="body bg-white py-4 px-4 d-flex flex-column gap-3 pb-5">
+                    <div class="row p-3" style="color: #92959A;">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                    <div>{{__('messages.plans.insurance_company')}}</div>
+                                    <select name="insurance_company_id" class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" required>
+                                        <option value="" disabled {{(!old('insurance_company_id') && !isset($plan->insurance_company_id) ? 'selected' : '')}} hidden>--Select--</option>
+                                        @foreach($insurance_companies as $single)
+                                        <option value="{{$single->id}}" {{(old('insurance_company_id') && old('insurance_company_id') == $single->id) ? 'selected' : (isset($plan->insurance_company_id) && $plan->insurance_company_id == $single->id ? 'selected' : '')}}>{{$single->company_name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                    <div>{{__('messages.plans.line_of_business')}}</div>
+                                    <input type="text" style="border: none;" disabled value="{{$line_of_businesses}}">
+                                    {{--
+                                    <select name="line_of_business_id" class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" required>
+                                        <option value="" disabled {{(!old('line_of_business_id') && !isset($plan->line_of_business_id) ? 'selected' : '')}} hidden>--Select--</option>
+                                    @foreach($line_of_businesses as $single)
+                                    <option value="{{$single->id}}" {{(old('line_of_business_id') && old('line_of_business_id') == $single->id) ? 'selected':(isset($plan->line_of_business_id) && $plan->line_of_business_id == $single->id? 'selected':'')}}>{{$single->name}}</option>
                                     @endforeach
-                                </select>
-                            </div>
-                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
-                                <div>{{__('messages.plans.line_of_business')}}</div>
-                                <input type="text" style="border: none;" disabled value="{{$line_of_businesses}}">
-                                {{--
-                                <select name="line_of_business_id" class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" required>
-                                    <option value="" disabled {{(!old('line_of_business_id') && !isset($plan->line_of_business_id) ? 'selected' : '')}} hidden>--Select--</option>
-                                @foreach($line_of_businesses as $single)
-                                <option value="{{$single->id}}" {{(old('line_of_business_id') && old('line_of_business_id') == $single->id) ? 'selected':(isset($plan->line_of_business_id) && $plan->line_of_business_id == $single->id? 'selected':'')}}>{{$single->name}}</option>
-                                @endforeach
-                                </select>
-                                --}}
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
-                                <div>{{__('messages.plans.plan_name')}}</div>
-                                <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                    <input type="text" name="plan_name" style="border: none;" required value="{{old('plan_name')?:($plan->plan_name ?? '')}}">
+                                    </select>
+                                    --}}
                                 </div>
                             </div>
-                        </div>
-                        <h3 class="pt-5">{{__('messages.plans.policy_period')}}</h3>
-                        <div class="row">
-                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
-                                <div>{{__('messages.plans.max_days')}}</div>
-                                <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                    <input type="number" id="policy_period" class="form-control number"
-                                        name="policy_period" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" style="border: none;" required max="4745">
+                            <div class="row">
+                                <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                    <div>{{__('messages.plans.plan_name')}}</div>
+                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                        <input type="text" name="plan_name" style="border: none;" required value="{{old('plan_name') ?: ($plan->plan_name ?? '')}}">
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <h3 class="pt-5">{{__('messages.plans.insurance_policy_wording')}}</h3>
-                        <div class="row">
-                            <div class="col-12">
-                                <div>
-                                    {{__('messages.plans.policy_wording_text')}}
+                            <h3 class="pt-5">{{__('messages.plans.policy_period')}}</h3>
+                            <div class="row">
+                                <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                    <div>{{__('messages.plans.max_days')}}</div>
+                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                        <input type="number" id="policy_period" class="form-control number"
+                                            name="policy_period" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" style="border: none;" required max="4745">
+                                    </div>
                                 </div>
-                                <textarea name="insurance_policy_text" class="ceditor" id="insurance_policy_text">{{isset($plan) && !empty($plan->insurance_policy_text) ? $plan->insurance_policy_text : ''}}</textarea>
                             </div>
-                        </div>
-                        <div class="row pt-4 pb-5 g-0 gap-4">
-                            <div class="col-12 col-lg">
-                                <div> {{__('messages.plans.policy_wording_pdf')}} </div>
-                                @if(isset($plan) && $plan->insurance_policy_pdf)
-                                <a id="v_insurance_policy_pdf" href="{{$plan->insurance_policy_pdf}}"
-                                    target="_blank">View</a>
-                                @endif
-                                <div class="card border-0 file-upload h-100 pt-2" style="cursor: pointer;">
-                                    <div class="py-5 shadow1 d-flex flex-column justify-content-center align-items-center gap-3">
-                                        <div>
-                                            <img src="{{asset('img/icon-upload.png')}}">
-                                        </div>
-                                        <input type="file" name="insurance_policy_pdf" id="insurance_policy_pdf" accept="application/pdf">
-                                        <div class="file-margin">
-                                            <label class="custom-file-label text-center" style="color: #ced4da; font-size: 1rem;">{{__('messages.agents.upload')}}</label>
-                                            <label id="insurance_policy_pdf-error" class="error" style="display: none"></label>
+                            <h3 class="pt-5">{{__('messages.plans.insurance_policy_wording')}}</h3>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div>
+                                        {{__('messages.plans.policy_wording_text')}}
+                                    </div>
+                                    <textarea name="insurance_policy_text" class="ceditor" id="insurance_policy_text">{{isset($plan) && !empty($plan->insurance_policy_text) ? $plan->insurance_policy_text : ''}}</textarea>
+                                </div>
+                            </div>
+                            <div class="row pt-4 pb-5 g-0 gap-4">
+                                <div class="col-12 col-lg">
+                                    <div> {{__('messages.plans.policy_wording_pdf')}} </div>
+                                    @if(isset($plan) && $plan->insurance_policy_pdf)
+                                    <a id="v_insurance_policy_pdf" href="{{$plan->insurance_policy_pdf}}"
+                                        target="_blank">View</a>
+                                    @endif
+                                    <div class="card border-0 file-upload h-100 pt-2" style="cursor: pointer;">
+                                        <div class="py-5 shadow1 d-flex flex-column justify-content-center align-items-center gap-3">
+                                            <div>
+                                                <img src="{{asset('img/icon-upload.png')}}">
+                                            </div>
+                                            <input type="file" name="insurance_policy_pdf" id="insurance_policy_pdf" accept="application/pdf">
+                                            <div class="file-margin">
+                                                <label class="custom-file-label text-center" style="color: #ced4da; font-size: 1rem;">{{__('messages.agents.upload')}}</label>
+                                                <label id="insurance_policy_pdf-error" class="error" style="display: none"></label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
-                                <div>{{__('messages.plans.policy_holder_country_restriction')}}</div>
-                                <select name="restricted_country_ids[]" id="restricted_country_ids" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
-                                    @foreach($countries as $single)
-                                    <option value="{{$single->id}}" {{in_array($single->id,old('restricted_country_ids',[]))}}>{{$single->name}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
-                                <div>{{__('messages.plans.policy_holder_city_restriction')}}</div>
-                                <select name="restricted_city_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
-                                    @foreach($cities as $single)
-                                    <option value="{{$single->id}}" {{in_array($single->id,old('restricted_city_ids',[]))}}>{{$single->name}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
-                                <div>{{__('messages.plans.policy_holder_district_restriction')}}</div>
-                                <select name="restricted_district_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
-                                    @foreach($districts as $single)
-                                    <option value="{{$single->id}}" {{in_array($single->id,old('restricted_district_ids',[]))}}>{{$single->name}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
-                                <div>{{__('messages.plans.policy_holder_age_restriction')}}</div>
-                                <select name="restricted_age_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
-                                    @foreach($ages as $single)
-                                    <option value="{{$single->id}}" {{in_array($single->id,old('restricted_age_ids',[]))}}>{{$single->age}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
-                                <div>{{__('messages.plans.policy_holder_occupation_restriction')}}</div>
-                                <select name="restricted_occupation_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
-                                    @foreach($occupations as $single)
-                                    <option value="{{$single->id}}" {{in_array($single->id,old('restricted_occupation_ids',[]))}}>{{$single->name}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
-                                <div>{{__('messages.plans.policy_holder_chronic_restriction')}}</div>
-                                <select name="restricted_chronic_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
-                                    @foreach($chronics as $single)
-                                    <option value="{{$single->id}}" {{in_array($single->id,old('restricted_chronic_ids',[]))}}>{{$single->name}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
-                                <div>{{__('messages.plans.policy_holder_dangerous_activities_restriction')}}</div>
-                                <select name="restricted_dangerous_activities_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
-                                    @foreach($dangerous_activities as $single)
-                                    <option value="{{$single->id}}" {{in_array($single->id,old('restricted_dangerous_activities_ids',[]))}}>{{$single->name}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
-                                <div>{{__('messages.plans.in_patient_deductible')}}</div>
-                                <select name="in_patient_deductibles_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
-                                    @foreach($in_patient_deductibles as $single)
-                                    <option value="{{$single->id}}" {{in_array($single->id,old('in_patient_deductibles_ids',[]))}}>{{$single->name}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
-                                <div>{{__('messages.plans.medical_network')}}</div>
-                                <select name="medical_networks_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
-                                    @foreach($medical_networks as $single)
-                                    <option value="{{$single->id}}" {{in_array($single->id,old('medical_networks_ids',[]))}}>{{$single->name}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <h3 class="pt-5">{{__('messages.plans.in_patient_insurance_limit')}}</h3>
-                        <div class="row">
-                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
-                                <div>{{__('messages.plans.coverage_amount')}}</div>
-                                <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                    <input type="text" name="limit" oninput="this.value = this.value.replace(/[^0-9.]/g, '').split('.').slice(0, 2).join('.');" style="border: none;" required value="{{old('limit')?:($plan->limit ?? '')}}">
+                            <div class="row">
+                                <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                    <div>{{__('messages.plans.policy_holder_country_restriction')}}</div>
+                                    <select name="restricted_country_ids[]" id="restricted_country_ids" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
+                                        @foreach($countries as $single)
+                                        <option value="{{$single->id}}" {{in_array($single->id, old('restricted_country_ids', []))}}>{{$single->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                    <div>{{__('messages.plans.policy_holder_city_restriction')}}</div>
+                                    <select name="restricted_city_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
+                                        @foreach($cities as $single)
+                                        <option value="{{$single->id}}" {{in_array($single->id, old('restricted_city_ids', []))}}>{{$single->name}}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
-                        </div>
+                            <div class="row">
+                                <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                    <div>{{__('messages.plans.policy_holder_district_restriction')}}</div>
+                                    <select name="restricted_district_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
+                                        @foreach($districts as $single)
+                                        <option value="{{$single->id}}" {{in_array($single->id, old('restricted_district_ids', []))}}>{{$single->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                    <div>{{__('messages.plans.policy_holder_age_restriction')}}</div>
+                                    <select name="restricted_age_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
+                                        @foreach($ages as $single)
+                                            <option value="{{$single->id}}" {{in_array($single->id, old('restricted_age_ids', []))}}>{{$single->age}} {{$single->type}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                    <div>{{__('messages.plans.policy_holder_occupation_restriction')}}</div>
+                                    <select name="restricted_occupation_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
+                                        @foreach($occupations as $single)
+                                        <option value="{{$single->id}}" {{in_array($single->id, old('restricted_occupation_ids', []))}}>{{$single->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                    <div>{{__('messages.plans.policy_holder_chronic_restriction')}}</div>
+                                    <select name="restricted_chronic_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
+                                        @foreach($chronics as $single)
+                                        <option value="{{$single->id}}" {{in_array($single->id, old('restricted_chronic_ids', []))}}>{{$single->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                    <div>{{__('messages.plans.policy_holder_dangerous_activities_restriction')}}</div>
+                                    <select name="restricted_dangerous_activities_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
+                                        @foreach($dangerous_activities as $single)
+                                        <option value="{{$single->id}}" {{in_array($single->id, old('restricted_dangerous_activities_ids', []))}}>{{$single->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                    <div>{{__('messages.plans.in_patient_deductible')}}</div>
+                                    <select name="in_patient_deductibles_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
+                                        @foreach($in_patient_deductibles as $single)
+                                        <option value="{{$single->id}}" {{in_array($single->id, old('in_patient_deductibles_ids', []))}}>{{$single->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                    <div>{{__('messages.plans.medical_network')}}</div>
+                                    <select name="medical_networks_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
+                                        @foreach($medical_networks as $single)
+                                        <option value="{{$single->id}}" {{in_array($single->id, old('medical_networks_ids', []))}}>{{$single->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
 
-                        <h3 class="pt-5">{{__('messages.plans.add_policy_covers')}}</h3>
-                        <table class="table-bordered dynamic-table" style="width: 100%;">
-                            <thead>
-                                <tr>
-                                    <th>{{__('messages.plans.name_of_cover')}}</th>
-                                    <th>{{__('messages.plans.limit')}}</th>
-                                    <th></th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr data-id="0">
-                                    <td width="50%">
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="policy_covers[0][cover_name]" style="border: none;" required>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="policy_covers[0][cover_limit]" style="border: none;" required>
-                                        </div>
-                                    </td>
-                                    <td width="5%">
-                                        <button class="btn p-0 m-0 deletebtn" title="Delete"><img src="{{asset('img/icon-delete.png')}}" alt=""></button>
-                                    </td>
-                                    <td rowspan="1" class="add-more-cell">
-                                        <button class="btn add_more_btn" title="Add More">Add More</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <h3 class="pt-5">{{__('messages.plans.in_patient_insurance_limit')}}</h3>
+                            <div class="row">
+                                <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                    <div>{{__('messages.plans.coverage_amount')}}</div>
+                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                        <input type="text" name="limit" oninput="this.value = this.value.replace(/[^0-9.]/g, '').split('.').slice(0, 2).join('.');" style="border: none;" required value="{{old('limit') ?: ($plan->limit ?? '')}}">
+                                    </div>
+                                </div>
+                            </div>
 
-                        <h3 class="pt-5">{{__('messages.plans.add_additional_benefits')}}</h3>
-                        <table class="table-bordered dynamic-table" style="width: 100%;">
-                            <thead>
-                                <tr>
-                                    <th>{{__('messages.plans.name_of_benefit')}}</th>
-                                    <th>{{__('messages.plans.limit')}}</th>
-                                    <th></th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td width="50%">
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="additional_benefits[0][benefit_name]" style="border: none;" required>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="additional_benefits[0][benefit_limit]" style="border: none;" required>
-                                        </div>
-                                    </td>
-                                    <td width="5%">
-                                        <button class="btn p-0 m-0 deletebtn" title="Delete"><img src="{{asset('img/icon-delete.png')}}" alt=""></button>
-                                    </td>
-                                    <td rowspan="1" class="add-more-cell">
-                                        <button class="btn add_more_btn" title="Add More">Add More</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <h3 class="pt-5">{{__('messages.plans.add_policy_covers')}}</h3>
+                            <table class="table-bordered dynamic-table" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>{{__('messages.plans.name_of_cover')}}</th>
+                                        <th>{{__('messages.plans.limit')}}</th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr data-id="0">
+                                        <td width="50%">
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="policy_covers[0][cover_name]" style="border: none;" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="policy_covers[0][cover_limit]" style="border: none;" required>
+                                            </div>
+                                        </td>
+                                        <td width="5%">
+                                            <button class="btn p-0 m-0 deletebtn" title="Delete"><img src="{{asset('img/icon-delete.png')}}" alt=""></button>
+                                        </td>
+                                        <td rowspan="1" class="add-more-cell">
+                                            <button class="btn add_more_btn" title="Add More">Add More</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
-                        <h3 class="pt-5">{{__('messages.plans.pricing_schedule')}}</h3>
-                        <table class="table-bordered dynamic-table" style="width: 100%;">
-                            <thead>
-                                <tr>
-                                    <th colspan="14">{{__('messages.plans.male_pricing_schedule')}}</th>
-                                </tr>
-                                <tr>
-                                    <th width="25%">{{__('messages.plans.age_band')}}</th>
-                                    <th>{{__('messages.plans.vip_class')}}</th>
-                                    <th>{{__('messages.plans.first_class')}}</th>
-                                    <th>{{__('messages.plans.second_class')}}</th>
-                                    <th>{{__('messages.plans.third_class')}}</th>
-                                    <th width="5%"></th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="male_pricing_schedule[0][age_band]" oninput="this.value = this.value.replace(/[^0-9-]/g, '').replace(/(.*?)-(.*?)-.*/, '$1-$2').replace(/^-/, '');" class="age_band" style="border: none;" required>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="male_pricing_schedule[0][vip_class]" style="border: none;" required>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="male_pricing_schedule[0][first_class]" style="border: none;" required>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="male_pricing_schedule[0][second_class]" style="border: none;" required>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="male_pricing_schedule[0][third_class]" style="border: none;" required>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button class="btn p-0 m-0 deletebtn" title="Delete"><img src="{{asset('img/icon-delete.png')}}" alt=""></button>
-                                    </td>
-                                    <td rowspan="1" class="add-more-cell">
-                                        <button class="btn add_more_btn" title="Add More">Add More</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <h3 class="pt-5">{{__('messages.plans.add_additional_benefits')}}</h3>
+                            <table class="table-bordered dynamic-table" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>{{__('messages.plans.name_of_benefit')}}</th>
+                                        <th>{{__('messages.plans.limit')}}</th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td width="50%">
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="additional_benefits[0][benefit_name]" style="border: none;" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="additional_benefits[0][benefit_limit]" style="border: none;" required>
+                                            </div>
+                                        </td>
+                                        <td width="5%">
+                                            <button class="btn p-0 m-0 deletebtn" title="Delete"><img src="{{asset('img/icon-delete.png')}}" alt=""></button>
+                                        </td>
+                                        <td rowspan="1" class="add-more-cell">
+                                            <button class="btn add_more_btn" title="Add More">Add More</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
-                        <br />
-                        <br />
+                            <h3 class="pt-5">{{__('messages.plans.pricing_schedule')}}</h3>
+                            <table class="table-bordered dynamic-table" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th colspan="14">{{__('messages.plans.male_pricing_schedule')}}</th>
+                                    </tr>
+                                    <tr>
+                                        <th width="25%">{{__('messages.plans.age_band')}}</th>
+                                        <th>{{__('messages.plans.vip_class')}}</th>
+                                        <th>{{__('messages.plans.first_class')}}</th>
+                                        <th>{{__('messages.plans.second_class')}}</th>
+                                        <th>{{__('messages.plans.third_class')}}</th>
+                                        <th width="5%"></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="male_pricing_schedule[0][age_band]" oninput="this.value = this.value.replace(/[^0-9-]/g, '').replace(/(.*?)-(.*?)-.*/, '$1-$2').replace(/^-/, '');" class="age_band" style="border: none;" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="male_pricing_schedule[0][vip_class]" style="border: none;" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="male_pricing_schedule[0][first_class]" style="border: none;" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="male_pricing_schedule[0][second_class]" style="border: none;" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="male_pricing_schedule[0][third_class]" style="border: none;" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <button class="btn p-0 m-0 deletebtn" title="Delete"><img src="{{asset('img/icon-delete.png')}}" alt=""></button>
+                                        </td>
+                                        <td rowspan="1" class="add-more-cell">
+                                            <button class="btn add_more_btn" title="Add More">Add More</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
-                        <table class="table-bordered dynamic-table" style="width: 100%;">
-                            <thead>
-                                <tr>
-                                    <th colspan="14">{{__('messages.plans.female_pricing_schedule')}}</th>
-                                </tr>
-                                <tr>
-                                    <th width="25%">{{__('messages.plans.age_band')}}</th>
-                                    <th>{{__('messages.plans.vip_class')}}</th>
-                                    <th>{{__('messages.plans.first_class')}}</th>
-                                    <th>{{__('messages.plans.second_class')}}</th>
-                                    <th>{{__('messages.plans.third_class')}}</th>
-                                    <th width="5%"></th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="female_pricing_schedule[0][age_band]" oninput="this.value = this.value.replace(/[^0-9-]/g, '').replace(/(.*?)-(.*?)-.*/, '$1-$2').replace(/^-/, '');" class="age_band" style="border: none;" required>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="female_pricing_schedule[0][vip_class]" style="border: none;" required>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="female_pricing_schedule[0][first_class]" style="border: none;" required>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="female_pricing_schedule[0][second_class]" style="border: none;" required>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="female_pricing_schedule[0][third_class]" style="border: none;" required>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button class="btn p-0 m-0 deletebtn" title="Delete"><img src="{{asset('img/icon-delete.png')}}" alt=""></button>
-                                    </td>
-                                    <td rowspan="1" class="add-more-cell">
-                                        <button class="btn add_more_btn" title="Add More">Add More</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <br />
+                            <br />
 
-                        <h3 class="pt-5">{{__('messages.plans.premium_calculations')}}</h3>
-                        <table class="table-bordered" style="width: 100%;">
-                            <thead>
-                                <tr>
-                                    <th width="20%">{{__('messages.plans.plan_name')}}</th>
-                                    <th>{{__('messages.plans.limit')}}</th>
-                                    {{-- <th>{{__('messages.plans.net_premium')}}</th> --}}
-                                    <th>{{__('messages.plans.fees')}}</th>
-                                    <th>{{__('messages.plans.stamps')}}</th>
-                                    <th>{{__('messages.plans.sales_tax')}}</th>
-                                    <th>{{__('messages.plans.cbj')}}</th>
-                                    <th>{{ __('messages.plans.sales_tax_on_cbj') }}</th>
-                                    {{-- <th>{{__('messages.plans.gross_premium')}}</th> --}}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" id="calc_plan_name" style="border: none;" readonly>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" id="calc_limit" style="border: none;" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" readonly class="positive_number_only_2_decimal">
-                                        </div>
-                                    </td>
-                                    {{-- <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="net_premium" id="net_premium" class="calc_gross_premium positive_number_only_2_decimal" style="border: none;" readonly required>
-                                        </div>
-                                    </td> --}}
-                                    <input type="hidden" name="net_premium" id="net_premium" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" class="calc_gross_premium" style="border: none;">
+                            <table class="table-bordered dynamic-table" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th colspan="14">{{__('messages.plans.female_pricing_schedule')}}</th>
+                                    </tr>
+                                    <tr>
+                                        <th width="25%">{{__('messages.plans.age_band')}}</th>
+                                        <th>{{__('messages.plans.vip_class')}}</th>
+                                        <th>{{__('messages.plans.first_class')}}</th>
+                                        <th>{{__('messages.plans.second_class')}}</th>
+                                        <th>{{__('messages.plans.third_class')}}</th>
+                                        <th width="5%"></th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="female_pricing_schedule[0][age_band]" oninput="this.value = this.value.replace(/[^0-9-]/g, '').replace(/(.*?)-(.*?)-.*/, '$1-$2').replace(/^-/, '');" class="age_band" style="border: none;" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="female_pricing_schedule[0][vip_class]" style="border: none;" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="female_pricing_schedule[0][first_class]" style="border: none;" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="female_pricing_schedule[0][second_class]" style="border: none;" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="female_pricing_schedule[0][third_class]" style="border: none;" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <button class="btn p-0 m-0 deletebtn" title="Delete"><img src="{{asset('img/icon-delete.png')}}" alt=""></button>
+                                        </td>
+                                        <td rowspan="1" class="add-more-cell">
+                                            <button class="btn add_more_btn" title="Add More">Add More</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="fees" id="fees" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" class="calc_gross_premium positive_number_only_2_decimal" style="border: none;" required>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="stamps" id="stamps" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" class="calc_gross_premium positive_number_only_2_decimal" style="border: none;" required>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="sales_tax" id="sales_tax" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" class="calc_gross_premium positive_number_only_2_decimal" style="border: none;" required>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="cbj" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" style="border: none;" class="calc_gross_premium positive_number_only_2_decimal" id="cbj" required>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="salextaxcbj" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" style="border: none;" class="calc_gross_premium positive_number_only_2_decimal" id="cbj_sales_tax" required>
-                                        </div>
-                                    </td>
-                                    <input type="hidden" name="gross_premium" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" id="gross_premium" style="border: none;">
+                            <h3 class="pt-5">{{__('messages.plans.premium_calculations')}}</h3>
+                            <table class="table-bordered" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th width="20%">{{__('messages.plans.plan_name')}}</th>
+                                        <th>{{__('messages.plans.limit')}}</th>
+                                        {{-- <th>{{__('messages.plans.net_premium')}}</th> --}}
+                                        <th>{{__('messages.plans.fees')}}</th>
+                                        <th>{{__('messages.plans.stamps')}}</th>
+                                        <th>{{__('messages.plans.sales_tax')}}</th>
+                                        <th>{{__('messages.plans.cbj')}}</th>
+                                        <th>{{ __('messages.plans.sales_tax_on_cbj') }}</th>
+                                        {{-- <th>{{__('messages.plans.gross_premium')}}</th> --}}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" id="calc_plan_name" style="border: none;" readonly>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" id="calc_limit" style="border: none;" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" readonly class="positive_number_only_2_decimal">
+                                            </div>
+                                        </td>
+                                        {{-- <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="net_premium" id="net_premium" class="calc_gross_premium positive_number_only_2_decimal" style="border: none;" readonly required>
+                                            </div>
+                                        </td> --}}
+                                        <input type="hidden" name="net_premium" id="net_premium" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" class="calc_gross_premium" style="border: none;">
 
-                                    {{-- <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="gross_premium" id="gross_premium" style="border: none;" readonly required class="positive_number_only_2_decimal">
-                                        </div>
-                                    </td> --}}
-                                </tr>
-                            </tbody>
-                        </table>
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="fees" id="fees" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" class="calc_gross_premium positive_number_only_2_decimal" style="border: none;" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="stamps" id="stamps" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" class="calc_gross_premium positive_number_only_2_decimal" style="border: none;" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="sales_tax" id="sales_tax" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" class="calc_gross_premium positive_number_only_2_decimal" style="border: none;" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="cbj" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" style="border: none;" class="calc_gross_premium positive_number_only_2_decimal" id="cbj" required>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="salextaxcbj" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" style="border: none;" class="calc_gross_premium positive_number_only_2_decimal" id="cbj_sales_tax" required>
+                                            </div>
+                                        </td>
+                                        <input type="hidden" name="gross_premium" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" id="gross_premium" style="border: none;">
 
-                        <h3 class="pt-5">{{__('messages.plans.commissions_calculations')}}</h3>
-                        <table class="table-bordered" style="width: 100%;">
-                            <thead>
-                                <tr>
-                                    {{-- <th>{{__('messages.plans.net_premium')}}</th> --}}
-                                    <th>{{__('messages.plans.commission_percentage')}}</th>
-                                    {{-- <th>{{__('messages.plans.commission_amount')}}</th> --}}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    {{-- <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" id="net_premium1" style="border: none;" readonly>
-                                        </div>
-                                    </td> --}}
-                                    <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="commission_percentage" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" id="commission_percentage" style="border: none;" class="positive_number_only_2_decimal" required>
-                                        </div>
-                                    </td>
-                                    {{-- <td>
-                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="commission_amount" id="commission_amount" style="border: none;" required readonly>
-                                        </div>
-                                    </td> --}}
-                                </tr>
-                            </tbody>
-                        </table>
+                                        {{-- <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="gross_premium" id="gross_premium" style="border: none;" readonly required class="positive_number_only_2_decimal">
+                                            </div>
+                                        </td> --}}
+                                    </tr>
+                                </tbody>
+                            </table>
 
-                        <div class="row pt-5">
-                            <div class="col-12 col-lg-9"></div>
-                            <div class="col-12 col-lg-3">
-                                <div class="pt-4 " style="border: none;">
-                                    <button type="submit" class="btn rounded-1 w-100 text-white opacity-50 p-2 submit-btn" style="background-color: #EF7C00;">{{isset($plan)? __('messages.clients.save') : __('messages.clients.add')}} </button>
+                            <h3 class="pt-5">{{__('messages.plans.commissions_calculations')}}</h3>
+                            <table class="table-bordered" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        {{-- <th>{{__('messages.plans.net_premium')}}</th> --}}
+                                        <th>{{__('messages.plans.commission_percentage')}}</th>
+                                        {{-- <th>{{__('messages.plans.commission_amount')}}</th> --}}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        {{-- <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" id="net_premium1" style="border: none;" readonly>
+                                            </div>
+                                        </td> --}}
+                                        <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="commission_percentage" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" id="commission_percentage" style="border: none;" class="positive_number_only_2_decimal" required>
+                                            </div>
+                                        </td>
+                                        {{-- <td>
+                                            <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                                <input type="text" name="commission_amount" id="commission_amount" style="border: none;" required readonly>
+                                            </div>
+                                        </td> --}}
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="row pt-5">
+                                <div class="col-12 col-lg-9"></div>
+                                <div class="col-12 col-lg-3">
+                                    <div class="pt-4 " style="border: none;">
+                                        <button type="submit" class="btn rounded-1 w-100 text-white opacity-50 p-2 submit-btn" style="background-color: #EF7C00;">{{isset($plan) ? __('messages.clients.save') : __('messages.clients.add')}} </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </form>
-    </div>
-</main>
+            </form>
+        </div>
+    </main>
 
 @endsection
 

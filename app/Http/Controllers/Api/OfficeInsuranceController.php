@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Models\Client;
 use Carbon\Carbon;
 use App\Models\Currency;
+use App\Helpers\InsurancePlanHelper;
 
 class OfficeInsuranceController extends Controller
 {
@@ -21,6 +22,7 @@ class OfficeInsuranceController extends Controller
 
         return is_numeric($clean) ? (float)$clean : 0;
     }
+
     private function normalizeRestricted($value)
     {
         if (!$value) return [];
@@ -36,15 +38,18 @@ class OfficeInsuranceController extends Controller
         if (is_numeric($value)) {
             return [(int)$value];
         }
+
         return [];
     }
 
     private function restrictionError($type)
     {
-        $message = "You are not eligible for this plan due to {$type} restriction.";
+        $message = __('messages.api.office_restriction_message', [
+            'type' => __('messages.api.office_restriction_' . $type)
+        ]);
 
         if ($type === 'country') {
-            $message .= ' Please contact us for further information.';
+            $message .= __('messages.api.country_contact');
         }
 
         return response()->json([
@@ -54,6 +59,7 @@ class OfficeInsuranceController extends Controller
             'data' => []
         ], 422);
     }
+
     private function normalizeDate($date)
     {
         if (!$date) return null;
@@ -64,6 +70,7 @@ class OfficeInsuranceController extends Controller
 
         return $date;
     }
+
     public function storeOfficeInsurance(Request $request)
     {
         try {
@@ -133,11 +140,12 @@ class OfficeInsuranceController extends Controller
 
             if ($data['country_id']) {
                 $country = \App\Models\Country::find($data['country_id']);
+
                 if (!$country) {
                     return response()->json([
                         'status' => false,
                         'status_code' => 422,
-                        'message' => 'Selected country does not exist.',
+                        'message' => __('messages.api.country_not_exist'),
                         'data' => []
                     ], 422);
                 }
@@ -152,7 +160,7 @@ class OfficeInsuranceController extends Controller
                     return response()->json([
                         'status' => false,
                         'status_code' => 422,
-                        'message' => 'Selected city does not belong to the selected country.',
+                        'message' => __('messages.api.city_not_belong_country'),
                         'data' => []
                     ], 422);
                 }
@@ -167,7 +175,7 @@ class OfficeInsuranceController extends Controller
                     return response()->json([
                         'status' => false,
                         'status_code' => 422,
-                        'message' => 'Selected district does not belong to the selected city.',
+                        'message' => __('messages.api.district_not_belong_city'),
                         'data' => []
                     ], 422);
                 }
@@ -179,7 +187,7 @@ class OfficeInsuranceController extends Controller
                 return response()->json([
                     'status' => false,
                     'status_code' => 422,
-                    'message' => 'Selected Office Insurance Plan does not exist.',
+                    'message' => __('messages.api.office_plan_not_exist'),
                     'data' => []
                 ], 422);
             }
@@ -187,11 +195,12 @@ class OfficeInsuranceController extends Controller
             $data['insurance_company_id'] = $plan_data->insurance_company_id;
 
             $client = Client::find($request->user_id);
+
             if (!$client) {
                 return response()->json([
                     'status' => false,
                     'status_code' => 422,
-                    'message' => 'Client not found.',
+                    'message' => __('messages.api.client_not_found'),
                     'data' => []
                 ], 422);
             }
@@ -207,6 +216,8 @@ class OfficeInsuranceController extends Controller
             $restrictedCities    = $this->normalizeRestricted($plan_data->restricted_city_ids);
             $restrictedDistricts = $this->normalizeRestricted($plan_data->restricted_district_ids);
             $restrictedAges      = $this->normalizeRestricted($plan_data->restricted_age_ids);
+            $restrictedProtectionSystems = $this->normalizeRestricted($plan_data->restricted_protection_system_ids);
+            $restrictedOfficeAges = $this->normalizeRestricted($plan_data->restricted_office_age_ids);
 
             if ($clientCountry && in_array($clientCountry, $restrictedCountries)) {
                 return $this->restrictionError('country');
@@ -225,6 +236,7 @@ class OfficeInsuranceController extends Controller
 
                 if (str_contains($range, '-')) {
                     [$min, $max] = explode('-', $range);
+
                     if ($clientAge >= (int)$min && $clientAge <= (int)$max) {
                         return $this->restrictionError('age');
                     }
@@ -234,12 +246,60 @@ class OfficeInsuranceController extends Controller
                     }
                 }
             }
+            if (!empty($restrictedProtectionSystems) && $data['protection_system']) {
+                $clientProtectionSystems = $this->normalizeRestricted($data['protection_system']);
 
+                $hasMatch = !empty(array_intersect(
+                    array_map('intval', $clientProtectionSystems),
+                    array_map('intval', $restrictedProtectionSystems)
+                ));
+
+                if ($hasMatch) {
+                    return $this->restrictionError('protection_system');
+                }
+            }
+            // if (!empty($restrictedOfficeAges) && !empty($data['age_of_apartment'])) {
+            //     $clientOfficeAges = $this->normalizeRestricted($data['age_of_apartment']);
+
+            //     $hasMatch = !empty(array_intersect(
+            //         array_map('intval', $clientOfficeAges),
+            //         array_map('intval', $restrictedOfficeAges)
+            //     ));
+
+            //     if ($hasMatch) {
+            //         return $this->restrictionError('office_age');
+            //     }
+            // }
+            if (!empty($restrictedOfficeAges) && isset($data['age_of_apartment']) && $data['age_of_apartment'] !== '') {
+                $clientOfficeAges = array_map('intval', $this->normalizeRestricted($data['age_of_apartment']));
+
+                foreach ($restrictedOfficeAges as $range) {
+                    $range = str_replace(' ', '', (string) $range);
+
+                    foreach ($clientOfficeAges as $officeAge) {
+                        if (str_contains($range, '-')) {
+                            // Range like "10-20" → block if inside the range
+                            [$min, $max] = explode('-', $range);
+                            if ($officeAge >= (int) $min && $officeAge <= (int) $max) {
+                                return $this->restrictionError('office_age');
+                            }
+                        } else {
+                            // Single value like "20" or "20+" → block 20 and above
+                            if ($officeAge >= (int) rtrim($range, '+')) {
+                                return $this->restrictionError('office_age');
+                            }
+                        }
+                    }
+                }
+            }
             $existingPolicy = PurchasePolicy::find($request->purchase_id ?? 0);
 
             if ($existingPolicy) {
                 $office = ClientOfficeInsurance::find($existingPolicy->policy_id);
-                if ($office) $office->update($data);
+
+                if ($office) {
+                    $office->update($data);
+                }
 
                 $data['purchase_id'] = $existingPolicy->id;
                 $data['inception_date'] = $data['effective_date'];
@@ -262,7 +322,10 @@ class OfficeInsuranceController extends Controller
             $data = ClientOfficeInsurance::getOfficeInsuranceDetails($data['policy_id']);
 
             $directory = public_path('insurance_pdfs/office_policy');
-            if (!file_exists($directory)) mkdir($directory, 0755, true);
+
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+            }
 
             $filename = uniqid() . '_policy_' . $office->id . '.pdf';
             $path = $directory . '/' . $filename;
@@ -293,7 +356,12 @@ class OfficeInsuranceController extends Controller
             $cbjSalesTaxAmount = ($cbjContribution * $cbjSalesTaxPercentage) / 100;
 
             // Total Gross Premium
-            $grossPremium = $net_premium + $issuanceFees + $stampAmount + $salesTaxAmount + $cbjContribution + $cbjSalesTaxAmount;
+            $grossPremium = $net_premium
+                + $issuanceFees
+                + $stampAmount
+                + $salesTaxAmount
+                + $cbjContribution
+                + $cbjSalesTaxAmount;
 
             $purchase['net_premium']       = $net_premium;
             $purchase['fees']              = $issuanceFees;
@@ -310,15 +378,27 @@ class OfficeInsuranceController extends Controller
             $purchase['policy_plan_limit']     = $policy_limit;
             $purchase['insurance_company_id']  = $data->insurance_company_id;
             $purchase['inception_date']        = $data->effective_date;
-            $purchase['expiry_date']           = $data->expiry_date;
+            $purchase['expiry_date']            = $data->expiry_date;
             $purchase['commission_percentage'] = $data->commission_percentage ?? $plan_data->commission_percentage;
             $purchase['policy_pdf_url']        = $path;
 
             PurchasePolicy::updatePurchasePolicy($purchase);
+
             $data->purchase_id = $office->id;
+            $data->purchase_policy_id = $office->id;
 
             $client = Client::with('country.currency')->find($request->user_id);
-            $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
+
+            // $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
+            $insuranceCompany = $plan_data->insurance_company;
+
+            // Use insurance company's currency first
+            if ($insuranceCompany && $insuranceCompany->currency) {
+                $abbr = $insuranceCompany->currency->abbreviation;
+            } else {
+                // Fallback to client's country currency
+                $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
+            }
 
             $pdf = Pdf::loadView('pdf.office_policy', [
                 'data' => $data,
@@ -326,10 +406,10 @@ class OfficeInsuranceController extends Controller
                 'plan' => $plan_data,
                 'purchase' => PurchasePolicy::where('id', $office->id)->first()
             ]);
+
             $pdf->save($path);
 
             $data['url'] = url('insurance_pdfs/office_policy/' . $filename);
-
 
             $data->net_premium       = number_format($purchase['net_premium'], 2) . ' ' . $abbr;
             $data->fees              = number_format($purchase['fees'], 2) . ' ' . $abbr;
@@ -343,7 +423,7 @@ class OfficeInsuranceController extends Controller
             return response()->json([
                 'status' => true,
                 'status_code' => 200,
-                'message' => 'Office Insurance Plan added successfully',
+                'message' => __('messages.api.add_office_insurance_plan_successfully'),
                 'data' => $data
             ]);
         } catch (\Exception $e) {
@@ -359,27 +439,46 @@ class OfficeInsuranceController extends Controller
     public function getOfficeInsurancePlan(Request $request)
     {
         try {
-            $data = OfficePlan::with('policy_covers', 'insurance_company')
-                ->whereHas('insurance_company', function ($q) {
-                    $q->whereNull('deleted_at');
-                })
-                ->where('plan_name', 'LIKE', '%' . $request->limit . '%')
-                ->get();
+
+            $query = OfficePlan::with([
+                'policy_covers',
+                'insurance_company',
+                'insurance_company.currency'
+            ]);
+
+            // Filter according to client's currency
+            $query = InsurancePlanHelper::filterByClientCurrency(
+                $query,
+                $request->user_id
+            );
+
+            // Filter by OfficePlan limit
+            if ($request->filled('limit')) {
+                $query->where('plan_name', $request->limit);
+            }
+
+            $data = $query->get();
 
             $data->transform(function ($item) {
                 if (!empty($item->insurance_policy_pdf)) {
-                    $item->insurance_policy_pdf = url('uploads/insurance_plans/' . $item->id . '/' . $item->insurance_policy_pdf);
+                    $item->insurance_policy_pdf = url(
+                        'uploads/insurance_plans/' . $item->id . '/' . $item->insurance_policy_pdf
+                    );
                 }
+
                 if (!empty($item->insurance_company->privacy_policy)) {
-                    $item->insurance_company->privacy_policy = url('insurance/' . $item->insurance_company->id . '/' . $item->insurance_company->privacy_policy);
+                    $item->insurance_company->privacy_policy = url(
+                        'insurance/' . $item->insurance_company->id . '/' . $item->insurance_company->privacy_policy
+                    );
                 }
+
                 return $item;
             });
 
             return response()->json([
                 'status' => true,
                 'status_code' => 200,
-                'message' => 'Get Office Insurance Plan successfully',
+                'message' => __('messages.api.get_office_insurance_plan_successfully'),
                 'data' => $data
             ]);
         } catch (\Exception $e) {

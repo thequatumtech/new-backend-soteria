@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use App\Models\Client;
 use Carbon\Carbon;
 use App\Models\Currency;
+use App\Models\InsuranceCompany;
+use App\Helpers\InsurancePlanHelper;
 
 class HomeInsuranceController extends Controller
 {
@@ -21,6 +23,7 @@ class HomeInsuranceController extends Controller
 
         return is_numeric($clean) ? (float)$clean : 0;
     }
+
     private function normalizeRestricted($value)
     {
         if (!$value) return [];
@@ -36,15 +39,18 @@ class HomeInsuranceController extends Controller
         if (is_numeric($value)) {
             return [(int)$value];
         }
+
         return [];
     }
 
     private function restrictionError($type)
     {
-        $message = "You are not eligible for this plan due to {$type} restriction.";
+        $message = __('messages.api.home_restriction_message', [
+            'type' => __('messages.api.home_restriction_' . $type)
+        ]);
 
         if ($type === 'country') {
-            $message .= ' Please contact us for further information.';
+            $message .= __('messages.api.country_contact');
         }
 
         return response()->json([
@@ -54,6 +60,7 @@ class HomeInsuranceController extends Controller
             'data' => []
         ], 422);
     }
+
     private function normalizeDate($date)
     {
         if (!$date) return null;
@@ -103,6 +110,7 @@ class HomeInsuranceController extends Controller
                 'company_declined_to_issue' => 'nullable',
                 'claims_accidents_past' => 'nullable',
                 'protection_system' => 'nullable',
+                'home_age' => 'nullable',
                 'insurance_limit' => 'nullable',
                 'plan_id' => 'nullable',
                 'effective_date' => 'nullable',
@@ -116,13 +124,15 @@ class HomeInsuranceController extends Controller
             if (isset($data['birth_date'])) {
                 $data['birth_date'] = $this->normalizeDate($data['birth_date']);
             }
+
             if ($data['country_id']) {
                 $country = \App\Models\Country::find($data['country_id']);
+
                 if (!$country) {
                     return response()->json([
                         'status' => false,
                         'status_code' => 422,
-                        'message' => 'Selected country does not exist.',
+                        'message' => __('messages.api.country_not_exist'),
                         'data' => []
                     ], 422);
                 }
@@ -137,7 +147,7 @@ class HomeInsuranceController extends Controller
                     return response()->json([
                         'status' => false,
                         'status_code' => 422,
-                        'message' => 'Selected city does not belong to the selected country.',
+                        'message' => __('messages.api.city_not_belong_country'),
                         'data' => []
                     ], 422);
                 }
@@ -152,23 +162,22 @@ class HomeInsuranceController extends Controller
                     return response()->json([
                         'status' => false,
                         'status_code' => 422,
-                        'message' => 'Selected district does not belong to the selected city.',
+                        'message' => __('messages.api.district_not_belong_city'),
                         'data' => []
                     ], 422);
                 }
             }
 
-
             $plan_data = HomePlan::find($data['plan_id']);
             $data['insurance_company_id'] = $plan_data->insurance_company_id;
 
-
             $client = Client::find($request->user_id);
+
             if (!$client) {
                 return response()->json([
                     'status' => false,
                     'status_code' => 422,
-                    'message' => 'Client not found.',
+                    'message' => __('messages.api.client_not_found'),
                     'data' => []
                 ], 422);
             }
@@ -184,6 +193,8 @@ class HomeInsuranceController extends Controller
             $restrictedCities    = $this->normalizeRestricted($plan_data->restricted_city_ids);
             $restrictedDistricts = $this->normalizeRestricted($plan_data->restricted_district_ids);
             $restrictedAges      = $this->normalizeRestricted($plan_data->restricted_age_ids);
+            $restrictedProtectionSystems = $this->normalizeRestricted($plan_data->restricted_protection_system_ids);
+            $restrictedHomeAges = $this->normalizeRestricted($plan_data->restricted_home_age_ids);
 
             if ($clientCountry && in_array($clientCountry, $restrictedCountries)) {
                 return $this->restrictionError('country');
@@ -202,6 +213,7 @@ class HomeInsuranceController extends Controller
 
                 if (str_contains($range, '-')) {
                     [$min, $max] = explode('-', $range);
+
                     if ($clientAge >= (int)$min && $clientAge <= (int)$max) {
                         return $this->restrictionError('age');
                     }
@@ -211,8 +223,52 @@ class HomeInsuranceController extends Controller
                     }
                 }
             }
+            if (!empty($restrictedProtectionSystems) && $data['protection_system']) {
+                $clientProtectionSystems = $this->normalizeRestricted($data['protection_system']);
 
+                $hasMatch = !empty(array_intersect(
+                    array_map('intval', $clientProtectionSystems),
+                    array_map('intval', $restrictedProtectionSystems)
+                ));
 
+                if ($hasMatch) {
+                    return $this->restrictionError('protection_system');
+                }
+            }
+            // if (!empty($restrictedHomeAges) && !empty($data['home_age'])) {
+            //     $clientHomeAges = $this->normalizeRestricted($data['home_age']);
+
+            //     $hasMatch = !empty(array_intersect(
+            //         array_map('intval', $clientHomeAges),
+            //         array_map('intval', $restrictedHomeAges)
+            //     ));
+
+            //     if ($hasMatch) {
+            //         return $this->restrictionError('home_age');
+            //     }
+            // }
+            if (!empty($restrictedHomeAges) && isset($data['home_age']) && $data['home_age'] !== '') {
+                    $clientHomeAges = array_map('intval', $this->normalizeRestricted($data['home_age']));
+
+                    foreach ($restrictedHomeAges as $range) {
+                        $range = str_replace(' ', '', (string) $range);
+
+                        foreach ($clientHomeAges as $homeAge) {
+                            if (str_contains($range, '-')) {
+                                // Range like "10-20" → block if inside the range
+                                [$min, $max] = explode('-', $range);
+                                if ($homeAge >= (int) $min && $homeAge <= (int) $max) {
+                                    return $this->restrictionError('home_age');
+                                }
+                            } else {
+                                // Single value like "20" or "20+" → block 20 and above
+                                if ($homeAge >= (int) rtrim($range, '+')) {
+                                    return $this->restrictionError('home_age');
+                                }
+                            }
+                        }
+                    }
+                }
             $existingHome = PurchasePolicy::find($request->purchase_id ?? 0);
 
             if ($existingHome) {
@@ -245,6 +301,7 @@ class HomeInsuranceController extends Controller
             $data = ClientHomeInsurance::getHomeInsuranceDetails($data['policy_id']);
 
             $directory = public_path('insurance_pdfs/home_policy');
+
             if (!file_exists($directory)) {
                 mkdir($directory, 0755, true);
             }
@@ -288,24 +345,42 @@ class HomeInsuranceController extends Controller
             $purchase['sales_tax_cbj']     = $cbjSalesTaxAmount;
             $purchase['gross_premium']     = $grossPremium;
             $purchase['commission_amount'] = ($plan_data->commission_percentage ?? 0) / 100 * $net_premium;
-            $purchase['purchase_id']          = $home->id;
-            $purchase['plan_id']              = $data->plan_id;
-            $purchase['plan_name']            = $plan_data->plan_name;
-            $purchase['policy_plan_limit']    = $policy_limit;
+            $purchase['purchase_id']       = $home->id;
+            $purchase['plan_id']           = $data->plan_id;
+            $purchase['plan_name']         = $plan_data->plan_name;
+            $purchase['policy_plan_limit'] = $policy_limit;
             $purchase['insurance_company_id'] = $data->insurance_company_id;
-            $purchase['inception_date']       = $data->effective_date;
-            $purchase['expiry_date']          = $data->expiry_date;
+            $purchase['inception_date']    = $data->effective_date;
+            $purchase['expiry_date']       = $data->expiry_date;
             $purchase['commission_percentage'] = $data->commission_percentage;
-            $purchase['policy_pdf_url']       = $path;
+            $purchase['policy_pdf_url']    = $path;
 
             PurchasePolicy::updatePurchasePolicy($purchase);
-            $plan = HomePlan::with('policy_covers')->find($plan_data->id);
+
+            // $plan = HomePlan::with('policy_covers')->find($plan_data->id);
+            $plan = HomePlan::with([
+                'policy_covers',
+                'insurance_company.currency'
+            ])->find($plan_data->id);
+
             $data->purchase_id = $home->id;
+            $data->purchase_policy_id = $home->id;
 
             $purchaseData = PurchasePolicy::where('id', $home->id)->first();
 
+            // $client = Client::with('country.currency')->find($request->user_id);
+            // $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
             $client = Client::with('country.currency')->find($request->user_id);
-            $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
+
+            // Get insurance company currency first
+            $insuranceCompany = $plan->insurance_company;
+
+            if ($insuranceCompany && $insuranceCompany->currency) {
+                $abbr = $insuranceCompany->currency->abbreviation;
+            } else {
+                // Fallback to client's country currency
+                $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
+            }
 
             $pdf = Pdf::loadView('pdf/home_policy', [
                 'data' => $data,
@@ -314,13 +389,10 @@ class HomeInsuranceController extends Controller
                 'abbr' => $abbr
             ]);
 
-
             $pdf->save($path);
 
             $url = url('insurance_pdfs/home_policy/' . $filename);
             $data['url'] = $url;
-
-
 
             $data->net_premium       = number_format($purchase['net_premium'], 2) . ' ' . $abbr;
             $data->fees              = number_format($purchase['fees'], 2) . ' ' . $abbr;
@@ -334,7 +406,7 @@ class HomeInsuranceController extends Controller
             return response()->json([
                 'status' => true,
                 'status_code' => 200,
-                'message' => 'Add Home Insurance Plan successfully',
+                'message' => __('messages.api.add_home_insurance_plan_successfully'),
                 'data' => $data
             ]);
         } catch (\Exception $e) {
@@ -347,34 +419,175 @@ class HomeInsuranceController extends Controller
         }
     }
 
+    // public function getHomeInsurancePlan(Request $request)
+    // {
+    //     try {
+    //         // $data = HomePlan::with('policy_covers', 'insurance_company')
+    //         //     ->whereHas('insurance_company', function ($q) {
+    //         //         $q->whereNull('deleted_at');
+    //         //     })
+    //         //     ->where('plan_name', 'LIKE', '%' . $request->limit . '%')
+    //         //     ->get();
+    //          $query = HomePlan::with([
+    //             'policy_covers',
+    //             'insurance_company',
+    //             'insurance_company.currency'
+    //         ]);
+
+    //         // Filter according to client's currency
+    //         $query = InsurancePlanHelper::filterByClientCurrency(
+    //             $query,
+    //             $request->user_id
+    //         );
+
+    //         // Filter by HomePlan limit if supplied
+    //         if ($request->filled('limit')) {
+    //             $query->where('limit', $request->limit);
+    //         }
+
+    //         $data = $query->get();
+
+    //         if ($data->isEmpty()) {
+    //             // Only show "no plans for your country" when the result is empty
+    //             // due to the country/currency filter — not because of a limit mismatch.
+    //             // Check if any plans exist for this client's country (ignoring limit).
+    //             if ($request->filled('limit')) {
+    //                 $countryQuery = HomePlan::whereHas('insurance_company', function ($q) {
+    //                     $q->whereNull('deleted_at');
+    //                 });
+
+    //                 InsurancePlanHelper::filterByClientCurrency($countryQuery, $request->user_id);
+    //                 $plansExistForCountry = $countryQuery->exists();
+
+    //                 if ($plansExistForCountry) {
+    //                     // Plans exist for the country but none match the given limit — return empty normally.
+    //                     return response()->json([
+    //                         'status'      => false,
+    //                         'status_code' => 404,
+    //                         'message'     => 'No home insurance plans are available for your country at this time. Please contact us for further information.',
+    //                         'data'        => []
+    //                     ], 404);
+    //                 }
+    //             }
+
+    //         }
+
+    //         $data->transform(function ($item) {
+    //             if (!empty($item->insurance_policy_pdf)) {
+    //                 $item->insurance_policy_pdf = url('uploads/insurance_plans/' . $item->id . '/' . $item->insurance_policy_pdf);
+    //             }
+    //             if (!empty($item->insurance_company->privacy_policy)) {
+    //                 $item->insurance_company->privacy_policy = url('insurance/' . $item->insurance_company->id . '/' . $item->insurance_company->privacy_policy);
+    //             }
+    //             return $item;
+    //         });
+
+    //         return response()->json([
+    //             'status' => true,
+    //             'status_code' => 200,
+    //             'message' => 'Get Home Insurance Plan successfully',
+    //             'data' => $data,
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'status' => false,
+    //             'status_code' => 500,
+    //             'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+    //             'data' => []
+    //         ]);
+    //     }
+    // }
 
     public function getHomeInsurancePlan(Request $request)
     {
         try {
-            $data = HomePlan::with('policy_covers', 'insurance_company')
+            $query = HomePlan::with([
+                'policy_covers',
+                'insurance_company',
+                'insurance_company.currency'
+            ]);
+
+            // Filter according to client's currency
+            $query = InsurancePlanHelper::filterByClientCurrency(
+                $query,
+                $request->user_id
+            );
+
+            // Filter by HomePlan limit if supplied
+            // if ($request->filled('limit')) {
+            //     $query->where('plan_name', 'LIKE', '%' . $request->limit . '%');
+            // }
+            if ($request->filled('limit')) {
+                $query->where('plan_name', $request->limit);
+            }
+
+            // Log the request parameters
+            \Log::info('Home Insurance Request Params: ', $request->all());
+            \Log::info('Home Insurance Limit Value: ' . $request->limit . ' | Type: ' . gettype($request->limit));
+
+            // Log the SQL query and bindings before execution
+            $sql = vsprintf(
+                str_replace('?', '%s', $query->toSql()),
+                array_map(fn($binding) => is_string($binding) ? "'$binding'" : $binding, $query->getBindings())
+            );
+            \Log::info('Home Insurance Query SQL: ' . $sql);
+
+            $data = $query->get();
+
+            // Log the retrieved data count
+            \Log::info('Home Insurance Raw Count: ' . $data->count());
+            \Log::info('Home Insurance Data: ', $data->toArray());
+
+            // Log all available plans without limit filter to see what exists
+            $allPlans = HomePlan::with(['insurance_company'])
                 ->whereHas('insurance_company', function ($q) {
-                    $q->whereNull('deleted_at');
+                    $q->whereNull('deleted_at')->where('currency_id', 1);
                 })
-                ->where('plan_name', 'LIKE', '%' . $request->limit . '%')
-                ->get();
+                ->get(['id', 'limit', 'plan_name']);
+
+            \Log::info('All Available Plans (id, limit, plan_name): ', $allPlans->toArray());
+
+            if ($data->isEmpty()) {
+                if ($request->filled('limit')) {
+                    $countryQuery = HomePlan::whereHas('insurance_company', function ($q) {
+                        $q->whereNull('deleted_at');
+                    });
+
+                    InsurancePlanHelper::filterByClientCurrency($countryQuery, $request->user_id);
+                    $plansExistForCountry = $countryQuery->exists();
+
+                    if ($plansExistForCountry) {
+                        return response()->json([
+                            'status'      => false,
+                            'status_code' => 404,
+                            'message'     => __('messages.api.no_home_insurance_plans_for_country'),
+                            'data'        => []
+                        ], 404);
+                    }
+                }
+            }
 
             $data->transform(function ($item) {
                 if (!empty($item->insurance_policy_pdf)) {
                     $item->insurance_policy_pdf = url('uploads/insurance_plans/' . $item->id . '/' . $item->insurance_policy_pdf);
                 }
+
                 if (!empty($item->insurance_company->privacy_policy)) {
                     $item->insurance_company->privacy_policy = url('insurance/' . $item->insurance_company->id . '/' . $item->insurance_company->privacy_policy);
                 }
+
                 return $item;
             });
 
             return response()->json([
                 'status' => true,
                 'status_code' => 200,
-                'message' => 'Get Home Insurance Plan successfully',
-                'data' => $data
+                'message' => __('messages.api.get_home_insurance_plan_successfully'),
+                'data' => $data,
             ]);
         } catch (\Exception $e) {
+            \Log::error('Home Insurance Error: ' . $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine());
+
             return response()->json([
                 'status' => false,
                 'status_code' => 500,

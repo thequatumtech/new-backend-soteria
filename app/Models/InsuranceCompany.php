@@ -26,6 +26,7 @@ class InsuranceCompany extends Model
         'mobile_number',
         'telephone_number',
         'joining_date',
+        'currency_id',
         'country_id',
         'city_id',
         'district_id',
@@ -42,5 +43,11 @@ class InsuranceCompany extends Model
     {
         return $this->hasMany(InsuranceCompanyDocument::class, 'insurance_id');
     }
+    
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class, 'currency_id');
+    }
+
     
 }

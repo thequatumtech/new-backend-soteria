@@ -13,6 +13,7 @@ use App\Models\LineOfBusiness;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
+use App\Models\Currency;
 
 class InsuranceCompanyController extends Controller
 {
@@ -20,28 +21,28 @@ class InsuranceCompanyController extends Controller
      {
           $insurance_companies = InsuranceCompany::all();
           $line_of_business = LineOfBusiness::all();
-          $countries = Country::all();
-          $cities = Cities::all();
-          $districts = District::all();
 
-          return view('content.insuranceCompany.insuranceCompany', ['insurance_companies' => $insurance_companies, 'line_of_business' => $line_of_business, 'countries' => $countries, 'cities' => $cities, 'districts' => $districts]);
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
+        $currencies = Currency::orderBy('name', 'asc')->get();
+
+
+          return view('content.insuranceCompany.insuranceCompany', ['insurance_companies' => $insurance_companies, 'line_of_business' => $line_of_business, 'countries' => $countries, 'cities' => $cities, 'districts' => $districts,'currencies' => $currencies]);
      }
 
      public function create(Request $request)
      {
           try {
                $request->validate([
-                    // 'company_name' => 'required|string|max:100|unique:insurance_companies',
+
                     'company_name' => 'required|string|max:100|unique:insurance_companies,company_name,NULL,id,deleted_at,NULL',
                     'company_national_id' => 'required|string|max:100',
-                    // 'register_number' => 'required|string|max:100|unique:insurance_companies',
                     'register_number' => 'required|string|max:100|unique:insurance_companies,register_number,NULL,id,deleted_at,NULL',
                     'tax_number' => 'required|string|max:100',
-                    // 'email' => 'required|email|unique:insurance_companies,email',
                     'email' => 'required|email|unique:insurance_companies,email,NULL,id,deleted_at,NULL',
                     'email_1' => 'nullable|email',
                     'email_2' => 'nullable|email',
-                    // 'claim_email' => 'required|email|unique:insurance_companies,claim_email',
                     'claim_email' => 'required|email|unique:insurance_companies,claim_email,NULL,id,deleted_at,NULL',
                     'mobile_number' => 'required',
                     'telephone_number' => 'nullable',
@@ -74,6 +75,7 @@ class InsuranceCompanyController extends Controller
                     'mobile_number' => $request->mobile_number,
                     'telephone_number' => $request->telephone_number,
                     'joining_date' => $request->joining_date,
+                    'currency_id' => $request->currency_id,
                     'country_id' => $request->country_id,
                     'city_id' => $request->city_id,
                     'district_id' => $request->district_id,
@@ -196,6 +198,7 @@ class InsuranceCompanyController extends Controller
                     'telephone_number' => 'nullable',
                     'joining_date' => 'required|date|date_format:Y-m-d',
                     'country_id' => 'required|integer',
+                     'currency_id' => 'required|exists:currencies,id',
                     'city_id' => 'required|integer',
                     'district_id' => 'required|integer',
                     'street_name' => 'required|string|max:100',
@@ -240,6 +243,7 @@ class InsuranceCompanyController extends Controller
                     'mobile_number' => $request->mobile_number,
                     'telephone_number' => $request->telephone_number,
                     'joining_date' => $request->joining_date,
+                    'currency_id' => $request->currency_id,
                     'country_id' => $request->country_id,
                     'city_id' => $request->city_id,
                     'district_id' => $request->district_id,

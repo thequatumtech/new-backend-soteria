@@ -12,12 +12,12 @@ class CustomerController extends Controller
 {
     function getCustomers(Request $request)
     {
-        return HelperController::sendJsonResponse(200, CustomerModel::all(), "Customer get successfully");
+        return HelperController::sendJsonResponse(200, CustomerModel::all(), __('messages.api.customer_get_successfully'));
     }
     function getCustomer(Request $request, $id)
     {
         $customer =  CustomerModel::find($id);
-        return HelperController::sendJsonResponse(200, $customer, $customer ? "Customer get successfully" : "Customer not found");
+        return HelperController::sendJsonResponse(200, $customer, $customer ? __('messages.api.customer_get_successfully') : __('messages.api.customer_not_found'));
     }
 
     function createCustomer(Request $request)
@@ -65,14 +65,14 @@ class CustomerController extends Controller
         $customer->save();
         $token = $customer->createToken('api_token');
         $customer['token'] = $token->plainTextToken;
-        return HelperController::sendJsonResponse(200, $customer, "Customer create successfully");
+        return HelperController::sendJsonResponse(200, $customer, __('messages.api.customer_create_successfully'));
     }
 
     function updateCustomer(Request $request, $id)
     {
         $customer = CustomerModel::find($id);
         if (!$customer) {
-            return HelperController::sendJsonResponse(500, null, "Customer not found");
+            return HelperController::sendJsonResponse(500, null, __('messages.api.customer_not_found'));
         }
         $validation = Validator::make($request->all(), [
             "email" => 'email',
@@ -80,12 +80,12 @@ class CustomerController extends Controller
         if ($validation->fails()) {
             return HelperController::sendJsonResponse(400, $validation->errors(), $validation->errors()->first());
         }
-        // $customer = new CustomerModel();
+        // $customer = new CustomerModel(); 
         if (isset($request->full_name) && $request->full_name) {
             $customer->full_name = $request->full_name;
         }
-        // (isset($request->email) && $request->email) && $customer->email;
-        // (isset($request->mobile_no) && $request->mobile_no) && $customer->mobile_no;
+        // (isset($request->email) && $request->email) && $customer->email; 
+        // (isset($request->mobile_no) && $request->mobile_no) && $customer->mobile_no; 
         if (isset($request->email) && $request->email) {
             $customer->email = $request->email;
         }
@@ -135,19 +135,19 @@ class CustomerController extends Controller
             $customer->house_no = $request->house_no;
         }
 
-        // new filed 
+        // new filed  
 
         $customer->save();
         $token = $customer->createToken('api_token');
         $customer['token'] = $token->plainTextToken;
-        return HelperController::sendJsonResponse(200, $customer, "Customer update successfully");
+        return HelperController::sendJsonResponse(200, $customer, __('messages.api.customer_update_successfully'));
     }
 
     public function  homeInsurance(Request $request)
     {
         $arr = [];
         if (!isset($request->user()->id)) {
-            return HelperController::sendJsonResponse(401, null, "Customer not found");
+            return HelperController::sendJsonResponse(401, null, __('messages.api.customer_not_found'));
         }
         if ($request->has('fname') && $request->fname) {
             $arr['fname'] = $request->fname;
@@ -207,18 +207,16 @@ class CustomerController extends Controller
             $homeInsturenPlan = HomeInsurancePlan::where('customer_id', $request->user()->id)->first();
             if ($homeInsturenPlan) {
                 $homeInsturenPlan->update($arr);
-                return HelperController::sendJsonResponse(200, $homeInsturenPlan, "Data save successfully");
+                return HelperController::sendJsonResponse(200, $homeInsturenPlan, __('messages.api.data_save_successfully'));
             } else {
                 $arr['customer_id'] = $request->user()->id;
                 $homeInsturenPlan = HomeInsurancePlan::create($arr);
-                return HelperController::sendJsonResponse(200, $homeInsturenPlan, "Data save successfully");
+                return HelperController::sendJsonResponse(200, $homeInsturenPlan, __('messages.api.data_save_successfully'));
             }
         } else {
-            return HelperController::sendJsonResponse(500, null, "Input is not valid");
+            return HelperController::sendJsonResponse(500, null, __('messages.api.input_not_valid'));
         }
     }
 
-    public function  homeInsurancePlan(Request $request)
-    {
-    }
+    public function  homeInsurancePlan(Request $request) {}
 }

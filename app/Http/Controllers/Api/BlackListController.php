@@ -19,7 +19,7 @@ class BlackListController extends Controller
         if (!$blacklist) {
             return response()->json([
                 'status'  => true,
-                'message' => 'User is not declined.',
+                'message' => __('messages.api.user_not_declined'),
             ]);
         }
 
@@ -31,14 +31,14 @@ class BlackListController extends Controller
             if (!in_array((string) $insuranceTypeId, $blockedTypes)) {
                 return response()->json([
                     'status'  => true,
-                    'message' => 'User is not declined for this plan.',
+                    'message' => __('messages.api.user_not_declined_for_this_plan'),
                 ]);
             }
         }
 
         return response()->json([
             'status'  => false,
-            'message' => 'You have been declined. For more information, please contact support.',
+            'message' => __('messages.api.user_declined_contact_support'),
         ], 403);
     }
 }

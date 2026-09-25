@@ -39,24 +39,27 @@
 <div class="chat-wrapper">
     <div class="chat-sidebar">
         <div class="chat-sidebar-header">
-            <strong>Chats</strong>
-            <button class="btn btn-sm btn-primary" onclick="openNewChatModal()">+ New Chat</button>
-        </div>
+           <strong>{{ __('messages.chat.chats') }}</strong>
+             <button class="btn btn-sm btn-primary" onclick="openNewChatModal()">
+                {{ __('messages.chat.new_chat') }}
+            </button>
+                </div>
         <div class="chat-list" id="clientList">
-            <div class="p-2 text-muted">Loading...</div>
+            <div class="p-2 text-muted">{{ __('messages.chat.loading') }}</div>
         </div>
-        <div class="load-more-clients" id="loadMoreInbox" style="display:none;">Load more</div>
+        <div class="load-more-clients" id="loadMoreInbox" style="display:none;">{{ __('messages.chat.load_more') }}
+</div>
     </div>
 
     <div class="chat-main">
         <div class="chat-messages" id="chatMessages">
-            <div class="text-center text-muted mt-5">Select a chat to start</div>
+            <div class="text-center text-muted mt-5">{{ __('messages.chat.select_chat') }}</div>
         </div>
         <div class="chat-input-box">
             <label for="fileInput" style="cursor:pointer; font-size:20px;">📎</label>
             <input type="file" id="fileInput" style="display:none;" disabled accept="image/*,video/*,.pdf,.doc,.docx">
-            <input type="text" id="messageInput" placeholder="Type a message..." disabled>
-            <button class="btn btn-primary" id="sendBtn" disabled>Send</button>
+                     <input type="text" id="messageInput" placeholder="{{ __('messages.chat.type_message') }}" disabled>
+            <button class="btn btn-primary" id="sendBtn" disabled>{{ __('messages.chat.send') }}</button>
         </div>
         <div id="filePreviewBar" style="padding:0 10px 8px; font-size:12px; color:#555;"></div>
     </div>
@@ -65,11 +68,23 @@
 <!-- New Chat Search Modal -->
 <div class="new-chat-modal" id="newChatModal">
     <div class="new-chat-box">
-        <input type="text" id="newChatSearch" placeholder="Search client by name or email...">
-        <div class="results" id="newChatResults"></div>
-        <button class="btn btn-sm btn-secondary mt-2" onclick="closeNewChatModal()">Close</button>
+        <input type="text" id="newChatSearch" placeholder="{{ __('messages.chat.search_client') }}">        <div class="results" id="newChatResults"></div>
+        <button class="btn btn-sm btn-secondary mt-2" onclick="closeNewChatModal()">
+                        {{ __('messages.chat.close') }}
+        </button>
     </div>
 </div>
+<script>
+    window.CHAT_TRANS = {
+        loading:       @json(__('messages.chat.loading')),
+        load_more:     @json(__('messages.chat.load_more')),
+        select_chat:   @json(__('messages.chat.select_chat')),
+        attached:      @json(__('messages.chat.attached')),
+        download_file: @json(__('messages.chat.download_file')),
+        today:         @json(__('messages.chat.today')),
+        yesterday:     @json(__('messages.chat.yesterday')),
+    };
+</script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -81,6 +96,7 @@ const firebaseConfig = {
     databaseURL: "https://suteria-48f4d-default-rtdb.asia-southeast1.firebasedatabase.app",
     projectId: "suteria-48f4d",
 };
+const T = window.CHAT_TRANS;
 // date time
 function formatDateLabel(dateStr) {
     const msgDate = new Date(dateStr); //.replace(' ', 'T'));
@@ -139,10 +155,16 @@ const loadMoreBtn = document.getElementById('loadMoreInbox');
 async function loadInbox(reset = false) {
     if (inboxLoading || (!inboxHasMore && !reset)) return;
     inboxLoading = true;
-    if (reset) { inboxPage = 1; inboxHasMore = true; inboxItems.clear(); clientListEl.innerHTML = ''; }
+     if (reset) {
+        inboxPage = 1; inboxHasMore = true;
+        inboxItems.clear();
+        clientListEl.innerHTML = `<div class="p-2 text-muted">${T.loading}</div>`;
+    }
 
     const res = await fetch(`/admin/chat/inbox?page=${inboxPage}`, { headers: { Accept: 'application/json' } });
     const data = await res.json();
+
+     if (reset) clientListEl.innerHTML = '';
 
     data.data.forEach(item => {
         inboxItems.set(item.chat_id, item);
@@ -151,6 +173,7 @@ async function loadInbox(reset = false) {
 
     inboxHasMore = data.has_more;
     loadMoreBtn.style.display = inboxHasMore ? 'block' : 'none';
+    loadMoreBtn.textContent   = T.load_more;
     inboxPage++;
     inboxLoading = false;
 }

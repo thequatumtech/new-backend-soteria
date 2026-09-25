@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Models\Client;
 use Carbon\Carbon;
 use App\Models\Currency;
+use App\Helpers\InsurancePlanHelper;
 
 class CriticalIllnessInsuranceController extends Controller
 {
@@ -21,6 +22,7 @@ class CriticalIllnessInsuranceController extends Controller
 
         return is_numeric($clean) ? (float)$clean : 0;
     }
+
     private function normalizeRestricted($value)
     {
         if (!$value) return [];
@@ -36,15 +38,27 @@ class CriticalIllnessInsuranceController extends Controller
         if (is_numeric($value)) {
             return [(int)$value];
         }
+
         return [];
     }
 
     private function restrictionError($type)
     {
-        $message = "You are not eligible for this plan due to {$type} restriction.";
+        $keyMap = [
+            'country'         => __('messages.api.critical_illness_restriction_country'),
+            'city'            => __('messages.api.critical_illness_restriction_city'),
+            'district'        => __('messages.api.critical_illness_restriction_district'),
+            'age'             => __('messages.api.critical_illness_restriction_age'),
+            'occupation'      => __('messages.api.critical_illness_restriction_occupation'),
+            'chronic disease' => __('messages.api.critical_illness_restriction_chronic_disease'),
+        ];
+
+        $typeLabel = $keyMap[$type] ?? $type;
+
+        $message = __('messages.api.critical_illness_restriction_message', ['type' => $typeLabel]);
 
         if ($type === 'country') {
-            $message .= ' Please contact us for further information.';
+            $message .= __('messages.api.critical_illness_country_contact');
         }
 
         return response()->json([
@@ -54,6 +68,7 @@ class CriticalIllnessInsuranceController extends Controller
             'data' => []
         ], 422);
     }
+
     private function normalizeDate($date)
     {
         if (!$date) return null;
@@ -64,6 +79,7 @@ class CriticalIllnessInsuranceController extends Controller
 
         return $date;
     }
+
     public function storeCriticalIllnessInsurance(Request $request)
     {
         try {
@@ -113,15 +129,18 @@ class CriticalIllnessInsuranceController extends Controller
                 'payment_status' => 'nullable',
             ]);
 
-            $plan_data = CriticalIllnessPlan::find($data['plan_id']);
+            // $plan_data = CriticalIllnessPlan::find($data['plan_id']);
+            $plan_data = CriticalIllnessPlan::with('insurance_company.currency')->find($data['plan_id']);
+
             $data['insurance_company_id'] = $plan_data->insurance_company_id;
 
             $client = Client::find($request->user_id);
+
             if (!$client) {
                 return response()->json([
                     'status' => false,
                     'status_code' => 422,
-                    'message' => 'Client not found.',
+                    'message' => __('messages.api.client_not_found'),
                     'data' => []
                 ], 422);
             }
@@ -156,6 +175,7 @@ class CriticalIllnessInsuranceController extends Controller
 
                 if (str_contains($range, '-')) {
                     [$min, $max] = explode('-', $range);
+
                     if ($clientAge >= (int)$min && $clientAge <= (int)$max) {
                         return $this->restrictionError('age');
                     }
@@ -171,6 +191,7 @@ class CriticalIllnessInsuranceController extends Controller
             }
 
             $userChronics = $this->normalizeRestricted($data['chronic_diseases_id'] ?? '');
+
             if (!empty($userChronics)) {
                 foreach ($userChronics as $chronicId) {
                     if (in_array($chronicId, $restrictedChronic)) {
@@ -183,15 +204,18 @@ class CriticalIllnessInsuranceController extends Controller
 
             if ($existing) {
                 $critical = CriticalIllnessInsurance::find($existing->policy_id);
+
                 if ($critical) $critical->update($data);
 
                 $data['purchase_id'] = $existing->id;
                 $data['inception_date'] = $data['inception_date'];
+
                 $critical = PurchasePolicy::updatePurchasePolicy($data);
                 $data['policy_id'] = $critical->policy_id;
             } else {
                 $data['client_id'] = $request->user_id;
                 $data['police_no'] = rand(10000000, 99999999);
+
                 $critical = CriticalIllnessInsurance::create($data);
 
                 $data['policy_type'] = 4;
@@ -204,18 +228,22 @@ class CriticalIllnessInsuranceController extends Controller
             $data = CriticalIllnessInsurance::getCriticalIllnessInsuranceDetails($data['policy_id']);
 
             $directory = public_path('insurance_pdfs/criticalIllness_policy');
-            if (!file_exists($directory)) mkdir($directory, 0755, true);
+
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+            }
 
             $filename = uniqid() . '_policy_' . $critical->id . '.pdf';
             $path = $directory . '/' . $filename;
 
             $policy_limit = $this->cleanNumber($plan_data->limit);
 
-            $purchase['net_premium']       = ($plan_data->net_premium / 100) * $policy_limit;
-            // $purchase['fees']              = ($plan_data->fees / 100) * $policy_limit;
-            // $purchase['stamps']            = ($plan_data->stamps / 100) * $policy_limit;
-            // $purchase['sales_tax']         = ($plan_data->sales_tax / 100) * $policy_limit;
-            // $purchase['gross_premium']     = ($plan_data->gross_premium / 100) * $policy_limit;
+            $purchase['net_premium'] = ($plan_data->net_premium / 100) * $policy_limit;
+
+            // $purchase['fees'] = ($plan_data->fees / 100) * $policy_limit;
+            // $purchase['stamps'] = ($plan_data->stamps / 100) * $policy_limit;
+            // $purchase['sales_tax'] = ($plan_data->sales_tax / 100) * $policy_limit;
+            // $purchase['gross_premium'] = ($plan_data->gross_premium / 100) * $policy_limit;
 
             $net_premium = (float)$plan_data->net_premium;
             $feesPercentage = (float)$plan_data->fees;
@@ -241,7 +269,12 @@ class CriticalIllnessInsuranceController extends Controller
             $cbjSalesTaxAmount = ($cbjContribution * $cbjSalesTaxPercentage) / 100;
 
             // Total Gross Premium
-            $grossPremium = $net_premium + $issuanceFees + $stampAmount + $salesTaxAmount + $cbjContribution + $cbjSalesTaxAmount;
+            $grossPremium = $net_premium
+                + $issuanceFees
+                + $stampAmount
+                + $salesTaxAmount
+                + $cbjContribution
+                + $cbjSalesTaxAmount;
 
             $purchase['net_premium']       = $net_premium;
             $purchase['fees']              = $issuanceFees;
@@ -257,16 +290,30 @@ class CriticalIllnessInsuranceController extends Controller
             $purchase['plan_name']             = $plan_data->plan_name;
             $purchase['policy_plan_limit']     = $policy_limit;
             $purchase['insurance_company_id']  = $data->insurance_company_id;
-            $purchase['inception_date'] = $data->effective_date ?? $data->inception_date ?? '';
+            $purchase['inception_date']        = $data->effective_date ?? $data->inception_date ?? '';
             $purchase['expiry_date']           = $data->expiry_date;
             $purchase['commission_percentage'] = $data->commission_percentage ?? $plan_data->commission_percentage;
             $purchase['policy_pdf_url']        = $path;
 
             PurchasePolicy::updatePurchasePolicy($purchase);
+
             $data->purchase_id = $critical->id;
+            $data->purchase_policy_id = $critical->id;
+
+            // $client = Client::with('country.currency')->find($request->user_id);
+            // $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
 
             $client = Client::with('country.currency')->find($request->user_id);
-            $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
+
+            // Get insurance company currency first
+            $insuranceCompany = $plan_data->insurance_company;
+
+            if ($insuranceCompany && $insuranceCompany->currency) {
+                $abbr = $insuranceCompany->currency->abbreviation;
+            } else {
+                // Fallback to client's country currency
+                $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
+            }
 
             $pdf = Pdf::loadView('pdf/criticalIllness_policy', [
                 'data' => $data,
@@ -274,10 +321,10 @@ class CriticalIllnessInsuranceController extends Controller
                 'plan' => $plan_data,
                 'purchase' => (object)$purchase
             ]);
+
             $pdf->save($path);
 
             $data['url'] = url('insurance_pdfs/criticalIllness_policy/' . $filename);
-
 
             $data->net_premium       = number_format($purchase['net_premium'], 2) . ' ' . $abbr;
             $data->fees              = number_format($purchase['fees'], 2) . ' ' . $abbr;
@@ -291,7 +338,7 @@ class CriticalIllnessInsuranceController extends Controller
             return response()->json([
                 'status' => true,
                 'status_code' => 200,
-                'message' => 'Add Critical Illness Insurance Plan successfully',
+                'message' => __('messages.api.add_critical_illness_insurance_successfully'),
                 'data' => $data
             ]);
         } catch (\Exception $e) {
@@ -303,30 +350,55 @@ class CriticalIllnessInsuranceController extends Controller
             ]);
         }
     }
+
     public function getCriticalIllnessInsurancePlan(Request $request)
     {
         try {
-            $data = CriticalIllnessPlan::with('policy_covers', 'insurance_company')
+
+            $query = CriticalIllnessPlan::with([
+                'policy_covers',
+                'insurance_company',
+                'insurance_company.currency'
+            ])
                 ->whereHas('insurance_company', function ($q) {
                     $q->whereNull('deleted_at');
                 })
-                ->where('plan_name', 'LIKE', '%' . $request->limit . '%')
-                ->get();
+                ->where('plan_name', $request->limit);
+
+            // Filter plans according to client's currency
+            $query = InsurancePlanHelper::filterByClientCurrency(
+                $query,
+                $request->user_id
+            );
+
+            $data = $query->get();
 
             $data->transform(function ($item) {
                 if (!empty($item->insurance_policy_pdf)) {
-                    $item->insurance_policy_pdf = url('uploads/insurance_plans/' . $item->id . '/' . $item->insurance_policy_pdf);
+                    $item->insurance_policy_pdf = url(
+                        'uploads/insurance_plans/' .
+                            $item->id .
+                            '/' .
+                            $item->insurance_policy_pdf
+                    );
                 }
+
                 if (!empty($item->insurance_company->privacy_policy)) {
-                    $item->insurance_company->privacy_policy = url('insurance/' . $item->insurance_company->id . '/' . $item->insurance_company->privacy_policy);
+                    $item->insurance_company->privacy_policy = url(
+                        'insurance/' .
+                            $item->insurance_company->id .
+                            '/' .
+                            $item->insurance_company->privacy_policy
+                    );
                 }
+
                 return $item;
             });
 
             return response()->json([
                 'status' => true,
                 'status_code' => 200,
-                'message' => 'Get Critical Illness Insurance Plan successfully',
+                'message' => __('messages.api.get_critical_illness_insurance_plan_successfully'),
                 'data' => $data
             ]);
         } catch (\Exception $e) {

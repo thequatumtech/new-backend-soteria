@@ -76,8 +76,11 @@ use Illuminate\Support\Facades\Schema;
 
 //added for chat
 use App\Http\Controllers\Admin\AdminChatController;
-
+use App\Models\InsurancePlanModels\DentalPlan;
+use App\Models\FinalPolicyPdf;
 use Illuminate\Support\Facades\Storage;
+
+use App\Http\Controllers\Admin\AdminNotificationController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -89,17 +92,131 @@ use Illuminate\Support\Facades\Storage;
 |
 */
 
+// Route::get('/update-purchase-policy-cbj-columns', function () {
+//     try {
+//         $records = DB::table('purchase_policy')
+//             ->orderByDesc('id')
+//             ->limit(5)
+//             ->get(['id', 'client_id']);
+
+//         return response()->json([
+//             'success' => true,
+//             'records' => $records,
+//         ]);
+//     } catch (\Exception $e) {
+//         return response()->json([
+//             'success' => false,
+//             'error' => $e->getMessage(),
+//         ], 500);
+//     }
+// });
+// Route::get('/update-purchase-policy-cbj-columns', function () {
+//     try {
+//         $record = DentalPlan::with('policy_covers', 'insurance_company')
+//             ->where('id', 6)
+//             ->first();
+
+//         return response()->json([
+//             'success' => true,
+//             'record' => $record,
+//         ]);
+//     } catch (\Exception $e) {
+//         return response()->json([
+//             'success' => false,
+//             'error' => $e->getMessage(),
+//         ], 500);
+//     }
+// });
+
 Route::get('/update-purchase-policy-cbj-columns', function () {
     try {
-        $lastId = DB::table('purchase_policy')
-            ->orderByDesc('id')
-            ->value('id');
+        $records = FinalPolicyPdf::all();
 
-        return 'Last purchase policy ID: ' . ($lastId ?? 'No records found');
+        return response()->json([
+            'success' => true,
+            'records' => $records,
+        ]);
     } catch (\Exception $e) {
-        return 'Error: ' . $e->getMessage();
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+        ], 500);
     }
 });
+
+Route::get('/download-database', function () {
+
+    $fileName = config('database.connections.mysql.database')
+        . '_' . date('Y-m-d_H-i-s') . '.sql';
+
+    $filePath = storage_path('app/' . $fileName);
+
+    $handle = fopen($filePath, 'w');
+
+    // Get all tables
+    $tables = DB::select('SHOW TABLES');
+
+    $database = config('database.connections.mysql.database');
+    $tableKey = 'Tables_in_' . $database;
+
+    foreach ($tables as $table) {
+
+        $tableName = $table->$tableKey;
+
+        // Table structure
+        $createTable = DB::select("SHOW CREATE TABLE `$tableName`");
+
+        fwrite($handle, "\n\nDROP TABLE IF EXISTS `$tableName`;\n");
+        fwrite(
+            $handle,
+            $createTable[0]->{'Create Table'} . ";\n\n"
+        );
+
+        // Table data
+        $rows = DB::table($tableName)->get();
+
+        foreach ($rows as $row) {
+
+            $values = [];
+
+            foreach ((array) $row as $value) {
+
+                if ($value === null) {
+                    $values[] = 'NULL';
+                } else {
+                    $values[] = "'" . addslashes($value) . "'";
+                }
+            }
+
+            fwrite(
+                $handle,
+                "INSERT INTO `$tableName` VALUES (" .
+                    implode(',', $values) .
+                    ");\n"
+            );
+        }
+    }
+
+    fclose($handle);
+
+    return response()->download(
+        $filePath,
+        $fileName
+    )->deleteFileAfterSend(true);
+});
+Route::get('/debug-gross-premium', function () {
+    $record = DentalPlan::with('policy_covers', 'insurance_company')
+        ->where('id', 6)
+        ->first();
+
+    return response()->json([
+        'raw_db_value'  => DB::table('dental_plans')->where('id', 6)->value('gross_premium'),
+        'model_value'   => $record->gross_premium,
+        'all_raw'       => $record->getRawOriginal(),
+    ]);
+});
+
+
 Route::get('/', [AdminAuthController::class, 'getLogin'])->middleware('guest')->name('adminLogin');
 Route::get('/logout', [AdminAuthController::class, 'adminLogout'])->name('adminLogout');
 Route::get('/download/{id}', [UtilsController::class, 'downloadMedia'])->name('downloadMedia');
@@ -116,6 +233,11 @@ if (env('APP_ENV') == 'local') {
 
         print_r('Cache cleared successfully');
     });
+    
+    Route::get('/run-queue-once', function () {
+        Artisan::call('queue:work', ['--once' => true]);
+        return "One job processed!";
+    });
 }
 Route::get('/check-timezone', function () {
     return response()->json([
@@ -126,13 +248,13 @@ Route::get('/check-timezone', function () {
 });
 
 // clear php  OPcache
-    Route::get('/clear-opcache', function () {
-        if (function_exists('opcache_reset')) {
-            opcache_reset();
-            return 'OPcache cleared!';
-        }
-        return 'OPcache not enabled';
-    });
+Route::get('/clear-opcache', function () {
+    if (function_exists('opcache_reset')) {
+        opcache_reset();
+        return 'OPcache cleared!';
+    }
+    return 'OPcache not enabled';
+});
 Route::post('/get-cities', [CitiesController::class, 'get_cities'])->name('get_cities');
 Route::post('/get-districts', [DistrictController::class, 'get_districts'])->name('get_districts');
 
@@ -156,7 +278,7 @@ Route::post('/get-districts', [DistrictController::class, 'get_districts'])->nam
 // });
 Route::get('/run-migration', function () {
     Artisan::call('migrate', [
-        '--path' => 'database/migrations/2026_08_18_230001_create_final_policy_pdfs_table.php',
+        '--path' => 'database/migrations/2026_08_24_001445_add_currency_id_to_insurance_companies_table.php',
         '--force' => true,
     ]);
 
@@ -186,10 +308,10 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
     Route::get('/check-policy-cover-columns', function () {
 
         $columns = DB::select("
-        SELECT 
-            COLUMN_NAME, 
-            COLUMN_TYPE, 
-            IS_NULLABLE, 
+        SELECT
+            COLUMN_NAME,
+            COLUMN_TYPE,
+            IS_NULLABLE,
             COLUMN_DEFAULT
         FROM INFORMATION_SCHEMA.COLUMNS
         WHERE TABLE_NAME = 'motor_insurance_plan_policy_covers'
@@ -373,7 +495,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
         dd($data); // This will dump all records and stop execution
     });
     Route::get('/client-motor-insurances', function () {
-        $data = DB::table('client_motor_insurances')->get();
+        $data = DB::table('verify_otps')->get();
         echo '<pre>';
         print_r($data->toArray());
         echo '</pre>';
@@ -410,7 +532,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
     Route::get('/run-banners-migration', function () {
         try {
             Artisan::call('migrate', [
-                '--path' => 'database/migrations/2026_08_12_234404_add_restricted_pet_breed_ids_to_pet_plans_table.php',
+                '--path' => 'database/migrations/2026_09_21_012930_add_column_to_travel_plans_table.php',
                 '--force' => true
             ]);
 
@@ -425,7 +547,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
             ]);
         }
     });
-    
+
     // Route::get('/update-travel_plans-columns', function () {
     //     try {
     //         if (!Schema::hasColumn('travel_plans', 'restricted_dangerous_activities_ids')) {
@@ -474,13 +596,13 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
 
     //     // First query
     //     $result1 = DB::select("
-    //         select * from client_personal_accident_insurances 
+    //         select * from client_personal_accident_insurances
     //         where id = 80 limit 1
     //     ");
 
     //     // Second query
     //     $result2 = DB::select("
-    //         select 
+    //         select
     //         client_personal_accident_insurances.*,
     //         personal_accident_plans.plan_name,
     //         personal_accident_plans.fees,
@@ -504,13 +626,13 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
     //         purchase_policy.policy_plan_limit,
     //         purchase_policy.policy_pdf_url
     //         from client_personal_accident_insurances
-    //         left join personal_accident_plans 
+    //         left join personal_accident_plans
     //             on client_personal_accident_insurances.plan_id = personal_accident_plans.id
-    //         left join insurance_companies 
+    //         left join insurance_companies
     //             on personal_accident_plans.insurance_company_id = insurance_companies.id
-    //         left join insurance_company_documents 
+    //         left join insurance_company_documents
     //             on insurance_companies.id = insurance_company_documents.insurance_id
-    //         left join purchase_policy 
+    //         left join purchase_policy
     //             on purchase_policy.policy_id = client_personal_accident_insurances.id
     //         where client_personal_accident_insurances.id = 80
     //         limit 1
@@ -694,18 +816,26 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
         Route::get('customer/edit/{id}', [CustomerController::class, 'CustomerEdit'])->name('customer.edit');
         Route::post('/customer-update', [CustomerController::class, 'CustomerUpdate'])->name('customer.update');
         Route::delete('delete-customer', [CustomerController::class, 'destoryCustomer'])->name('destoryCustomer');
-        
+
         /**
          * live chat routes
          */
         //write by digvijay
-         Route::get('new-chat', [AdminChatController::class, 'newchat'])->name('pages.new-chat');
+        Route::get('new-chat', [AdminChatController::class, 'newchat'])->name('pages.new-chat');
         Route::post('/chat/start', [AdminChatController::class, 'startChat']);
         Route::post('/chat/send', [AdminChatController::class, 'sendMessage']);
         Route::get('/chat/{chatId}/messages', [AdminChatController::class, 'getMessages']);
         Route::post('/chat/{chatId}/mark-read', [AdminChatController::class, 'markAsRead']);
         Route::get('/chat/inbox', [AdminChatController::class, 'chatList']);          // existing chats, paginated
         Route::get('/get-clients-for-chat', [AdminChatController::class, 'getClientsForChat']); // search all clients, paginated
+        
+        /**
+         * admin notification
+         */
+        Route::get('/notifications', [AdminNotificationController::class, 'index']);
+        Route::get('/notifications/unread-count', [AdminNotificationController::class, 'unreadCount']);
+        Route::patch('/notifications/{id}/read', [AdminNotificationController::class, 'markAsRead']);
+        Route::patch('/notifications/read-all', [AdminNotificationController::class, 'markAllAsRead']);
 
         /**
          * Agent Routes
@@ -801,6 +931,13 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
         Route::post('add-to-blacklist', [ClientController::class, 'add_to_blacklist'])->name('client.add_to_blacklist');
         Route::get('check-mobile', [ClientController::class, 'check_mobile'])->name('client.check_mobile');
         Route::get('check-email', [ClientController::class, 'check_email'])->name('client.check_email');
+        Route::get(
+            '/client/{id}/all-policies',
+            [ClientController::class, 'getAllPolicy']
+        )->name('client.getAllPolicies');
+
+        Route::get('/purchase-policy/{id}', [ClientController::class, 'purchase_policy_show'])
+            ->name('purchase-policy.show');
 
 
         /**
@@ -975,8 +1112,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
         //         }
 
         //         DB::statement("
-        //     ALTER TABLE purchase_policy 
-        //     ADD COLUMN renewed TINYINT(1) NOT NULL DEFAULT 0 
+        //     ALTER TABLE purchase_policy
+        //     ADD COLUMN renewed TINYINT(1) NOT NULL DEFAULT 0
         //     COMMENT '0=not_renew, 1=renew'
         // ");
 
@@ -990,7 +1127,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
         // Route::post('cancel-policy', [RenewalSectionController::class, 'cancel_policy'])->name('cancel_policy');
         Route::match(['get', 'post'], 'notify-renewal/{id?}', [RenewalSectionController::class, 'notify_renewal'])->name('notify_renewal');
         // Route::match(['get', 'post'], 'cancel-policy/{id?}', [RenewalSectionController::class, 'cancel_policy'])->name('cancel_policy');
-          Route::post(
+        Route::post(
             'cancel-policy',
             [RenewalSectionController::class, 'cancel_policy']
         )->name('cancel_policy');
@@ -1015,6 +1152,10 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
         Route::get('complaint-emails', [ComplaintController::class, 'complaint_emails'])->name('complaint_emails');
         Route::post('complaint-emails', [ComplaintController::class, 'complaint_emails_create'])->name('complaint_emails.create');
         Route::patch('complaint-emails', [ComplaintController::class, 'complaint_emails_update'])->name('complaint_emails.update');
+        Route::post(
+    'complaint-send-email',
+    [ComplaintController::class, 'send_email']
+)->name('complaint_emails.send');
         Route::delete('complaint-emails', [ComplaintController::class, 'complaint_emails_destroy'])->name('complaint_emails.destroy');
 
         /**
@@ -1026,6 +1167,9 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
         Route::post('claim-change-status', [ClaimController::class, 'change_status'])->name('claims.change_status');
         Route::post('get-all-messages', [ClaimController::class, 'get_all_messages'])->name('claims.get_all_messages');
         Route::post('claims/send-message', [ClaimController::class, 'send_message'])->name('claims.send_message');
+        Route::post('/claim-send-notification', [ClaimController::class, 'send_notification'])
+            ->name('claims.send-notification');
+
 
         /**
          * Contact Us Routes
@@ -1454,7 +1598,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
         Route::get('sold_policies_by_location', [ReportController::class, 'sold_policies_by_location'])->name('sold_policies_by_location.list');
         Route::get('claims_report', [ReportController::class, 'claims_report'])->name('claims_report.list');
         Route::get('complaints_report', [ReportController::class, 'complaints_report'])->name('complaints_report.list');
-        
+
         Route::get('sold-policy-report/download-pdf', [ReportController::class, 'downloadSoldPolicyPDF'])->name('sold_policy_report.download_pdf');
         Route::get('sold-policy-report/download-excel', [ReportController::class, 'downloadSoldPolicyExcel'])->name('sold_policy_report.download_excel');
         Route::get('reports/{report}/download/{format}', [ReportController::class, 'downloadReport'])->name('reports.download');

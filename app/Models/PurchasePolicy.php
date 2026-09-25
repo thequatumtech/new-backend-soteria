@@ -57,7 +57,15 @@ class PurchasePolicy extends Model
         'gross_premium',
         'commission_percentage',
         'commission_amount',
-        'policy_pdf_url'
+        'policy_pdf_url',
+        'policy_plan_limit',
+        'plan_name',
+        'insurance_company_id',
+        'notify_30_days',
+        'notify_15_days',
+        'custom_notify',
+        'cancelled_at',
+        'renewed',
     ];
     public function getFullNameAttribute() // notice that the attribute name is in CamelCase.
     {
@@ -179,73 +187,178 @@ class PurchasePolicy extends Model
 
     //     return $policy;
     // }
+//     public static function getAllPolicy($user_id)
+// {
+//     $policyTypes = [
+//         1  => 'Home Insurance',
+//         2  => 'Office Insurance',
+//         3  => 'Life Insurance',
+//         4  => 'Critical Illness Insurance',
+//         5  => 'Personal Accident Insurance',
+//         6  => 'Individual Medical Insurance',
+//         7  => 'Family Medical Insurance',
+//         8  => 'Pet Insurance',
+//         9  => 'Dental Insurance',
+//         10 => 'Travel Insurance',
+//         11 => 'Marine Insurance',
+//         12 => 'Motor Insurance'
+//     ];
+
+//     $policy = PurchasePolicy::select(
+//         'purchase_policy.id',
+//         'purchase_policy.client_id',
+//         'purchase_policy.policy_id',
+//         'purchase_policy.plan_id',
+//         'purchase_policy.insurance_company_id',
+//         'purchase_policy.policy_no',
+//         'purchase_policy.policy_type',
+//         'purchase_policy.plan_name',
+//         'purchase_policy.policy_plan_limit',
+//         'purchase_policy.inception_date',
+//         'purchase_policy.expiry_date',
+//         'purchase_policy.payment_status',
+//         'purchase_policy.net_premium',
+//         'purchase_policy.fees',
+//         'purchase_policy.stamps',
+//         'purchase_policy.sales_tax',
+//         'purchase_policy.cbj',
+//         'purchase_policy.sales_tax_cbj',
+//         'purchase_policy.gross_premium',
+//         'purchase_policy.commission_percentage',
+//         'purchase_policy.commission_amount',
+//         'purchase_policy.policy_pdf_url',
+//         'insurance_companies.company_name',
+//         'clients.first_name',
+//         'clients.father_name',
+//         'clients.grandfather_name',
+//         'clients.surname'
+//     )
+//     ->leftJoin('insurance_companies', 'purchase_policy.insurance_company_id', '=', 'insurance_companies.id')
+//     ->leftJoin('clients', 'purchase_policy.client_id', '=', 'clients.id')
+//     ->where('purchase_policy.client_id', $user_id)
+//     ->where('purchase_policy.payment_status', 1)
+//     ->get();
+
+//     foreach ($policy as $p) {
+//         $p->policy_type_no = $p->policy_type ?? 0;
+//         $p->policy_type    = $policyTypes[$p->policy_type] ?? 'Unknown Policy Type';
+
+//         // Build the correct public URL from the actual stored path
+//         $p->pdf_url = self::buildPdfUrl($p->policy_pdf_url);
+
+//         // Hide the raw filesystem path from the response
+//         $p->makeHidden('policy_pdf_url');
+//     }
+
+//     return $policy;
+// }
     public static function getAllPolicy($user_id)
-{
-    $policyTypes = [
-        1  => 'Home Insurance',
-        2  => 'Office Insurance',
-        3  => 'Life Insurance',
-        4  => 'Critical Illness Insurance',
-        5  => 'Personal Accident Insurance',
-        6  => 'Individual Medical Insurance',
-        7  => 'Family Medical Insurance',
-        8  => 'Pet Insurance',
-        9  => 'Dental Insurance',
-        10 => 'Travel Insurance',
-        11 => 'Marine Insurance',
-        12 => 'Motor Insurance'
-    ];
+    {
+        $policyTypes = [
+            1 => 'Home Insurance',
+            2 => 'Office Insurance',
+            3 => 'Life Insurance',
+            4 => 'Critical Illness Insurance',
+            5 => 'Personal Accident Insurance',
+            6 => 'Individual Medical Insurance',
+            7 => 'Family Medical Insurance',
+            8 => 'Pet Insurance',
+            9 => 'Dental Insurance',
+            10 => 'Travel Insurance',
+            11 => 'Marine Insurance',
+            12 => 'Motor Insurance'
+        ];
 
-    $policy = PurchasePolicy::select(
-        'purchase_policy.id',
-        'purchase_policy.client_id',
-        'purchase_policy.policy_id',
-        'purchase_policy.plan_id',
-        'purchase_policy.insurance_company_id',
-        'purchase_policy.policy_no',
-        'purchase_policy.policy_type',
-        'purchase_policy.plan_name',
-        'purchase_policy.policy_plan_limit',
-        'purchase_policy.inception_date',
-        'purchase_policy.expiry_date',
-        'purchase_policy.payment_status',
-        'purchase_policy.net_premium',
-        'purchase_policy.fees',
-        'purchase_policy.stamps',
-        'purchase_policy.sales_tax',
-        'purchase_policy.cbj',
-        'purchase_policy.sales_tax_cbj',
-        'purchase_policy.gross_premium',
-        'purchase_policy.commission_percentage',
-        'purchase_policy.commission_amount',
-        'purchase_policy.policy_pdf_url',
-        'insurance_companies.company_name',
-        'clients.first_name',
-        'clients.father_name',
-        'clients.grandfather_name',
-        'clients.surname'
-    )
-    ->leftJoin('insurance_companies', 'purchase_policy.insurance_company_id', '=', 'insurance_companies.id')
-    ->leftJoin('clients', 'purchase_policy.client_id', '=', 'clients.id')
-    ->where('purchase_policy.client_id', $user_id)
-    ->where('purchase_policy.payment_status', 1)
-    ->get();
+        $policy = PurchasePolicy::select(
+            'purchase_policy.id',
+            'purchase_policy.client_id',
+            'purchase_policy.policy_id',
+            'purchase_policy.plan_id',
+            'purchase_policy.insurance_company_id',
+            'purchase_policy.policy_no',
+            'purchase_policy.policy_type',
+            'purchase_policy.plan_name',
+            'purchase_policy.policy_plan_limit',
+            'purchase_policy.inception_date',
+            'purchase_policy.expiry_date',
+            'purchase_policy.payment_status',
+            'purchase_policy.net_premium',
+            'purchase_policy.fees',
+            'purchase_policy.stamps',
+            'purchase_policy.sales_tax',
+            'purchase_policy.cbj',
+            'purchase_policy.sales_tax_cbj',
+            'purchase_policy.gross_premium',
+            'purchase_policy.commission_percentage',
+            'purchase_policy.commission_amount',
+            'purchase_policy.policy_pdf_url',
 
-    foreach ($policy as $p) {
-        $p->policy_type_no = $p->policy_type ?? 0;
-        $p->policy_type    = $policyTypes[$p->policy_type] ?? 'Unknown Policy Type';
+            // Final PDF
+            'final_policy_pdfs.final_pdf_url',
 
-        // Build the correct public URL from the actual stored path
-        $p->pdf_url = self::buildPdfUrl($p->policy_pdf_url);
+            'insurance_companies.company_name',
 
-        // Hide the raw filesystem path from the response
-        $p->makeHidden('policy_pdf_url');
+            'clients.first_name',
+            'clients.father_name',
+            'clients.grandfather_name',
+            'clients.surname'
+        )
+            ->leftJoin(
+                'insurance_companies',
+                'purchase_policy.insurance_company_id',
+                '=',
+                'insurance_companies.id'
+            )
+            ->leftJoin(
+                'clients',
+                'purchase_policy.client_id',
+                '=',
+                'clients.id'
+            )
+            ->leftJoin(
+                'final_policy_pdfs',
+                'final_policy_pdfs.policy_id',
+                '=',
+                'purchase_policy.id'
+            )
+            ->where('purchase_policy.client_id', $user_id)
+            ->where('purchase_policy.payment_status', 1)
+            ->orderBy('purchase_policy.id', 'desc')
+
+            ->get();
+
+        foreach ($policy as $p) {
+
+            $p->policy_type_no = $p->policy_type ?? 0;
+
+            $p->policy_type = $policyTypes[$p->policy_type]
+                ?? 'Unknown Policy Type';
+
+            /*
+            |--------------------------------------------------------------------------
+            | PDF URL
+            |--------------------------------------------------------------------------
+            | If final PDF exists -> use final PDF
+            | Otherwise -> use original policy PDF
+            |--------------------------------------------------------------------------
+            */
+
+            if (!empty($p->final_pdf_url)) {
+                $p->pdf_url = self::buildPdfUrl($p->final_pdf_url);
+            } else {
+                $p->pdf_url = self::buildPdfUrl($p->policy_pdf_url);
+            }
+
+            // Hide internal/raw paths
+            $p->makeHidden([
+                'policy_pdf_url',
+                'final_pdf_url'
+            ]);
+        }
+
+        return $policy;
     }
-
-    return $policy;
-}
-
-private static function buildPdfUrl($storedPath)
+public static function buildPdfUrl($storedPath)
 {
     if (!$storedPath) {
         return null;
@@ -285,10 +398,25 @@ private static function buildPdfUrl($storedPath)
     {
         return $this->belongsTo(Agent::class, 'agent_id');
     }
-    public function insurance_company()
+    // public function insurance_company()
+    // {
+    //     return $this->belongsTo(InsuranceCompany::class, 'insurance_company_id', 'id');
+    // }
+    // public function client_home_insurance()
+    // {
+    //     return $this->belongsTo(ClientHomeInsurance::class, 'policy_id');
+    // }
+        public function insurance_company()
     {
         return $this->belongsTo(InsuranceCompany::class, 'insurance_company_id', 'id');
     }
+
+    // ADD THIS — final generated PDF for this purchased policy
+    public function finalPolicyPdf()
+    {
+        return $this->hasOne(\App\Models\FinalPolicyPdf::class, 'policy_id')->latestOfMany();
+    }
+
     public function client_home_insurance()
     {
         return $this->belongsTo(ClientHomeInsurance::class, 'policy_id');
@@ -508,7 +636,8 @@ private static function buildPdfUrl($storedPath)
             'insurance_companies.company_name',
             'agent.first_name as agent_name',
             'supervisors.first_name as supervisor_name',
-            'clients.first_name as client_name',
+            //'clients.first_name as client_name',
+            DB::raw("CONCAT_WS(' ', clients.first_name, clients.surname) as client_name"),
             'clients.id as client_id',
             'occupations.name as occupations_name',
             'districts.name as district',
@@ -727,11 +856,11 @@ private static function buildPdfUrl($storedPath)
             // $groupedPolicies[$groupKey]['totals']['net_premium_after'] += $policy->net_premium_after;
             // $groupedPolicies[$groupKey]['totals']['total_net_premium'] += $policy->net_premium;
             // $groupedPolicies[$groupKey]['totals']['total_gross_premium'] += $policy->gross_premium;
-        
+
           // Accumulate totals
             $groupedPolicies[$groupKey]['totals']['total_net_premium'] += (float)($policy->net_premium ?? 0);
             $groupedPolicies[$groupKey]['totals']['total_gross_premium'] += (float)($policy->gross_premium ?? 0);
-     
+
             }
 
         return $groupedPolicies;
@@ -743,7 +872,8 @@ private static function buildPdfUrl($storedPath)
             'insurance_companies.company_name',
             'agent.first_name as agent_name',
             'travel_plans.plan_name as travel_plans_name',
-            'clients.first_name as client_name',
+            //'clients.first_name as client_name',
+            DB::raw("CONCAT_WS(' ', clients.first_name, clients.surname) as client_name"),
             'countries.name as distination',
             DB::raw('TIMESTAMPDIFF(YEAR, clients.birth_date, CURDATE()) as client_age'),
             DB::raw('CONCAT(COALESCE(client_travel_insurances.travel_days, DATEDIFF(purchase_policy.expiry_date, purchase_policy.inception_date)), " Days") as period_of_travel')
@@ -845,7 +975,8 @@ private static function buildPdfUrl($storedPath)
             'purchase_policy.*',
             'insurance_companies.company_name',
             'agent.first_name as agent_name',
-            'clients.first_name as client_name',
+            //'clients.first_name as client_name',
+            DB::raw("CONCAT_WS(' ', clients.first_name, clients.surname) as client_name"),
             'client_pets_insurances.pets_type',
             'client_pets_insurances.breed as pet_breed',
             'cities.name as owner_city',

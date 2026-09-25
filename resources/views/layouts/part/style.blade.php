@@ -500,7 +500,7 @@
   /*------scroll bar---------------------*/
 
   ::-webkit-scrollbar {
-    width: 16px;
+    width: 7px;
     height: 7px;
   }
 
@@ -512,7 +512,7 @@
   ::-webkit-scrollbar-thumb {
     background: #525965;
     border: 0px none #ffffff;
-    border-radius: 0px;
+  border-radius: 13px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
@@ -526,7 +526,7 @@
   ::-webkit-scrollbar-track {
     background: transparent;
     border: 0px none #ffffff;
-    border-radius: 50px;
+    border-radius: 100px;
   }
 
   ::-webkit-scrollbar-track:hover {

@@ -18,6 +18,25 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+        \App\Events\ChatMessageSent::class => [
+            \App\Listeners\SendChatMessageNotification::class,
+        ],
+        \App\Events\ClaimStatusUpdated::class => [
+            \App\Listeners\SendClaimStatusNotification::class,
+        ],
+        \App\Events\ComplaintStatusUpdated::class => [
+            \App\Listeners\SendComplaintStatusNotification::class,
+        ],
+        \App\Events\CouponSent::class => [
+            \App\Listeners\SendCouponNotification::class,
+        ],
+        \App\Events\ExpiryReminderDue::class => [
+            \App\Listeners\SendExpiryReminderNotification::class,
+        ],
+        //for admin notification when client send message to admin
+        \App\Events\ClientMessageToAdmin::class => [
+            \App\Listeners\SendAdminChatNotification::class,
+        ],
     ];
 
     /**

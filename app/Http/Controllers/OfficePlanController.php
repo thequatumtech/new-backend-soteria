@@ -11,6 +11,9 @@ use App\Models\InsurancePlanModels\OfficePlan;
 use App\Models\InsurancePlanModels\OfficePlanPolicyCover;
 use App\Models\LineOfBusiness;
 use Illuminate\Http\Request;
+use App\Models\ProtectionSystem;
+use Illuminate\Support\Facades\Crypt;
+
 
 class OfficePlanController extends Controller
 {
@@ -25,65 +28,67 @@ class OfficePlanController extends Controller
 
     public function add_office_plan(Request $request)
     {
-        $insurance_companies = InsuranceCompany::where('line_of_business_id','like','%"4"%')->get();
+        $insurance_companies = InsuranceCompany::where('line_of_business_id', 'like', '%"4"%')->get();
         $line_of_businesses = LineOfBusiness::find(self::line_of_business_id)->name;
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
-        return view('admin.plan.office-plans.add_office_plan',compact('insurance_companies','line_of_businesses','countries','cities','districts','ages'));
+        $protection_systems = ProtectionSystem::all();
+        return view('admin.plan.office-plans.add_office_plan', compact('insurance_companies', 'line_of_businesses', 'countries', 'cities', 'districts', 'ages', 'protection_systems'));
     }
 
     public function edit_office_plan(Request $request, $id)
     {
-        $insurance_companies = InsuranceCompany::where('line_of_business_id','like','%"4"%')->get();
+
+        $decryptedId = Crypt::decrypt($id);
+
+        $insurance_companies = InsuranceCompany::where('line_of_business_id', 'like', '%"4"%')->get();
         $line_of_businesses = LineOfBusiness::all();
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
-        $plan = OfficePlan::find($id);
+        $plan = OfficePlan::find($decryptedId);
         $selected_country_ids = $plan->restricted_country_ids ? json_decode($plan->restricted_country_ids, true) : [];
         $selected_city_ids = $plan->restricted_city_ids ? json_decode($plan->restricted_city_ids, true) : [];
         $selected_district_ids = $plan->restricted_district_ids ? json_decode($plan->restricted_district_ids, true) : [];
+        $protection_systems = ProtectionSystem::all();
+        $selected_protection_system_ids = $plan->restricted_protection_system_ids ? json_decode($plan->restricted_protection_system_ids, true) : [];
+        $selected_office_age_ids = $plan->restricted_office_age_ids ? json_decode($plan->restricted_office_age_ids, true) : [];
 
-        // Load only related cities and districts
-        // $cities = count($selected_country_ids) > 0
-        //     ? Cities::whereIn('country_id', $selected_country_ids)->get()
-        //     : collect(); // empty collection
-
-        // $districts = count($selected_city_ids) > 0
-        //     ? District::whereIn('city_id', $selected_city_ids)->get()
-        //     : collect(); // empty collection
-
-/*        if($plan->restricted_country_ids) {
-            $cities = Cities::whereIn('country_id', json_decode($plan->restricted_country_ids))->get();
-            if($plan->restricted_city_ids) {
-                $districts = District::whereIn('city_id', json_decode($plan->restricted_city_ids))->get();
-            } else {
-                $districts = [];
-            }
-        } else {
-            $cities = $districts = [];
-        }*/
-        return view('admin.plan.office-plans.edit_office_plan',compact('insurance_companies','line_of_businesses','countries','cities','districts','ages','plan','selected_country_ids',
+        return view('admin.plan.office-plans.edit_office_plan', compact(
+            'insurance_companies',
+            'line_of_businesses',
+            'countries',
+            'cities',
+            'districts',
+            'ages',
+            'plan',
+            'selected_country_ids',
             'selected_city_ids',
-            'selected_district_ids'));
+            'selected_district_ids',
+            'protection_systems',
+            'selected_protection_system_ids',
+            'selected_office_age_ids'
+        ));
     }
 
     public function save_office_plan(Request $request)
     {
-        if($request->form_type == 'add'){
+        if ($request->form_type == 'add') {
             $office_insurance_plan = new OfficePlan();
             $office_insurance_plan->line_of_business_id = self::line_of_business_id;
             $office_insurance_plan->insurance_company_id = $request->insurance_company_id;
             $office_insurance_plan->plan_name = $request->plan_name;
             $office_insurance_plan->policy_period = $request->policy_period;
-            $office_insurance_plan->insurance_policy_text = $request->insurance_policy_text??null;
-            $office_insurance_plan->restricted_country_ids = $request->restricted_country_ids?json_encode($request->restricted_country_ids):null;
-            $office_insurance_plan->restricted_city_ids = $request->restricted_city_ids?json_encode($request->restricted_city_ids):null;
-            $office_insurance_plan->restricted_district_ids = $request->restricted_district_ids?json_encode($request->restricted_district_ids):null;
-            $office_insurance_plan->restricted_age_ids = $request->restricted_age_ids?json_encode($request->restricted_age_ids):null;
+            $office_insurance_plan->insurance_policy_text = $request->insurance_policy_text ?? null;
+            $office_insurance_plan->restricted_country_ids = $request->restricted_country_ids ? json_encode($request->restricted_country_ids) : null;
+            $office_insurance_plan->restricted_city_ids = $request->restricted_city_ids ? json_encode($request->restricted_city_ids) : null;
+            $office_insurance_plan->restricted_district_ids = $request->restricted_district_ids ? json_encode($request->restricted_district_ids) : null;
+            $office_insurance_plan->restricted_age_ids = $request->restricted_age_ids ? json_encode($request->restricted_age_ids) : null;
+            $office_insurance_plan->restricted_protection_system_ids = $request->restricted_protection_system_ids ? json_encode($request->restricted_protection_system_ids) : null;
+            $office_insurance_plan->restricted_office_age_ids = $request->restricted_office_age_ids ? json_encode($request->restricted_office_age_ids) : null;
             $office_insurance_plan->limit = $request->limit;
             $office_insurance_plan->limit = str_replace(',', '', $request->limit);
             $office_insurance_plan->net_premium = $request->net_premium;
@@ -92,7 +97,7 @@ class OfficePlanController extends Controller
             $office_insurance_plan->sales_tax = $request->sales_tax;
             $office_insurance_plan->cbj = $request->cbj;
             $office_insurance_plan->sales_tax_cbj = $request->salextaxcbj;
-            
+
             $office_insurance_plan->gross_premium = $request->gross_premium;
             $office_insurance_plan->commission_percentage = $request->commission_percentage;
             $office_insurance_plan->commission_amount = $request->commission_amount;
@@ -102,7 +107,7 @@ class OfficePlanController extends Controller
             if ($request->hasFile($file)) {
                 $uploadedFile = $request->file($file);
                 $filename = $uploadedFile->getClientOriginalName(); // Original filename
-                $newFilename = $file."_file_" . time() . "." .$uploadedFile->getClientOriginalExtension(); // New filename with timestamp
+                $newFilename = $file . "_file_" . time() . "." . $uploadedFile->getClientOriginalExtension(); // New filename with timestamp
                 $uploadedFile->move(public_path('uploads/insurance_plans/' . $office_insurance_plan->id), $newFilename);
 
                 $office_insurance_plan->$file = $newFilename; // Store the filename in the database
@@ -121,17 +126,19 @@ class OfficePlanController extends Controller
                 $office_insurance_plan_policy_covers->save();
             }
             $message = __('messages.plans.add_success');
-        } else if($request->form_type == 'edit'){
+        } else if ($request->form_type == 'edit') {
             $plan_id = $request->plan_id;
             $office_insurance_plan = OfficePlan::find($plan_id);
             $office_insurance_plan->insurance_company_id = $request->insurance_company_id;
             $office_insurance_plan->plan_name = $request->plan_name;
             $office_insurance_plan->policy_period = $request->policy_period;
-            $office_insurance_plan->insurance_policy_text = $request->insurance_policy_text??null;
-            $office_insurance_plan->restricted_country_ids = $request->restricted_country_ids?json_encode($request->restricted_country_ids):null;
-            $office_insurance_plan->restricted_city_ids = $request->restricted_city_ids?json_encode($request->restricted_city_ids):null;
-            $office_insurance_plan->restricted_district_ids = $request->restricted_district_ids?json_encode($request->restricted_district_ids):null;
-            $office_insurance_plan->restricted_age_ids = $request->restricted_age_ids?json_encode($request->restricted_age_ids):null;
+            $office_insurance_plan->insurance_policy_text = $request->insurance_policy_text ?? null;
+            $office_insurance_plan->restricted_country_ids = $request->restricted_country_ids ? json_encode($request->restricted_country_ids) : null;
+            $office_insurance_plan->restricted_city_ids = $request->restricted_city_ids ? json_encode($request->restricted_city_ids) : null;
+            $office_insurance_plan->restricted_district_ids = $request->restricted_district_ids ? json_encode($request->restricted_district_ids) : null;
+            $office_insurance_plan->restricted_age_ids = $request->restricted_age_ids ? json_encode($request->restricted_age_ids) : null;
+            $office_insurance_plan->restricted_protection_system_ids = $request->restricted_protection_system_ids ? json_encode($request->restricted_protection_system_ids) : null;
+            $office_insurance_plan->restricted_office_age_ids = $request->restricted_office_age_ids ? json_encode($request->restricted_office_age_ids) : null;
             $office_insurance_plan->limit = $request->limit;
             $office_insurance_plan->limit = str_replace(',', '', $request->limit);
             $office_insurance_plan->net_premium = $request->net_premium;
@@ -140,7 +147,7 @@ class OfficePlanController extends Controller
             $office_insurance_plan->sales_tax = $request->sales_tax;
             $office_insurance_plan->cbj = $request->cbj;
             $office_insurance_plan->sales_tax_cbj = $request->salextaxcbj;
-         
+
             $office_insurance_plan->gross_premium = $request->gross_premium;
             $office_insurance_plan->commission_percentage = $request->commission_percentage;
             $office_insurance_plan->commission_amount = $request->commission_amount;
@@ -150,23 +157,23 @@ class OfficePlanController extends Controller
             if ($request->hasFile($file)) {
                 $uploadedFile = $request->file($file);
                 $filename = $uploadedFile->getClientOriginalName(); // Original filename
-                $newFilename = $file."_file_" . time() . "." .$uploadedFile->getClientOriginalExtension(); // New filename with timestamp
+                $newFilename = $file . "_file_" . time() . "." . $uploadedFile->getClientOriginalExtension(); // New filename with timestamp
                 $uploadedFile->move(public_path('uploads/insurance_plans/' . $office_insurance_plan->id), $newFilename);
 
                 $office_insurance_plan->$file = $newFilename; // Store the filename in the database
                 $office_insurance_plan->save();
             }
             // OfficePlanPolicyCover::where('office_plan_id',$plan_id)->delete();
-             $requestCoverIds = [];
-                foreach ($request->policy_covers as $single) {
-                    if (!empty($single['id'])) {
-                        $requestCoverIds[] = $single['id'];
-                    }
+            $requestCoverIds = [];
+            foreach ($request->policy_covers as $single) {
+                if (!empty($single['id'])) {
+                    $requestCoverIds[] = $single['id'];
                 }
+            }
 
-             OfficePlanPolicyCover::where('office_plan_id', $plan_id)
-                    ->whereNotIn('id', $requestCoverIds)
-                    ->delete();
+            OfficePlanPolicyCover::where('office_plan_id', $plan_id)
+                ->whereNotIn('id', $requestCoverIds)
+                ->delete();
             foreach ($request->policy_covers as $single) {
                 // $office_insurance_plan_policy_covers = new OfficePlanPolicyCover();
                 // $office_insurance_plan_policy_covers->office_plan_id = $plan_id;
@@ -179,7 +186,7 @@ class OfficePlanController extends Controller
                 // $office_insurance_plan_policy_covers->save();
 
 
-                 if (!empty($single['id'])) {
+                if (!empty($single['id'])) {
                     $cover = OfficePlanPolicyCover::find($single['id']);
                     if ($cover) {
                         $cover->update([
@@ -201,18 +208,17 @@ class OfficePlanController extends Controller
                         'cover_premium' => $single['cover_premium'],
                     ]);
                 }
-
             }
             $message = __('messages.plans.edit_success');
         }
-        return redirect()->route('office_plan.office_plan')->with('success',$message);
+        return redirect()->route('office_plan.office_plan')->with('success', $message);
     }
 
     public function delete_office_plan(Request $request)
     {
         $plan_id = $request->delete_plan_id;
-        OfficePlanPolicyCover::where('office_plan_id',$plan_id)->delete();
+        OfficePlanPolicyCover::where('office_plan_id', $plan_id)->delete();
         OfficePlan::find($plan_id)->delete();
-        return back()->with('success',__('messages.plans.delete_success'));
+        return back()->with('success', __('messages.plans.delete_success'));
     }
 }

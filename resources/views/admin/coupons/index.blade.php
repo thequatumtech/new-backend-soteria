@@ -106,9 +106,7 @@
     <div class="container-fluid">
         <div class="header d-flex justify-content-between p-3 py-2 align-items-center">
             <div class="text-white group-title fw-bold">{{__('messages.discount_coupons.coupons_list')}}</div>
-            <!-- <div class="py-1">
-                <img src="{{asset('img/icon-add.png')}}" alt="">
-            </div> -->
+           
             @if(is_admin_authorized('coupons.add'))
             <a href="{{route('coupons.add')}}" class="btn pe-0">
                 <img src="{{asset('img/icon-add.png')}}" alt="">
@@ -166,16 +164,7 @@
                                     </button>
                                 @endif
                             </div>
-                            {{--
-                                                                                        <div class="d-flex gap-3 justify-content-evenly align-items-center px-2">
-                                <button type="button" class="btn p-0 m-0 btn-custom viewbtn" value="{{$agentsdata->id}}">
-                                                                    <img src="{{asset('img/icon-eye.png')}}" alt="View" title="View">
-                                                                </button>
-                                                                <button  class="btn p-0 m-0 editbtn" value="{{$agentsdata->id}}" title="Edit">
-                                                                    <img src="{{asset('img/icon-edit.png')}}" alt="">
-                                                                </button>
-                                                            </div>
-                                                        --}}
+                            
                         </td>
                         <td>{{$coupon->status == 1 ? 'Active' : 'Inactive'}}</td>
                     </tr>

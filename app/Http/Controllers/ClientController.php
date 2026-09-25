@@ -17,18 +17,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\DB;
-use App\Models\ClientHomeInsurance;
-use App\Models\ClientOfficeInsurance;
-use App\Models\ClientLifeInsurance;
-use App\Models\CriticalIllnessInsurance;
-use App\Models\ClientPersonalAccidentInsurance;
-use App\Models\ClientTravelInsurance;
-use App\Models\ClientMarineInsurance;
-use App\Models\ClientDentalsInsurance;
-use App\Models\ClientPetsInsurance;
-use App\Models\ClientFamilyMedicalInsurance;
-use App\Models\ClientMotorInsurance;
+use Illuminate\Support\Facades\Crypt;
+
 
 class ClientController extends Controller
 {
@@ -37,107 +27,178 @@ class ClientController extends Controller
         $clients = Client::with('agent')->where('is_blacklisted', 2)->get();
         return view('admin.client.client', compact('clients'));
     }
-    // public function purchased_policy(Request $request, $id)
-    // {
-    //     $purchased_policy = PurchasePolicy::with(['client', 'insurance_company'])
-    //         ->where('client_id', $id)
-    //         ->get();
 
-    //     if ($purchased_policies->isEmpty()) {
-    //         return response()->json([
-    //             'purchased_policy' => [],
-    //             'status' => 404,
-    //             'message' => 'No purchased policies found for this client.'
-    //         ]);
-    //     }
-
-    //     $models = [
-    //         ClientHomeInsurance::class,
-    //         ClientOfficeInsurance::class,
-    //         ClientLifeInsurance::class,
-    //         CriticalIllnessInsurance::class,
-    //         ClientPersonalAccidentInsurance::class,
-    //         ClientTravelInsurance::class,
-    //         ClientMarineInsurance::class,
-    //         ClientDentalsInsurance::class,
-    //         ClientPetsInsurance::class,
-    //         ClientFamilyMedicalInsurance::class,
-    //         ClientMotorInsurance::class,
-    //     ];
-
-    //     $result = [];
-
-    //     foreach ($purchased_policies as $policy) {
-    //         $policyNo = $policy->policy_no;
-    //         $policyDetails = null;
-    //         $sourceTable = null;
-
-    //         foreach ($models as $model) {
-    //             $record = $model::select(
-    //                 'police_no',
-    //                 'first_name',
-    //                 'last_name',
-    //                 'third_name',
-    //                 'family_name',
-    //                 'gender',
-    //                 'birth_date'
-    //             )
-    //                 ->where('police_no', $policyNo)
-    //                 ->first();
-
-    //             if ($record) {
-    //                 $policyDetails = $record;
-    //                 $sourceTable = $record->getTable();
-    //                 break;
-    //             }
-    //         }
-
-    //         $result[] = [
-    //             'purchase_policy' => $policy,
-    //             'details' => $policyDetails,
-    //             'source_table' => $sourceTable,
-    //         ];
-    //     }
-
-    //     return response()->json([
-    //         'purchased_policy' => $result,
-    //         'status' => 200
-    //     ]);
-    // }
-
-    public function purchased_policy(Request $request, $id)
+    public function getAllPolicy(Request $request, $id)
     {
-        $purchased_policy = PurchasePolicy::with(['client', 'insurance_company'])
-            ->where('client_id', $id)
-            ->get();
+        $client = Client::with([
+            'agent',
+            'purchased_policies.finalPolicyPdf',
+            'purchased_policies.insurance_company',
+        ])->findOrFail($id);
 
-        if ($purchased_policy->isNotEmpty()) {
+        $policyTypes = [
+            1 => 'Home Insurance',
+            2 => 'Office Insurance',
+            3 => 'Life Insurance',
+            4 => 'Critical Illness Insurance',
+            5 => 'Personal Accident Insurance',
+            6 => 'Individual Medical Insurance',
+            7 => 'Family Medical Insurance',
+            8 => 'Pet Insurance',
+            9 => 'Dental Insurance',
+            10 => 'Travel Insurance',
+            11 => 'Marine Insurance',
+            12 => 'Motor Insurance',
+        ];
 
-            //  Add details to each policy
-            $purchased_policy->transform(function ($policy) {
-                $policy->details = [
-                    'police_no'   => $policy->policy_no ?? 'N/A',
-                    'first_name'  => $policy->client->first_name ?? 'N/A',
-                    'last_name'   => $policy->client->surname ?? 'N/A',
-                    'third_name'  => $policy->client->grandfather_name ?? 'N/A',
-                    'family_name' => $policy->client->father_name ?? 'N/A',
-                    'gender' => ($policy->client->gender == 1) ? 'Male' : (($policy->client->gender == 2) ? 'Female' : 'N/A'),
-                    'birth_date'  => $policy->client->birth_date ?? 'N/A',
-                ];
-                return $policy;
-            });
+        $purchased_policy = $client->purchased_policies;
 
-            return response()->json([
-                'purchased_policy' => $purchased_policy,
-                'status' => 200
-            ]);
+        foreach ($purchased_policy as $policy) {
+
+            // Keep numeric type separately if needed
+            $policy->policy_type_no = $policy->policy_type;
+
+            // Policy type name
+            $policy->policy_type = $policyTypes[$policy->policy_type]
+                ?? 'Unknown Policy Type';
+
+            /*
+             * Draft / Original PDF
+             */
+            $policy->draft_pdf_url = PurchasePolicy::buildPdfUrl(
+                $policy->policy_pdf_url
+            );
+
+            /*
+             * Final PDF
+             */
+            $policy->final_pdf_url = $policy->finalPolicyPdf
+                ? PurchasePolicy::buildPdfUrl(
+                    $policy->finalPolicyPdf->final_pdf_url
+                )
+                : null;
         }
 
+        return view('admin.client.all-policies', compact(
+            'client',
+            'purchased_policy'
+        ));
+    }
+
+    public function purchase_policy_show(Request $request, $id)
+    {
+        $policy = PurchasePolicy::with([
+            'client',
+            'agent',
+            'insurance_company',
+            'finalPolicyPdf',
+        ])->findOrFail($id);
+
+        $policyTypes = [
+            1 => 'Home Insurance',
+            2 => 'Office Insurance',
+            3 => 'Life Insurance',
+            4 => 'Critical Illness Insurance',
+            5 => 'Personal Accident Insurance',
+            6 => 'Individual Medical Insurance',
+            7 => 'Family Medical Insurance',
+            8 => 'Pet Insurance',
+            9 => 'Dental Insurance',
+            10 => 'Travel Insurance',
+            11 => 'Marine Insurance',
+            12 => 'Motor Insurance',
+        ];
+
+        $policyViews = [
+            1 => 'admin.client.policies.home',
+            2 => 'admin.client.policies.office',
+            3 => 'admin.client.policies.life',
+            4 => 'admin.client.policies.critical-illness',
+            5 => 'admin.client.policies.personal-accident',
+            6 => 'admin.client.policies.individual-medical',
+            7 => 'admin.client.policies.family-medical',
+            8 => 'admin.client.policies.pet',
+            9 => 'admin.client.policies.dental',
+            10 => 'admin.client.policies.travel',
+            11 => 'admin.client.policies.marine',
+            12 => 'admin.client.policies.motor',
+        ];
+
+
+        $policy->policy_type_no = $policy->policy_type;
+
+        $policy->policy_type_name =
+            $policyTypes[$policy->policy_type] ?? 'Unknown Policy Type';
+
+        $policy->draft_pdf_url = PurchasePolicy::buildPdfUrl(
+            $policy->policy_pdf_url
+        );
+
+        $policy->final_pdf_url = $policy->finalPolicyPdf
+            ? PurchasePolicy::buildPdfUrl(
+                $policy->finalPolicyPdf->final_pdf_url
+            )
+            : null;
+
+        $policy_details = PurchasePolicy::getCombinedPolicyDetails($policy);
+
+            // dd($policy_details);
+     $policyView = $policyViews[$policy->policy_type]
+            ?? 'admin.client.policies.default';
+
+
+            // dd($policy_details->home_type);
+
+        return view(
+            'admin.client.purchase-policy-show',
+            compact(
+                'policy',
+                'policy_details',
+                'policyView'
+            )
+             );
+    }
+
+
+    public function purchased_policy(Request $request, $id)
+{
+    $purchased_policy = PurchasePolicy::with(['client', 'insurance_company', 'finalPolicyPdf'])
+        ->where('client_id', $id)
+        ->get();
+
+    if ($purchased_policy->isNotEmpty()) {
+
+        //  Add details to each policy
+        $purchased_policy->transform(function ($policy) {
+            $policy->details = [
+                'police_no'   => $policy->policy_no ?? 'N/A',
+                'first_name'  => $policy->client->first_name ?? 'N/A',
+                'last_name'   => $policy->client->surname ?? 'N/A',
+                'third_name'  => $policy->client->grandfather_name ?? 'N/A',
+                'family_name' => $policy->client->father_name ?? 'N/A',
+                'gender' => ($policy->client->gender == 1) ? 'Male' : (($policy->client->gender == 2) ? 'Female' : 'N/A'),
+                'birth_date'  => $policy->client->birth_date ?? 'N/A',
+            ];
+
+            // ADD THIS — final PDF url pulled from final_policy_pdfs table
+                $policy->final_pdf_url = \App\Models\PurchasePolicy::buildPdfUrl($policy->policy_pdf_url) ?? null;
+
+            // dd($policy);
+            return $policy;
+        });
+
+
         return response()->json([
-            'purchased_policy' => [],
-            'status' => 404
+            'purchased_policy' => $purchased_policy,
+            'status' => 200
         ]);
     }
+
+    return response()->json([
+        'purchased_policy' => [],
+        'status' => 404
+    ]);
+}
 
 
     public function view(Request $request)
@@ -148,9 +209,9 @@ class ClientController extends Controller
     public function add(Request $request)
     {
         $nationalities = Nationality::all();
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities =  Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $occupations = Occupations::all();
         return view('admin.client.add_client', compact('nationalities', 'countries', 'cities', 'districts', 'occupations'));
     }
@@ -162,65 +223,7 @@ class ClientController extends Controller
             $clientId = $request->client_id;
         }
         try {
-            // $request->validate([
-            //     'first_name' => 'required',
-            //     'father_name' => 'required',
-            //     'grandfather_name' => 'required',
-            //     'surname' => 'required',
-            //     'language' => 'required',
-            //     'nationality_id' => 'required',
-            //     'national_id_number' => 'required',
-            //     'residence_id_number' => 'required',
-            //     'birth_date' => ['required', 'date', new AdultRule],
-            //     'gender' => 'required',
-            //     'marital_status' => 'required',
-            //     'email_id' => ['required', 'email', 'unique:clients,email_id,' . $clientId . ',id,deleted_at,NULL'],
-            //     'mobile_no' => ['required', 'numeric', 'unique:clients,mobile_no,' . $clientId . ',id,deleted_at,NULL'],
-            //     'country_id' => 'required|numeric',
-            //     'residing_country_same' => 'required',
-            //     'city_id' => 'required|numeric',
-            //     'district_id' => 'required|numeric',
-            //     'street_name' => 'required',
-            //     'building_no' => 'required',
-            //     'company_name' => 'required',
-            //     'occupation_id' => 'required|numeric',
-            //     'work_nature' => 'required',
-            //     'company_city_id' => 'required|numeric',
-            //     'company_district_id' => 'required|numeric',
-            //     'company_street_name' => 'required',
-            //     'company_building_no' => 'required',
-            //     'company_contact_no' => 'required',
-            //     'id_front' => [$clientId ? 'nullable' : 'required', 'file', 'max:10240', 'image'],
-            //     'id_back' => [$clientId ? 'nullable' : 'required', 'file', 'max:10240', 'image'],
-            //     'profile_pic' => [$clientId ? 'nullable' : 'required', 'file', 'max:10240', 'image'],
-            //     'agent_id' => 'nullable|numeric',
-            //     'password' => 'required_without:client_id',
-            //     'has_company' => 'required',
-            //     'client_company_name' => 'required_if:has_company,1',
-            //     'client_company_registered_national_id_no' => 'required_if:has_company,1',
-            //     'client_company_registration_no' => 'required_if:has_company,1',
-            //     'client_company_country_id' => 'required_if:has_company,1|numeric',
-            //     'client_company_city_id' => 'required_if:has_company,1|numeric',
-            //     'client_company_district_id' => 'required_if:has_company,1|numeric',
-            //     'client_company_street_name' => 'required_if:has_company,1',
-            //     'client_company_building_no' => 'required_if:has_company,1',
-            //     'client_company_office_no' => 'required_if:has_company,1',
-            //     'client_company_telephone_no' => 'required_if:has_company,1',
-            //     'client_company_owner_first_name' => 'required_if:has_company,1',
-            //     'client_company_owner_father_name' => 'required_if:has_company,1',
-            //     'client_company_owner_grandfather_name' => 'required_if:has_company,1',
-            //     'client_company_owner_surname' => 'required_if:has_company,1',
-            //     'client_company_owner_telephone_no' => 'required_if:has_company,1',
-            //     'is_partner' => 'required_if:has_company,1',
-            //     'is_authorized' => 'required_if:has_company,1',
-            //     'authorized_position' => 'required_if:is_authorized,1',
-            //     'is_authorization_in_registration' => 'required_if:is_authorized,1',
-            //     'issuer_authorization_document' => ['required_if:has_company,1|required_unless:client_id,null', 'file', 'max:10240', 'mimes:jpeg,png,gif,bmp,pdf'],
-            //     'ownership_document' => ['required_if:has_company,1|required_unless:client_id,null', 'file', 'max:10240', 'mimes:jpeg,png,gif,bmp,pdf'],
-            //     'career_municipality_license' => ['required_if:has_company,1|required_unless:client_id,null', 'file', 'max:10240', 'mimes:jpeg,png,gif,bmp,pdf'],
-            //     'company_tax_certificate' => ['required_if:has_company,1|required_unless:client_id,null', 'file', 'max:10240', 'mimes:jpeg,png,gif,bmp,pdf'],
-            //     'practice_certificate' => ['required_if:has_company,1|required_unless:client_id,null', 'file', 'max:10240', 'mimes:jpeg,png,gif,bmp,pdf'],
-            // ]/*, $customMessages*/);
+
  if (empty($request->agent_id)) {
             return back()->withInput()->with('error', 'Agent ID is required.');
         }
@@ -525,12 +528,17 @@ class ClientController extends Controller
 
     public function edit(Request $request, $id)
     {
-        $client = Client::find($id);
+        // $client = Client::find($id);
+
+        $decryptedId = Crypt::decrypt($id);
+
+        $client = Client::find($decryptedId);
+
         if ($client) {
             $nationalities = Nationality::all();
-            $countries = Country::all();
-            $cities = Cities::all();
-            $districts = District::all();
+            $countries = Country::orderBy('name', 'asc')->get();
+            $cities = Cities::orderBy('name', 'asc')->get();
+            $districts = District::orderBy('name', 'asc')->get();
             $occupations = Occupations::all();
             return view('admin.client.add_client', compact('client', 'nationalities', 'countries', 'cities', 'districts', 'occupations'));
         } else {
@@ -616,39 +624,9 @@ class ClientController extends Controller
         }
     }
 
-    // public function send_message(Request $request)
-    // {
-    //     try {
-    //         $client_id = explode(',', $request->send_client_id);
-    //         $all_clients = Client::whereIn('id', $client_id)->get();
-    //         if ($all_clients->count()) {
-    //             foreach ($all_clients as $single) {
-    //                 $client_message = new ClientMessage();
-    //                 $client_message->client_id = $single->id;
-    //                 $client_message->message = $request->message;
-    //                 $client_message->save();
-    //                 $to_name = $single->full_name;
-    //                 $to_email = $single->email_id;
-    //                 $data = array('name' => $to_name, 'body' => nl2br($request->message));
-    //                 Mail::send('mail', $data, function ($message) use ($to_name, $to_email) {
-    //                     $message->to($to_email, $to_name)
-    //                         ->subject(__('messages.clients.send_message_subject'));
-    //                     $message->from(env('MAIL_USERNAME'), env('MAIL_FROM_NAME'));
-    //                 });
-    //             }
-    //         }
-    //         return back()->with('success', __('messages.clients.message_sent'));
-    //     } catch (\Exception $e) {
-    //         logger()->error($e->getTraceAsString());
-    //         logger()->error($e->getMessage());
-    //         return back()->with('error', __('messages.clients.message_not_sent'));
-    //     }
-    // }
+
      public function send_message(Request $request)
     {
-
-    // dd($request->all());
-    // die();
 
         $request->validate([
             'send_client_id' => 'required|string',

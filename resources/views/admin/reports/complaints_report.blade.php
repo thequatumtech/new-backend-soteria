@@ -89,64 +89,65 @@
                     <div class="container">
                         <div class="row">
                             <div class="col-12 col-lg-12 pt-4 d-flex flex-column">
-                                <label for="grouptype">Group Report By</label>
+                               <label for="grouptype">{{__('messages.complaints_report.group_report_by')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="grouptype" id="grouptype" onchange="toggleDateFields()">
-                                    <option value="insurance_company" {{ request('grouptype')=='insurance_company' ? 'selected' : ''}}>Insurance Company</option>
-                                    <option value="client_name" {{ request('grouptype')=='client_name' ? 'selected' : ''}}>Client Name</option>
-                                    <option value="policy_type" {{ request('grouptype')=='policy_type' ? 'selected' : ''}}>Policy Type</option>
-                                    <option value="complaint_status" {{ request('grouptype')=='complaint_status' ? 'selected' : ''}}>Complaint Status</option>
+                                    <option value="insurance_company" {{ request('grouptype')=='insurance_company' ? 'selected' : ''}}>{{__('messages.complaints_report.grouptype_insurance_company')}}</option>
+                                    <option value="client_name" {{ request('grouptype')=='client_name' ? 'selected' : ''}}>{{__('messages.complaints_report.grouptype_client_name')}}</option>
+                                    <option value="policy_type" {{ request('grouptype')=='policy_type' ? 'selected' : ''}}>{{__('messages.complaints_report.grouptype_policy_type')}}</option>
+                                    <option value="complaint_status" {{ request('grouptype')=='complaint_status' ? 'selected' : ''}}>{{__('messages.complaints_report.grouptype_complaint_status')}}</option>
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="insurance_company">Insurance Company</label>
+                                <label for="insurance_company">{{__('messages.complaints_report.insurance_company')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="insurance_company" id="insurance_company">
-                                    <option value="">Select Company</option>
+                                <option value="">{{__('messages.complaints_report.select_company')}}</option>
                                     @foreach ($insuranceCompanies as $company)
                                     <option value="{{ $company->id }}" {{ request('insurance_company')==$company->id ? 'selected' : ''}}>{{ $company->company_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="issue_date">From Date(ISSUE DATE)</label>
+                                    <label for="issue_date">{{__('messages.complaints_report.from_date')}}</label>
                                 <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                     <input type="date" name="issue_date" id="issue_date" value="{{request('issue_date')}}">
                                 </div>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="expiry_date">To Date</label>
+<label for="expiry_date">{{__('messages.complaints_report.to_date')}}</label>
                                 <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                     <input type="date" name="expiry_date" id="expiry_date" value="{{request('expiry_date')}}">
                                 </div>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="client_name">Clients’ Name</label>
+                                <label for="client_name">{{__('messages.complaints_report.client_name')}}</label>
+
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="client_name" id="client_name">
-                                    <option value="">Select Clients’ Name</option>
+    <option value="">{{__('messages.complaints_report.select_client_name')}}</option>
                                     @foreach ($clients as $client)
                                     <option value="{{ $client->id }}" {{ request('client_name')==$client->id ? 'selected' : ''}}>{{ $client->first_name }} {{ $client->father_name }} {{ $client->surname }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="policy_type">Policy Type</label>
+<label for="policy_type">{{__('messages.complaints_report.policy_type')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="policy_type" id="policy_type">
-                                    <option value="">Select Policy Type</option>
+    <option value="">{{__('messages.complaints_report.select_policy_type')}}</option>
                                     @foreach ($policyTypes as $type)
                                     <option value="{{ $type['id'] }}" {{ request('policy_type')==$type['id'] ? 'selected' : ''}}>{{ $type['name'] }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="complaint_status">Complaint Status</label>
-                                <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="complaint_status" id="complaint_status">
-                                    <option value="">Select Complaint Status</option>
-                                    <option value="under review">Under Review</option>
-                                    <option value="received">Received</option>
-                                    <option value="closed">Closed</option>
-                                </select>
+                               <label for="complaint_status">{{__('messages.complaints_report.complaint_status')}}</label>
+<select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="complaint_status" id="complaint_status">
+    <option value="">{{__('messages.complaints_report.select_complaint_status')}}</option>
+    <option value="under review">{{__('messages.complaints_report.under_review')}}</option>
+    <option value="received">{{__('messages.complaints_report.received')}}</option>
+    <option value="closed">{{__('messages.complaints_report.closed')}}</option>
+</select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <button type="submit" class="btn rounded-1 text-white opacity-50 p-2" style="background-color: #EF7C00;">Generate Report</button>
+<button type="submit" class="btn rounded-1 text-white opacity-50 p-2" style="background-color: #EF7C00;">{{__('messages.complaints_report.generate_report')}}</button>
                             </div>
                         </div>
                     </div>
@@ -155,7 +156,7 @@
         </form>
         <div class="m-2 text-center">
             <img class="p-3" src="{{asset('img/DashboardSotariaLogo.png')}}" alt="">
-            <h4>Complaints by
+            <!-- <h4>Complaints by
                 @php
                 switch(request('grouptype'))
                 {
@@ -177,7 +178,30 @@
                 }
                 @endphp
             </h4>
-            <p>From: {{ request('issue_date') ?? '--' }} To: {{ request('expiry_date') ?? '--' }}</p>
+            <p>From: {{ request('issue_date') ?? '--' }} To: {{ request('expiry_date') ?? '--' }}</p> -->
+            <h4>{{__('messages.complaints_report.complaints_by')}}
+    @php
+    switch(request('grouptype'))
+    {
+    case 'insurance_company':
+    echo __('messages.complaints_report.heading_insurance_company');
+    break;
+    case 'policy_type':
+    echo __('messages.complaints_report.heading_policy_type');
+    break;
+    case 'client_name':
+    echo __('messages.complaints_report.heading_client_name');
+    break;
+    case 'complaint_status':
+    echo __('messages.complaints_report.heading_complaint_status');
+    break;
+    default:
+    echo __('messages.complaints_report.heading_insurance_company');
+    break;
+    }
+    @endphp
+</h4>
+<p>{{__('messages.complaints_report.from')}} {{ request('issue_date') ?? __('messages.complaints_report.no_date') }} {{__('messages.complaints_report.to')}} {{ request('expiry_date') ?? __('messages.complaints_report.no_date') }}</p>
         </div>
         <div class="body bg-white py-4 px-4 d-flex flex-column gap-3 pb-5">
             @if($policies)
@@ -208,16 +232,17 @@
                     </tr>
                     @endforeach
                     <!-- Totals Row -->
-                    <tr>
-                        <td colspan="6"><strong>TOTAL</strong></td>
-                        <td>{{ $data['totals']['total_complaint_amount'] }}</td>
-                    </tr>
-                </tbody>
-            </table>
-            @endforeach
-            @else
-            <h4 class="text-center">No Record Found</h4>
-            @endif
+                    <!-- Totals Row -->
+<tr>
+    <td colspan="6"><strong>{{__('messages.complaints_report.total')}}</strong></td>
+    <td>{{ $data['totals']['total_complaint_amount'] }}</td>
+</tr>
+</tbody>
+</table>
+@endforeach
+@else
+<h4 class="text-center">{{__('messages.complaints_report.no_record')}}</h4>
+@endif
         </div>
     </div>
     <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">

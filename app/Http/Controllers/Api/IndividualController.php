@@ -23,7 +23,11 @@ class IndividualController extends Controller
         ]);
 
         if ($validate->fails()) {
-            return HelperController::sendJsonResponse(500, $validate->errors(), "Please enter valid data");
+            return HelperController::sendJsonResponse(
+                500,
+                $validate->errors(),
+                __('messages.api.please_enter_valid_data')
+            );
         }
 
         $individualPlanModel = IndividualPlanModel::where('user_id', $user->id)->first();
@@ -36,7 +40,7 @@ class IndividualController extends Controller
             $individualPlanModel->family_data = json_encode($request->row);
         }
         $individualPlanModel->age = isset($request->age) ? $request->age : null;
-      
+
         $individualPlanModel->policy_holder = isset($request->policy_holder) ? $request->policy_holder : null;
         $individualPlanModel->national_id = isset($request->national_id) ? $request->national_id : null;
         $individualPlanModel->id_no = isset($request->id_no) ? $request->id_no : null;
@@ -46,6 +50,10 @@ class IndividualController extends Controller
 
         $individualPlanModel->save();
 
-        return HelperController::sendJsonResponse(200, $individualPlanModel, "Please enter valid data");
+        return HelperController::sendJsonResponse(
+            200,
+            $individualPlanModel,
+            __('messages.api.individual_insurance_saved_successfully')
+        );
     }
 }

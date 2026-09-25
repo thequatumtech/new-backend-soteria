@@ -12,6 +12,7 @@ use App\Models\InsurancePlanModels\PetPlanPolicyCover;
 use App\Models\LineOfBusiness;
 use Illuminate\Http\Request;
 use App\Models\PetBreed;
+use Illuminate\Support\Facades\Crypt;
 
 class PetPlanController extends Controller
 {
@@ -30,9 +31,9 @@ class PetPlanController extends Controller
     {
         $insurance_companies = InsuranceCompany::where('line_of_business_id', 'like', '%"11"%')->get();
         $line_of_businesses = LineOfBusiness::where('id', self::line_of_business_id)->first()->name;
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
         $breeds = PetBreed::whereNull('deleted_at')->orderBy('type')->orderBy('breed')->get();
         return view('admin.plan.pet-plans.add_pet_plan', compact('insurance_companies', 'line_of_businesses', 'countries', 'cities', 'districts', 'ages', 'breeds'));
@@ -40,14 +41,16 @@ class PetPlanController extends Controller
 
     public function edit_pet_plan(Request $request, $id)
     {
+        $decryptedId = Crypt::decrypt($id);
+
         $insurance_companies = InsuranceCompany::where('line_of_business_id', 'like', '%"11"%')->get();
         $line_of_businesses = LineOfBusiness::all();
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
         $breeds = PetBreed::whereNull('deleted_at')->orderBy('type')->orderBy('breed')->get();
-        $plan = PetPlan::find($id);
+        $plan = PetPlan::find($decryptedId);
 
         $selected_country_ids = $plan->restricted_country_ids ? json_decode($plan->restricted_country_ids, true) : [];
         $selected_city_ids = $plan->restricted_city_ids ? json_decode($plan->restricted_city_ids, true) : [];

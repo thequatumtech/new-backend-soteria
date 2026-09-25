@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Helpers\InsurancePlanHelper;
+use App\Models\InsuranceCompany;
+use App\Models\Client;
 
 class AdminbasicController extends Controller
 {
@@ -17,39 +20,82 @@ class AdminbasicController extends Controller
     {
         try {
             $data = Ages::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Ages successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_ages_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getChronicDisease(Request $request)
     {
         try {
             $data = ChronicDisease::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Chronic Disease successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_chronic_disease_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getClaimStatus(Request $request)
     {
         try {
             $data = ClaimStatus::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Claim Status successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_claim_status_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getCountry(Request $request)
     {
         try {
             $data = Country::orderBy('name', 'asc')->get();
-
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Country successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_country_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => []]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => []
+            ]);
         }
     }
+
     public function getDistrict(Request $request)
     {
         try {
@@ -59,11 +105,22 @@ class AdminbasicController extends Controller
                 $data = District::orderBy('name', 'asc')->get();
             }
 
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get District successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_district_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => []]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => []
+            ]);
         }
     }
+
     public function getCities(Request $request)
     {
         try {
@@ -73,54 +130,119 @@ class AdminbasicController extends Controller
                 $data = Cities::orderBy('name', 'asc')->get();
             }
 
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Cities successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_cities_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => []]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => []
+            ]);
         }
     }
+
     public function getComplaintStatus(Request $request)
     {
         try {
             $data = ComplaintStatus::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Complaint Status successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_complaint_status_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getDangerousActivities(Request $request)
     {
         try {
             $data = DangerousActivities::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Dangerous Activities successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_dangerous_activities_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getEngineCapacity(Request $request)
     {
         try {
             $data = EngineCapacity::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Engine Capacity successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_engine_capacity_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getEngineType(Request $request)
     {
         try {
             $data = EngineType::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Engine Type successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_engine_type_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getInsurancePeriod(Request $request)
     {
         try {
             $data = InsurancePeriod::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Insurance Period successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_insurance_period_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
 
@@ -142,187 +264,423 @@ class AdminbasicController extends Controller
     {
         try {
             $data = MedicalNetwork::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Medical Network successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_medical_network_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getMotorPlan(Request $request)
     {
         try {
             $data = MotorPlan::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Motor Plan successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_motor_plan_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getProtectionSystem(Request $request)
     {
         try {
             $data = ProtectionSystem::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Protection System successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_protection_system_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getInPatientDeductible(Request $request)
     {
         try {
             $data = InPatientDeductible::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get In-Patient Deductible successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_in_patient_deductible_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getOutPatientDeductible(Request $request)
     {
         try {
             $data = OutPatientDeductible::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Out-Patient Deductible successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_out_patient_deductible_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getNumberOfVisits(Request $request)
     {
         try {
             $data = NoOfVisit::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Number Of Visits successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_number_of_visits_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getClaimDeductible(Request $request)
     {
         try {
             $data = ClaimDeductible::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Claim Deductible successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_claim_deductible_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getOccupations(Request $request)
     {
         try {
             $data = Occupations::orderBy('name', 'asc')->get();
 
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Occupations successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_occupations_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => []]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => []
+            ]);
         }
     }
+
     public function getLanguage(Request $request)
     {
         try {
             $data = Language::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Language successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_language_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getNationality(Request $request)
     {
         try {
             $data = Nationality::orderBy('name', 'asc')->get();
 
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Nationality successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_nationality_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => []]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => []
+            ]);
         }
     }
+
     public function getCurrency(Request $request)
     {
         try {
             $data = Currency::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Currency successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_currency_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getGeographicalArea(Request $request)
     {
         try {
             $data = GeographicalArea::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Geographical Area successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_geographical_area_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getVehicleBrands(Request $request)
     {
         try {
             $data = VehicleBrand::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Vehicle Brands successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_vehicle_brands_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getVehicleCategory(Request $request)
     {
         try {
             $data = VehicleCategory::where('vehicle_brand_id', $request->brand_id)->get();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Vehicle Category successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_vehicle_category_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getVehicleColor(Request $request)
     {
         try {
             $data = VehicleColor::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Vehicle Color successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_vehicle_color_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getTypeCover(Request $request)
     {
         try {
             $data = TypeOfCover::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Type Of Cover successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_type_of_cover_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getItemCategory(Request $request)
     {
         try {
             $data = InsuredItemCategory::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Insured Item Category successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_insured_item_category_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function getItemSubcategory(Request $request)
     {
         try {
             $data = InsuredItemSubCategory::where('insured_item_category_id', $request->id)->get();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Insured Item Subategory successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_insured_item_subcategory_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function insuranceLimit(Request $request)
     {
+        $client = Client::find($request->user_id);
+
+        if (!$client) {
+            return response()->json([
+                'status' => false,
+                'status_code' => 404,
+                'message' => __('messages.api.client_not_found'),
+                'data' => [],
+                'total' => 0,
+            ]);
+        }
+
+        $currency = Currency::where(
+            'country_id',
+            $client->country_id
+        )->first();
+
+        if (!$currency) {
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.no_currency_found'),
+                'data' => [],
+                'total' => 0,
+                'currency' => null,
+            ]);
+        }
+
         try {
             $data = [];
+
             if ($request->insurance_type == 1) {
-                $plan = HomePlan::getHomeInsurancePlanLimit();
+                $plan = $plan = HomePlan::getHomeInsurancePlanLimit(
+                    $request->user_id
+                );
                 $data = [];
 
                 foreach ($plan as $val) {
-                    $plan_name = HomePlan::getHomeInsurancePlanByLimit($val['limit']);
+                    $plan_name = HomePlan::getHomeInsurancePlanByLimit(
+                        $val['limit'],
+                        $request->user_id
+                    );
+
                     $data[] = [
                         'limit' => $val['limit'],
                         'plan_name' => $plan_name
                     ];
                 }
             } elseif ($request->insurance_type == 2) {
-                $plan = OfficePlan::getOfficeInsurancePlanLimit();
+                // $plan = OfficePlan::getOfficeInsurancePlanLimit();
+                $plan = OfficePlan::getOfficeInsurancePlanLimit($request->user_id);
+
                 $data = [];
 
                 foreach ($plan as $val) {
-                    $plan_name = OfficePlan::getOfficeInsurancePlanByLimit($val['limit']);
+                    $plan_name = OfficePlan::getOfficeInsurancePlanByLimit($val['limit'], $request->user_id);
+                    // $plan_name = OfficePlan::getOfficeInsurancePlanByLimit($val['limit']);
                     $data[] = [
                         'limit' => $val['limit'],
                         'plan_name' => $plan_name
@@ -330,11 +688,13 @@ class AdminbasicController extends Controller
                 }
             } elseif ($request->insurance_type == 3) {
                 // DB::enableQueryLog();
-                $plan = LifePlan::getLifeInsurancePlanLimit();
+                // $plan = LifePlan::getLifeInsurancePlanLimit();
+                $plan = LifePlan::getLifeInsurancePlanLimit($request->user_id);
                 $data = [];
 
                 foreach ($plan as $val) {
-                    $plan_name = LifePlan::getLifeInsurancePlanByLimit($val['limit']);
+                    $plan_name = LifePlan::getLifeInsurancePlanByLimit($val['limit'], $request->user_id);
+                    // $plan_name = LifePlan::getLifeInsurancePlanByLimit($val['limit']);
                     $data[] = [
                         'limit' => $val['limit'],
                         'plan_name' => $plan_name
@@ -342,56 +702,87 @@ class AdminbasicController extends Controller
                 }
                 // dd(\DB::getQueryLog());
             } elseif ($request->insurance_type == 4) {
-                $plan = CriticalIllnessPlan::getCriticalIllnessInsurancePlanLimit();
+                // $plan = CriticalIllnessPlan::getCriticalIllnessInsurancePlanLimit();
+                $plan = CriticalIllnessPlan::getCriticalIllnessInsurancePlanLimit($request->user_id);
                 $data = [];
 
                 foreach ($plan as $val) {
-                    $plan_names = CriticalIllnessPlan::getCriticalIllnessInsurancePlanByLimit($val['limit']);
+                    // $plan_names = CriticalIllnessPlan::getCriticalIllnessInsurancePlanByLimit($val['limit']);
+                    $plan_names = CriticalIllnessPlan::getCriticalIllnessInsurancePlanByLimit($val['limit'], $request->user_id);
+
                     $data[] = [
                         // 'limit'     => (int)$val['limit'],
                         // 'limit'     => (int) str_replace(',', '', $val['limit']),
                         'limit'     => $val['limit'],
                         'plan_name' => $plan_names->map(fn($p) => [
-                            'plan_name'          => $p->plan_name,
+                            'plan_name' => $p->plan_name,
                             'policy_period' => $p->policy_period,
                         ])->values()
                     ];
                 }
             } elseif ($request->insurance_type == 5) {
-                $plan = PersonalAccidentPlan::getPersonalAccidentInsurancePlanLimit();
+                // $plan = PersonalAccidentPlan::getPersonalAccidentInsurancePlanLimit();
+                $plan = PersonalAccidentPlan::getPersonalAccidentInsurancePlanLimit(
+                    $request->user_id
+                );
+
                 $data = [];
 
                 foreach ($plan as $val) {
-                    $plan_name = PersonalAccidentPlan::getPersonalAccidentInsurancePlanByLimit($val['limit']);
+                    // $plan_name = PersonalAccidentPlan::getPersonalAccidentInsurancePlanByLimit($val['limit']);
+                    $plan_name = PersonalAccidentPlan::getPersonalAccidentInsurancePlanByLimit(
+                        $val['limit'],
+                        $request->user_id
+                    );
+
                     $data[] = [
                         'limit' => $val['limit'],
                         'plan_name' => $plan_name
                     ];
                 }
             } elseif ($request->insurance_type == 6) {
-                $plan = InPatientPlan::getInPatientPlanLimit();
+                // $plan = InPatientPlan::getInPatientPlanLimit();
+                $plan = InPatientPlan::getInPatientPlanLimit(
+                    $request->user_id
+                );
+
                 $data = [];
 
                 foreach ($plan as $val) {
-                    $plan_names = InPatientPlan::getInPatientInsurancePlanByLimit($val['limit']);
+                    // $plan_names = InPatientPlan::getInPatientInsurancePlanByLimit($val['limit']);
+
+                    $plan_names = InPatientPlan::getInPatientInsurancePlanByLimit(
+                        $val['limit'],
+                        $request->user_id
+                    );
+
                     $data[] = [
-                        'limit'     => $val['limit'],
+                        'limit' => $val['limit'],
                         'plan_name' => $plan_names->map(fn($p) => [
-                            'plan_name'     => $p->plan_name,
+                            'plan_name' => $p->plan_name,
                             'policy_period' => $p->policy_period,
                         ])->values()
                     ];
                 }
             } elseif ($request->insurance_type == 7) {
-                $plan = InOutPatientPlan::getInOutPatientPlanLimit();
+                // $plan = InOutPatientPlan::getInOutPatientPlanLimit();
+                $plan = InOutPatientPlan::getInOutPatientPlanLimit(
+                    $request->user_id
+                );
+
                 $data = [];
 
                 foreach ($plan as $val) {
-                    $plan_names = InOutPatientPlan::getInOutPatientInsurancePlanByLimit($val['limit']);
+                    // $plan_names = InOutPatientPlan::getInOutPatientInsurancePlanByLimit($val['limit']);
+                    $plan_names = InOutPatientPlan::getInOutPatientInsurancePlanByLimit(
+                        $val['limit'],
+                        $request->user_id
+                    );
+
                     $data[] = [
-                        'limit'     => $val['limit'],
+                        'limit' => $val['limit'],
                         'plan_name' => $plan_names->map(fn($p) => [
-                            'plan_name'     => $p->plan_name,
+                            'plan_name' => $p->plan_name,
                             'policy_period' => $p->policy_period,
                         ])->values()
                     ];
@@ -403,9 +794,9 @@ class AdminbasicController extends Controller
                 foreach ($plan as $val) {
                     $plan_names = PetPlan::getPetInsurancePlanByLimit($val['limit']);
                     $data[] = [
-                        'limit'     => $val['limit'],
+                        'limit' => $val['limit'],
                         'plan_name' => $plan_names->map(fn($p) => [
-                            'plan_name'     => $p->plan_name,
+                            'plan_name' => $p->plan_name,
                             'policy_period' => $p->policy_period,
                         ])->values()
                     ];
@@ -419,7 +810,7 @@ class AdminbasicController extends Controller
                     $data[] = [
                         'limit'     => $val['limit'],
                         'plan_name' => $plan_names->map(fn($p) => [
-                            'plan_name'     => $p->plan_name,
+                            'plan_name' => $p->plan_name,
                             'policy_period' => $p->policy_period,
                         ])->values()
                     ];
@@ -436,60 +827,87 @@ class AdminbasicController extends Controller
             //             'plan_name' => $plan_name
             //         ];
             //     }
-            // } 
+            // }
             elseif ($request->insurance_type == 10) {
                 $data = [];
 
                 // $plan_names = TravelPlan::select('plan_name', 'policy_period')->get();
-                   $query = TravelPlan::select('plan_name', 'policy_period')
-                    ->whereHas('insurance_company', function ($q) {
-                        $q->whereNull('deleted_at');
-                    });
+                //    $query = TravelPlan::select('plan_name', 'policy_period')
+                //     ->whereHas('insurance_company', function ($q) {
+                //         $q->whereNull('deleted_at');
+                //     });
+                $query = TravelPlan::select(
+                    'plan_name',
+                    'policy_period'
+                );
+
+                // Filter according to client's country currency
+                $query = InsurancePlanHelper::filterByClientCurrency(
+                    $query,
+                    $request->user_id
+                );
 
                 if ($request->has('destination_country_id') && !empty($request->destination_country_id)) {
                     $query->where(function ($q) use ($request) {
                         $q->whereJsonContains('countries', (string)$request->destination_country_id)
-                          ->orWhereJsonContains('countries', (int)$request->destination_country_id)
-                          ->orWhereHas('geographical_area', function ($q2) use ($request) {
-                              $q2->whereJsonContains('countries', (string)$request->destination_country_id)
-                                 ->orWhereJsonContains('countries', (int)$request->destination_country_id);
-                          });
+                            ->orWhereJsonContains('countries', (int)$request->destination_country_id)
+                            ->orWhereHas('geographical_area', function ($q2) use ($request) {
+                                $q2->whereJsonContains('countries', (string)$request->destination_country_id)
+                                    ->orWhereJsonContains('countries', (int)$request->destination_country_id);
+                            });
                     });
                 }
 
                 $plan_names = $query->groupBy('plan_name', 'policy_period')->get();
 
-
                 foreach ($plan_names as $val) {
                     $data[] = [
-                        'plan_name'     => $val->plan_name,
+                        'plan_name' => $val->plan_name,
                         'policy_period' => $val->policy_period,
                     ];
                 }
             } elseif ($request->insurance_type == 11) {
-                $plan = MarinePlan::getMarinePlanLimit();
+                // $plan = MarinePlan::getMarinePlanLimit();
+                $plan = MarinePlan::getMarinePlanLimit(
+                    $request->user_id
+                );
+
                 $data = [];
 
                 foreach ($plan as $val) {
-                    $plan_names = MarinePlan::getMarineInsurancePlanByLimit($val['limit']);
+                    // $plan_names = MarinePlan::getMarineInsurancePlanByLimit($val['limit']);
+                    $plan_names = MarinePlan::getMarineInsurancePlanByLimit(
+                        $val['limit'],
+                        $request->user_id
+                    );
+
                     $data[] = [
-                        'limit'     => $val['limit'],
+                        'limit' => $val['limit'],
                         'plan_name' => $plan_names->map(fn($p) => [
-                            'plan_name'     => $p->plan_name,
+                            'plan_name' => $p->plan_name,
                             'policy_period' => $p->policy_period,
                         ])->values()
                     ];
                 }
             } elseif ($request->insurance_type == 12) {
-                $plan = MotorInsurancePlan::getMotorPlanLimit();
+                // $plan = MotorInsurancePlan::getMotorPlanLimit();
+                $plan = MotorInsurancePlan::getMotorPlanLimit(
+                    $request->user_id
+                );
+
                 $data = [];
 
                 foreach ($plan as $val) {
-                    $plan_names = MotorInsurancePlan::getMotorInsurancePlanByLimit($val->limit);
+                    // $plan_names = MotorInsurancePlan::getMotorInsurancePlanByLimit($val->limit);
+                    $plan_names = MotorInsurancePlan::getMotorInsurancePlanByLimit(
+                        $val->limit,
+                        $request->user_id
+                    );
+
                     $data[] = [
-                        'limit'     => $val->limit,
+                        'limit' => $val->limit,
                         'plan_name' => $plan_names->map(fn($p) => [
-                            'plan_name'     => $p->plan_name,
+                            'plan_name' => $p->plan_name,
                             'policy_period' => $p->policy_period,
                         ])->values()
                     ];
@@ -499,8 +917,8 @@ class AdminbasicController extends Controller
             return response()->json([
                 'status' => true,
                 'status_code' => 200,
-                'message' => 'Get Insurance Limit successfully',
-                'data' => $data
+                'message' => __('messages.api.get_insurance_limit_successfully'),
+                'data' => $data,
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -564,45 +982,136 @@ class AdminbasicController extends Controller
                 }
             }
 
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Store Document successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.store_document_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => []]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => []
+            ]);
         }
     }
+
+    // public function deleteDocument(Request $request)
+    // {
+    //     try {
+    //         $filePath = $request->input('document');
+    //         if (file_exists(public_path($filePath))) {
+    //             unlink(public_path($filePath));
+    //         } else {
+    //             return response()->json(['status' => false, 'status_code' => 404, 'message' => 'File not found', 'data' => []]);
+    //         }
+    //         return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Document deleted successfully', 'data' => []]);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => []]);
+    //     }
+    // }
 
     public function deleteDocument(Request $request)
     {
         try {
             $filePath = $request->input('document');
-            if (file_exists(public_path($filePath))) {
-                unlink(public_path($filePath));
-            } else {
-                return response()->json(['status' => false, 'status_code' => 404, 'message' => 'File not found', 'data' => []]);
+
+            // Check if document parameter is empty
+            if (empty($filePath)) {
+                return response()->json([
+                    'status' => false,
+                    'status_code' => 400,
+                    'message' => __('messages.api.document_path_required'),
+                    'data' => []
+                ], 400);
             }
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Document deleted successfully', 'data' => []]);
+
+            $fullPath = public_path($filePath);
+
+            // Check that it is actually a file
+            if (!file_exists($fullPath)) {
+                return response()->json([
+                    'status' => false,
+                    'status_code' => 404,
+                    'message' => __('messages.api.file_not_found'),
+                    'data' => []
+                ], 404);
+            }
+
+            if (!is_file($fullPath)) {
+                return response()->json([
+                    'status' => false,
+                    'status_code' => 400,
+                    'message' => __('messages.api.document_path_not_file'),
+                    'data' => []
+                ], 400);
+            }
+
+            unlink($fullPath);
+
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.document_deleted_successfully'),
+                'data' => []
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => []]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage(),
+                'data' => []
+            ], 500);
         }
     }
+
     public function getVehicleType(Request $request)
     {
         try {
             $data = VehicleType::all();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Vehicle Type successfully', 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_vehicle_type_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     public function insuranceCurrent(Request $request)
     {
         try {
             $user_id = $request->user_id;
-            $data = PurchasePolicy::where('client_id', $user_id)->where('policy_type', $request->insurance_type)->orderBy('expiry_date', 'DESC')->first();
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Get Policy Successfully', 'data' => $data]);
+            $data = PurchasePolicy::where('client_id', $user_id)
+                ->where('policy_type', $request->insurance_type)
+                ->orderBy('expiry_date', 'DESC')
+                ->first();
+
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_policy_successfully'),
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(), 'data' => array()]);
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
+            ]);
         }
     }
+
     // public function checkDangerousActivity(Request $request)
     // {
     //     $request->validate([
@@ -639,8 +1148,8 @@ class AdminbasicController extends Controller
             'dangerous_ids' => $dangerous,
             'safe_ids' => $safe,
             'message' => empty($dangerous)
-                ? 'All activities are safe.'
-                : 'Some activities are dangerous.'
+                ? __('messages.api.all_activities_safe')
+                : __('messages.api.some_activities_dangerous')
         ], empty($dangerous) ? 200 : 403);
     }
 }

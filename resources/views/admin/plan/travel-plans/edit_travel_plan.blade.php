@@ -191,7 +191,7 @@
                                     @foreach($ages as $single)
                                     <option value="{{$single->id}}"
                                         {{ in_array($single->id, old('restricted_age_ids', !empty($plan->restricted_age_ids) ? json_decode($plan->restricted_age_ids) : [])) ? 'selected' : '' }}>
-                                        {{$single->age}}
+                                        {{$single->age}} {{$single->type}}
                                     </option>
                                     @endforeach
                                 </select>
@@ -216,6 +216,17 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                <div>{{__('messages.plans.policy_holder_destination_country_restriction')}}</div>
+                                <select name="restricted_destination_country_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
+                                    @foreach($countries as $single)
+                                        <option value="{{$single->id}}"
+                                            {{ in_array($single->id, old('restricted_destination_country_ids', !empty($plan->restricted_destination_country_ids) ? json_decode($plan->restricted_destination_country_ids) : [])) ? 'selected' : '' }}>
+                                            {{$single->name}}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                         <div class="row">
                             <!-- <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
@@ -236,14 +247,14 @@
                                     @endforeach
                                 </select>
                             </div> -->
-                            <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                            {{-- <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
                                 <div>{{__('messages.plans.country')}}</div>
                                 <select name="countries[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
                                     @foreach($countries as $single)
                                     <option value="{{$single->id}}" {{in_array($single->id, old('countries', $plan->countries ?? [])) ? 'selected' : ''}}>{{$single->name}}</option>
                                     @endforeach
                                 </select>
-                            </div>
+                            </div> --}}
                         </div>
 
                         <h3 class="pt-5">{{__('messages.plans.add_policy_covers')}}</h3>

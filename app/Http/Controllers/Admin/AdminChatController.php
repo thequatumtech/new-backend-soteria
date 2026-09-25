@@ -98,6 +98,17 @@ class AdminChatController extends Controller
         ]);
 
         $this->updateChatSummaryAndNotify($request->chat_id, 'admin', $request->message, $fileType, $fileName);
+        
+        // Notification bell: client ko notify karo
+            $chat = Chat::find($request->chat_id);
+            $clientId = $chat->user_one_type === 'client' ? $chat->user_one_id : $chat->user_two_id;
+
+            event(new \App\Events\ChatMessageSent(
+                recipientUserId: $clientId,
+                chatId: $chat->id,
+                claimId: null,
+                messagePreview: $request->message ?: ($fileName ?? 'Sent an attachment')
+            ));
 
         return response()->json(['status' => true, 'data' => $message]);
     }

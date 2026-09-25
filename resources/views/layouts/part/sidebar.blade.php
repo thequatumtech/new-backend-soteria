@@ -256,13 +256,15 @@ $authorized_routes = json_decode($admin->authorized_routes, 1);
                 </li>
                 @endif
 
-                <li class="sidebar-dropdown {{in_array($currentRouteName, ['active_policies','expired_policies']) ? 'active-main active' : '' }} ">
+
+                <!-- <li class="sidebar-dropdown {{in_array($currentRouteName, ['active_policies','expired_policies']) ? 'active-main active' : '' }} ">
                     <a href="javascript:void(0)">
                         <i class="far fa-gem"></i>
                         <span>{{__('messages.sidebar_titles.renewal_section')}}</span>
                     </a>
                     <div class="sidebar-submenu" style="{{in_array($currentRouteName, ['active_policies','expired_policies']) ? 'display:block;' : '' }} ">
                         <ul>
+
                             <li class="{{in_array($currentRouteName, ['active_policies']) ? 'active-main' : '' }}">
                                 <a href="{{ route('active_policies') }}">{{__('messages.sidebar_titles.active_policies')}}</a>
                             </li>
@@ -271,7 +273,42 @@ $authorized_routes = json_decode($admin->authorized_routes, 1);
                             </li>
                         </ul>
                     </div>
-                </li>
+                </li> -->
+
+                @if(
+    $is_super_admin == 1 ||
+    in_array('active_policies', $authorized_routes) ||
+    in_array('expired_policies', $authorized_routes)
+)
+    <li class="sidebar-dropdown {{in_array($currentRouteName, ['active_policies','expired_policies']) ? 'active-main active' : ''}}">
+        <a href="javascript:void(0)">
+            <i class="far fa-gem"></i>
+            <span>{{__('messages.sidebar_titles.renewal_section')}}</span>
+        </a>
+
+        <div class="sidebar-submenu" style="{{in_array($currentRouteName, ['active_policies','expired_policies']) ? 'display:block;' : ''}}">
+            <ul>
+
+                @if(is_admin_authorized('active_policies'))
+                    <li class="{{ $currentRouteName == 'active_policies' ? 'active-main' : '' }}">
+                        <a href="{{ route('active_policies') }}">
+                            {{__('messages.sidebar_titles.active_policies')}}
+                        </a>
+                    </li>
+                @endif
+
+                @if(is_admin_authorized('expired_policies'))
+                    <li class="{{ $currentRouteName == 'expired_policies' ? 'active-main' : '' }}">
+                        <a href="{{ route('expired_policies') }}">
+                            {{__('messages.sidebar_titles.expired_policies')}}
+                        </a>
+                    </li>
+                @endif
+
+            </ul>
+        </div>
+    </li>
+@endif
 
                 @if($is_super_admin == 1 || in_array('claims',$authorized_routes))
                 <li class="{{in_array($currentRouteName, ['claims','claims.add','claims.view']) ? 'active-main' : '' }}">
@@ -325,29 +362,29 @@ $authorized_routes = json_decode($admin->authorized_routes, 1);
 
                 @if($is_super_admin == 1 || in_array('pages.contact-us',$authorized_routes))
                 <li class="{{$currentRouteName == 'pages.contact-us' ? 'active-main' : '' }}">
-                    <a href="{{ route('pages.contact-us') }}">
+                    <a href="{{ route('pages.new-chat') }}">
                         <i class="fa fa-phone"></i>
                         <span>{{__('messages.sidebar_titles.contact_messages')}}</span>
                     </a>
                 </li>
                 @endif
                 {{-- @if($is_super_admin == 1 || in_array('pages.new-chat',$authorized_routes)) --}}
-                <li class="{{$currentRouteName == 'pages.new-chat' ? 'active-main' : '' }}">
+                {{-- <li class="{{$currentRouteName == 'pages.new-chat' ? 'active-main' : '' }}">
                     <a href="{{ route('pages.new-chat') }}">
                         <i class="fa fa-phone"></i>
                         <span>new chat</span>
-                        {{-- <span>{{__('messages.sidebar_titles.new_chat')}}</span> --}}
+                        <span>{{__('messages.sidebar_titles.new_chat')}}</span>
                     </a>
-                </li>
+                </li> --}}
                 {{-- @endif --}}
-                @if($is_super_admin == 1 || in_array('pages.contactus',$authorized_routes))
+                {{-- @if($is_super_admin == 1 || in_array('pages.contactus',$authorized_routes))
                 <li class="{{$currentRouteName == 'pages.contactus' ? 'active-main' : '' }}">
                     <a href="{{ route('pages.contactus') }}">
                         <i class="fa fa-phone"></i>
                         <span>{{__('messages.sidebar_titles.contact_us')}}</span>
                     </a>
                 </li>
-                @endif
+                @endif --}}
                 @if($is_super_admin == 1 || in_array('black_list',$authorized_routes))
                 <li class=" {{in_array($currentRouteName, ['black_list','black_list.add','black_list.edit']) ? 'active-main' : '' }} ">
                     <a href="{{ route('black_list') }}">
@@ -383,20 +420,20 @@ $authorized_routes = json_decode($admin->authorized_routes, 1);
                 @endphp
                 @if($is_super_admin == 1 || $is_authorized_for_any_report)
                 <!-- <li class="sidebar-dropdown {{in_array($currentRouteName, ['sold_policy_report.list']) ? 'active-main active' : '' }} "> -->
-            <li class="sidebar-dropdown {{in_array($currentRouteName, $report_routes) ? 'active-main active' : '' }} ">    
+            <li class="sidebar-dropdown {{in_array($currentRouteName, $report_routes) ? 'active-main active' : '' }} ">
                 <a href="javascript:void(0)">
                         <i class="far fa-gem"></i>
                         <span>{{__('messages.reports.reports')}}</span>
                     </a>
                     <!-- <div class="sidebar-submenu" style="{{in_array($currentRouteName, ['sold_policy_report.list','policy_commission.list','policy_renewal_report.list','travel_policies_report.list','pets_policies_report.list','cancelled_by_admin_report.list','renewed_by_admin_report.list','expired_without_renewal_report.list','client_report.list','sold_policies_by_location.list','claims_report.list','complaints_report.list','supervisor_report.list']) ? 'display:block;' : '' }} "> -->
-                       <div class="sidebar-submenu" style="{{in_array($currentRouteName, $report_routes) ? 'display:block;' : '' }} ">   
+                       <div class="sidebar-submenu" style="{{in_array($currentRouteName, $report_routes) ? 'display:block;' : '' }} ">
                         <ul>
                               @if(is_admin_authorized('sold_policy_report.list'))
                             <li class="{{in_array($currentRouteName, ['sold_policy_report.list']) ? 'active-main' : '' }}">
                                 <a href="{{ route('sold_policy_report.list') }}">{{__('messages.reports.sold_policy_report')}}</a>
                             </li>
                             @endif
-                            @if(is_admin_authorized('supervisor_report.list'))                            
+                            @if(is_admin_authorized('supervisor_report.list'))
                             <li class="{{in_array($currentRouteName, ['supervisor_report.list']) ? 'active-main' : '' }}">
                                 <a href="{{ route('supervisor_report.list') }}">{{__('messages.reports.supervisor_report')}}</a>
                             </li>
@@ -470,7 +507,7 @@ $authorized_routes = json_decode($admin->authorized_routes, 1);
                     <div class="sidebar-submenu" style="{{in_array($currentRouteName, ['ages.list','chronic_disease.list','claim_status.list','complaint_status.list','dangerous_activities.list','engine_capacity.list','engine_type.list','insurance_period.list','medical_network.list','motor_plan.list','protection_system.list','in_patient_deductible.list','out_patient_deductible.list','no_of_visits.list','country.list','district.list','occupations.list','language.list','nationality.list','currency.list','geographical_area.list','claim_deductible.list','cities.list','pages.vehicle-brand','pages.vehicle-categories','pages.vehicle-color','pages.vehicle-type','type_of_covers.list','insured-items-categories.list','insured_item_sub_categories.list','banner.list']) ? 'display:block;' : '' }}">
                         <ul>
                             <li class="{{in_array($currentRouteName,['banner.list']) ? 'active-main' : ''}}">
-                                <a href="{{ route('banner.list') }}">Banner Management</a>
+                                <a href="{{ route('banner.list') }}">{{__('messages.sidebar_titles.banner_management')}}</a>
                             </li>
                             <li class="{{in_array($currentRouteName,['ages.list']) ? 'active-main' : ''}}">
                                 <a href="{{ route('ages.list') }}">{{__('messages.sidebar_titles.age')}}</a>
@@ -607,11 +644,11 @@ $authorized_routes = json_decode($admin->authorized_routes, 1);
                 @php $petRoutes = ['pet_breed.list']; @endphp
                 <li class="inner-dropdown {{ in_array($currentRouteName, $petRoutes) ? 'open' : '' }}">
                     <a href="javascript:void(0)">
-                        Pets <i class="fa fa-angle-right toggle-arrow {{ in_array($currentRouteName, $petRoutes) ? 'rotate-90' : '' }}" style="float:right;"></i>
+                        {{ __('messages.sidebar_titles.pets') }} <i class="fa fa-angle-right toggle-arrow {{ in_array($currentRouteName, $petRoutes) ? 'rotate-90' : '' }}" style="float:right;"></i>
                     </a>
                     <ul class="inner-submenu" style="display: {{ in_array($currentRouteName, $petRoutes) ? 'block' : 'none' }};">
                         <li class="{{ $currentRouteName == 'pet_breed.list' ? 'active-sub' : '' }}">
-                            <a href="{{ route('pet_breed.list') }}">Pet Breeds</a>
+                            <a href="{{ route('pet_breed.list') }}">{{ __('messages.sidebar_titles.pet_breeds') }}</a>
                         </li>
                     </ul>
                 </li>

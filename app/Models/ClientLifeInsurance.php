@@ -63,7 +63,6 @@ class ClientLifeInsurance extends Model
         'plan_id',
         'payment_status'
     ];
-
     public static function getLifeInsuranceDetails($id)
     {
         // Find the birth date of the client
@@ -102,6 +101,7 @@ class ClientLifeInsurance extends Model
             'insurance_companies.company_name',
             'insurance_company_documents.company_stamp',
             'insurance_company_documents.logo',
+            'insurance_company_documents.letterhead',
             'insurance_company_documents.authorized_signature',
             'life_plan_pricing_schedules.year_1',
             'life_plan_pricing_schedules.year_2',
@@ -116,6 +116,7 @@ class ClientLifeInsurance extends Model
             'life_plan_pricing_schedules.year_11',
             'life_plan_pricing_schedules.year_12',
             'life_plan_pricing_schedules.year_13',
+            'insurance_periods.name as periods_val',
             'insurance_companies.id as insurance_company_id'
         )
             ->leftJoin('life_plans', 'client_life_insurances.plan_id', '=', 'life_plans.id')
@@ -126,28 +127,29 @@ class ClientLifeInsurance extends Model
             })
             ->leftJoin('insurance_companies', 'life_plans.insurance_company_id', '=', 'insurance_companies.id')
             ->leftJoin('insurance_company_documents', 'insurance_companies.id', '=', 'insurance_company_documents.insurance_id')
+            ->leftJoin('insurance_periods', 'client_life_insurances.insurance_period', '=', 'insurance_periods.id')
             ->where('client_life_insurances.id', $id)
             ->first();
 
         if ($plan) {
             // // Dynamically set the net_premium based on insurance_periods.name
-            // // $insurancePeriodVal = $plan->periods_val; // Assuming this returns a value like '2'
-            // // $netPremiumsField = 'year_' . $insurancePeriodVal;
+            // $insurancePeriodVal = $plan->periods_val; // Assuming this returns a value like '2'
+            // $netPremiumsField = 'year_' . $insurancePeriodVal;
 
             // // Set net_premium based on the dynamically generated field
             // $plan->net_premium = $plan->$netPremiumsField ?? 0;
             // $plan->gross_premium = $plan->$netPremiumsField+$plan->fees+$plan->stamps+$plan->sales_tax ?? 0;
             // Store the rates before they are overwritten by amounts
-            $plan->net_premium_rate = $plan->net_premium;
+            $plan->net_premium_rate = $plan->net_premium; // This is the rate from life_plans if applicable
             $plan->fees_rate = $plan->fees;
             $plan->stamps_rate = $plan->stamps;
             $plan->sales_tax_rate = $plan->sales_tax;
-            $plan->cbj_rate = $plan->cbj;
-            $plan->sales_tax_cbj_rate = $plan->sales_tax_cbj;
 
-            // Dynamically set the net_premium (amount) based on insurance_period
-            $insurancePeriodVal = $plan->insurance_period;
-            $yearNum = (int) $insurancePeriodVal;
+            // Dynamically set the net_premium (amount) based on insurance_periods.name
+            $insurancePeriodVal = $plan->periods_val;
+            // $netPremiumsField = 'year_' . $insurancePeriodVal;
+            // $netPremiumAmount = $plan->$netPremiumsField ?? 0;
+            $yearNum = preg_replace('/[^0-9]/', '', $insurancePeriodVal);
             $netPremiumsField = 'year_' . $yearNum;
             $netPremiumAmount = $plan->$netPremiumsField ?? 0;
 
@@ -158,37 +160,23 @@ class ClientLifeInsurance extends Model
             if (is_string($netPremiumAmount) && strtolower(trim($netPremiumAmount)) === 'n/a') {
                 throw new \Exception("Plan not processible. Please select another plan or contact support.");
             }
-
             // Fallback
             if (!is_numeric($netPremiumAmount) || $netPremiumAmount == 0) {
                 $netPremiumAmount = $plan->net_premium_rate;
             }
 
-            $netPremiumAmount = (float) $netPremiumAmount;
-
             $plan->net_premium = $netPremiumAmount;
 
             // Calculate other components as amounts if they are percentages
-            $feesAmount = $netPremiumAmount * ((float) $plan->fees_rate / 100);
-            $stampsAmount = $netPremiumAmount * ((float) $plan->stamps_rate / 100);
-            $taxAmount = (($netPremiumAmount + $feesAmount) * (float) $plan->sales_tax_rate) / 100;
-
-            $cbjContribution = ($netPremiumAmount * (float) $plan->cbj_rate) / 100;
-            $cbjSalesTaxAmount = ($cbjContribution * (float) $plan->sales_tax_cbj_rate) / 100;
+            $feesAmount = $netPremiumAmount * ($plan->fees_rate / 100);
+            $stampsAmount = $netPremiumAmount * ($plan->stamps_rate / 100);
+            $taxAmount = $netPremiumAmount * ($plan->sales_tax_rate / 100);
 
             $plan->fees = $feesAmount;
             $plan->stamps = $stampsAmount;
             $plan->sales_tax = $taxAmount;
-            $plan->cbj = $cbjContribution;
-            $plan->sales_tax_cbj = $cbjSalesTaxAmount;
 
-            $plan->gross_premium =
-                $netPremiumAmount
-                + $feesAmount
-                + $stampsAmount
-                + $taxAmount
-                + $cbjContribution
-                + $cbjSalesTaxAmount;
+            $plan->gross_premium = $netPremiumAmount + $feesAmount + $stampsAmount + $taxAmount;
         }
 
         return $plan;

@@ -35,7 +35,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('policies:reset-renewed')->dailyAt('00:00');
         $schedule->command('policies:reset-renewed')->everyMinute();
         $schedule->command('notify:renewals')->everyMinute();
-        $schedule->command('queue:work --queue=default --sleep=3 --tries=3 --timeout=90')->everyMinute();
+        $schedule->command('queue:work --queue=default --sleep=3 --tries=3 --timeout=90 --stop-when-empty')->everyMinute()->withoutOverlapping();
     }
 
     /**

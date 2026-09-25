@@ -8,16 +8,21 @@ use Illuminate\Support\Facades\DB;
 
 class TermsController extends Controller
 {
-    public function getTerms()
+    public function getTerms(Request $request)
     {
+        $request->validate([
+            'id' => 'required|integer',
+        ]);
+
         $terms = DB::table('terms_and_conditions')
-                    ->orderBy('created_at', 'desc')
-                    ->first();
+            ->whereNull('deleted_at')
+            ->where('id', $request->input('id'))
+            ->first();
 
         if (!$terms) {
             return response()->json([
                 'success' => false,
-                'message' => 'No terms and conditions found'
+                'message' => __('messages.api.terms_no_record_found')
             ], 404);
         }
 
@@ -27,9 +32,10 @@ class TermsController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => [
+            'data'    => [
+                'id'      => $terms->id,
                 'message' => $terms->message,
-                'file' => $terms->file
+                'file'    => $terms->file,
             ]
         ]);
     }

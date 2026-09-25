@@ -59,92 +59,92 @@
                     <div class="container">
                         <div class="row">
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="insurance_company">Insurance Company</label>
+                                 <label for="insurance_company">{{__('messages.expired_without_renewal_report.insurance_company')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="insurance_company" id="insurance_company">
-                                    <option value="">Select Company</option>
+                                <option value="">{{__('messages.expired_without_renewal_report.select_company')}}</option>
                                     @foreach ($insuranceCompanies as $company)
                                     <option value="{{ $company->id }}" {{ request('insurance_company')==$company->id ? 'selected' : ''}}>{{ $company->company_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="issue_date">Issue Date</label>
+                             <label for="issue_date">{{__('messages.expired_without_renewal_report.issue_date')}}</label>
                                 <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                     <input type="date" name="issue_date" id="issue_date" value="{{request('issue_date')}}">
                                 </div>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="expiry_date">Expiry Date</label>
+                                <label for="expiry_date">{{__('messages.expired_without_renewal_report.expiry_date')}}</label>
                                 <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                     <input type="date" name="expiry_date" id="expiry_date" value="{{request('expiry_date')}}">
                                 </div>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="agent_name">Agent Name</label>
+                                <label for="agent_name">{{__('messages.expired_without_renewal_report.agent_name')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="agent_name" id="agent_name">
-                                    <option value="">Select Agent</option>
+                                    <option value="">{{__('messages.expired_without_renewal_report.select_agent')}}</option>
                                     @foreach ($agents as $agent)
                                     <option value="{{ $agent->id }}" {{ request('agent_name')==$agent->id ? 'selected' : ''}}>{{ $agent->first_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="client_position">Client Position</label>
+                                <label for="client_position">{{__('messages.expired_without_renewal_report.client_position')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="client_position" id="client_position">
-                                    <option value="">Select Client Position</option>
+                                    <option value="">{{__('messages.expired_without_renewal_report.select_client_position')}}</option>
                                     @foreach ($positions as $position)
                                     <option value="{{ $position->position }}" {{ request('client_position')==$position->position ? 'selected' : ''}}>{{ $position->position }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="client_district">Client district</label>
+                                <label for="client_district">{{__('messages.expired_without_renewal_report.client_district')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="client_district" id="client_district">
-                                    <option value="">Select Client district</option>
+                                    <option value="">{{__('messages.expired_without_renewal_report.select_client_district')}}</option>
                                     @foreach ($district as $district)
                                     <option value="{{ $district->id }}" {{ request('client_district')==$district->id ? 'selected' : ''}}>{{ $district->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="policy_type">Policy Type</label>
+                                <label for="policy_type">{{__('messages.expired_without_renewal_report.policy_type')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="policy_type" id="policy_type">
-                                    <option value="">Select Policy Type</option>
+                                    <option value="">{{__('messages.expired_without_renewal_report.select_policy_type')}}</option>
                                     @foreach ($policyTypes as $type)
                                     <option value="{{ $type['id'] }}" {{ request('policy_type')==$type['id'] ? 'selected' : ''}}>{{ $type['name'] }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="client_gender">Client Gender</label>
+                                <label for="client_gender">{{__('messages.expired_without_renewal_report.client_gender')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="client_gender" id="client_gender">
-                                    <option value="">Select Client Gender</option>
+                                    <option value="">{{__('messages.expired_without_renewal_report.select_client_gender')}}</option>
                                     <option value="1" {{ request('client_gender')==1 ? 'selected' : ''}}>Male</option>
                                     <option value="2" {{ request('client_gender')==2 ? 'selected' : ''}}>Female</option>
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="client_city">Client City</label>
+                                <label for="client_city">{{__('messages.expired_without_renewal_report.client_city')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="client_city" id="client_city">
-                                    <option value="">Select Client City</option>
+                                    <option value="">{{__('messages.expired_without_renewal_report.select_client_city')}}</option>
                                     @foreach ($city as $city)
                                     <option value="{{ $city->id }}" {{ request('client_city')==$city->id ? 'selected' : ''}}>{{ $city->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="supervisor">Supervisor Name</label>
+                                <label for="supervisor">{{__('messages.expired_without_renewal_report.supervisor_name')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="supervisor" id="supervisor">
-                                    <option value="">Select Supervisor Name</option>
+                                    <option value="">{{__('messages.expired_without_renewal_report.select_supervisor_name')}}</option>
                                     @foreach ($supervisor as $supervisor)
                                     <option value="{{ $supervisor->id }}" {{ request('supervisor')==$supervisor->id ? 'selected' : ''}}>{{ $supervisor->svname }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="client_age">Client Age</label>
+                                <label for="client_age">{{__('messages.expired_without_renewal_report.client_age')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="client_age" id="client_age">
-                                    <option value="">Select Client Age</option>
+                                    <option value="">{{__('messages.expired_without_renewal_report.select_client_age')}}</option>
                                     @foreach ($ages as $age)
                                     <option value="{{ $age->age }}" {{ request('client_age')==$age->age ? 'selected' : ''}}>{{ $age->age }}</option>
                                     @endforeach
@@ -160,8 +160,9 @@
         </form>
         <div class="m-2 text-center">
             <img class="p-3" src="{{asset('img/DashboardSotariaLogo.png')}}" alt="">
-            <h4>Sales by Insurance Company</h4>
-            <p>From: {{ request('issue_date') ?? '--' }} To: {{ request('expiry_date') ?? '--' }}</p>
+            <h4>{{__('messages.expired_without_renewal_report.sales_by_insurance_company')}}</h4>
+            <p>{{__('messages.expired_without_renewal_report.from')}} {{ request('issue_date') ?? __('messages.expired_without_renewal_report.no_date') }} {{__('messages.expired_without_renewal_report.to')}} {{ request('expiry_date') ?? __('messages.expired_without_renewal_report.no_date') }}</p>
+
         </div>
         <div class="body bg-white py-4 px-4 d-flex flex-column gap-3 pb-5">
             @if($policies)
@@ -201,7 +202,7 @@
                     @endforeach
                     <!-- Totals Row -->
                     <tr>
-                        <td colspan="7"><strong>TOTAL</strong></td>
+                        <td colspan="7"><strong>{{__('messages.expired_without_renewal_report.total')}}</strong></td>
                         <td>{{ $data['totals']['policy_limit'] }}</td>
                         <td>{{ $data['totals']['net_premium_before'] }}</td>
                         <td>{{ $data['totals']['commission'] }}</td>
@@ -211,7 +212,7 @@
             </table>
             @endforeach
             @else
-            <h4 class="text-center">No Record Found</h4>
+            <h4 class="text-center">{{__('messages.expired_without_renewal_report.no_record')}}</h4>
             @endif
         </div>
     </div>

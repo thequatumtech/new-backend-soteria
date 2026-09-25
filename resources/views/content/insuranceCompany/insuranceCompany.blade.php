@@ -21,7 +21,7 @@
         <div class="container-fluid">
             <div class="header d-flex justify-content-between p-3 py-2 align-items-center">
                 <div class="text-white group-title fw-bold"> {{__('messages.insurance_company.insurance_company')}} </div>
-                @if(is_admin_authorized('insurance_company_add'))
+                 @if(canAccessRoute('insurance_plans_add'))
                     <button data-bs-toggle="modal" data-bs-target="#addInsuranceCompany" class="btn pe-0">
                         <img src="{{asset('img/icon-add.png')}}" alt="">
                     </button>
@@ -156,6 +156,24 @@
                                         <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                             <input type="date" name="joining_date" style="border: none;" required>
                                         </div>
+                                    </div>
+                                    <div class="col-12 col-lg-4 pt-2">
+                                        <div>{{__('messages.insurance_company.currency')}}</div>
+
+                                        <select name="currency_id"
+                                                class="form-select rounded-0 flex-grow-1 border-0 shadow1"
+                                                style="height: 3.5rem;"
+                                                required>
+
+                                            <option value="" disabled selected hidden>Select Currency</option>
+
+                                            @foreach($currencies as $currency)
+                                                <option value="{{ $currency->id }}">
+                                                    {{ $currency->name }} ({{ $currency->abbreviation }})
+                                                </option>
+                                            @endforeach
+
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -497,6 +515,25 @@
                                         <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                             <input type="date" id="joining_date" name="joining_date" style="border: none;" required value="">
                                         </div>
+                                    </div>
+                                      <div class="col-12 col-lg-4 pt-2">
+                                        <div>{{__('messages.insurance_company.currency')}}</div>
+
+                                        <select name="currency_id"
+                                                id="currency_id"
+                                                class="form-select rounded-0 flex-grow-1 border-0 shadow1"
+                                                style="height: 3.5rem;"
+                                                required>
+
+                                            <option value="" disabled selected hidden>Select Currency</option>
+
+                                            @foreach($currencies as $currency)
+                                                <option value="{{ $currency->id }}">
+                                                    {{ $currency->name }} ({{ $currency->abbreviation }})
+                                                </option>
+                                            @endforeach
+
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="row">

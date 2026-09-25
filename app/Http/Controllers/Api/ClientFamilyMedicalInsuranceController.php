@@ -41,10 +41,22 @@ class ClientFamilyMedicalInsuranceController extends Controller
 
     private function restrictionError($type)
     {
-        $message = "You are not eligible for this plan due to {$type} restriction.";
+        $keyMap = [
+            'country'            => __('messages.api.medical_restriction_country'),
+            'city'               => __('messages.api.medical_restriction_city'),
+            'district'           => __('messages.api.medical_restriction_district'),
+            'age'                => __('messages.api.medical_restriction_age'),
+            'occupation'         => __('messages.api.medical_restriction_occupation'),
+            'chronic disease'    => __('messages.api.medical_restriction_chronic_disease'),
+            'dangerous activity' => __('messages.api.medical_restriction_dangerous_activity'),
+        ];
+
+        $typeLabel = $keyMap[$type] ?? $type;
+
+        $message = __('messages.api.medical_restriction_message', ['type' => $typeLabel]);
 
         if ($type === 'country') {
-            $message .= ' Please contact us for further information.';
+            $message .= __('messages.api.medical_country_contact');
         }
 
         return response()->json([
@@ -181,7 +193,7 @@ class ClientFamilyMedicalInsuranceController extends Controller
                 return response()->json([
                     'status' => false,
                     'status_code' => 422,
-                    'message' => 'Client not found.',
+                    'message' => __('messages.api.client_not_found'),
                     'data' => []
                 ], 422);
             }
@@ -286,7 +298,7 @@ class ClientFamilyMedicalInsuranceController extends Controller
                 return response()->json([
                     'status' => false,
                     'status_code' => 404,
-                    'message' => 'No medical insurance details found for your age.',
+                    'message' => __('messages.api.no_medical_insurance_details_found'),
                     'data' => []
                 ]);
             }
@@ -425,6 +437,7 @@ class ClientFamilyMedicalInsuranceController extends Controller
 
             PurchasePolicy::updatePurchasePolicy($purchase);
             $data->purchase_id = $Medical->id;
+            $data->purchase_policy_id = $Medical->id;
             $plan_for_pdf = clone $plan_data;
             // Store the amounts in the plan object for the PDF values
             $plan_for_pdf->net_premium_amount = $net_premium;
@@ -526,11 +539,11 @@ class ClientFamilyMedicalInsuranceController extends Controller
 
 
             if ($data['insurance_type_status'] == 1) {
-                return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Add Individual Medical Insurance Plan successfully', 'data' => $data]);
+                return response()->json(['status' => true, 'status_code' => 200, 'message' => __('messages.api.add_individual_medical_insurance_successfully'), 'data' => $data]);
             }
 
 
-            return response()->json(['status' => true, 'status_code' => 200, 'message' => 'Add Family Medical Insurance Plan successfully', 'data' => $data]);
+            return response()->json(['status' => true, 'status_code' => 200, 'message' => __('messages.api.add_family_medical_insurance_successfully'), 'data' => $data]);
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage(), 'data' => array()]);
         }

@@ -47,6 +47,15 @@ class NotifyRenewals extends Command
                     DB::beginTransaction();
 
                     $this->sendEmails($policy, $daysLeft);
+                    
+                    // Trigger the ExpiryReminderDue event for in-app notification rajput digvijay
+                    event(new \App\Events\ExpiryReminderDue(
+                        recipientUserId: $policy->client_id,
+                        policyId: $policy->id,
+                        expiryDate: $policy->expiry_date,
+                        daysLeft: $daysLeft
+                    ));
+                    // End of event trigger
 
                     $policy->notify_30_days = '1';
                     $policy->save();
@@ -61,6 +70,15 @@ class NotifyRenewals extends Command
                     DB::beginTransaction();
 
                     $this->sendEmails($policy, $daysLeft);
+                    
+                    // Trigger the ExpiryReminderDue event for in-app notification rajput digvijay
+                    event(new \App\Events\ExpiryReminderDue(
+                        recipientUserId: $policy->client_id,
+                        policyId: $policy->id,
+                        expiryDate: $policy->expiry_date,
+                        daysLeft: $daysLeft
+                    ));
+                    // End of event trigger
 
                     $policy->notify_15_days = '1';
                     $policy->save();

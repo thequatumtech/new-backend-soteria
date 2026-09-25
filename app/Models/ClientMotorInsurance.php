@@ -96,6 +96,7 @@ class ClientMotorInsurance extends Model
                 'insurance_companies.company_name',
                 'insurance_company_documents.company_stamp',
                 'insurance_company_documents.logo',
+            'insurance_company_documents.letterhead',
                 'insurance_company_documents.authorized_signature',
                 'insurance_companies.id as insurance_company_id'
             )

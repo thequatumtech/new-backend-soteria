@@ -89,86 +89,86 @@
                     <div class="container">
                         <div class="row">
                             <div class="col-12 col-lg-12 pt-4 d-flex flex-column">
-                                <label for="grouptype">Group Report By</label>
+                                 <label for="grouptype">{{__('messages.sold_policies_by_location.group_report_by')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="grouptype" id="grouptype" onchange="toggleDateFields()">
-                                    <option value="insurance_company" {{ request('grouptype')=='insurance_company' ? 'selected' : ''}}>Insurance Company</option>
-                                    <option value="client_name" {{ request('grouptype')=='client_name' ? 'selected' : ''}}>Client Name</option>
-                                    <option value="policy_type" {{ request('grouptype')=='policy_type' ? 'selected' : ''}}>Policy Type</option>
-                                    <option value="city" {{ request('grouptype')=='city' ? 'selected' : ''}}>City</option>
-                                    <option value="district" {{ request('grouptype')=='district' ? 'selected' : ''}}>District</option>
-                                    <option value="position" {{ request('grouptype')=='position' ? 'selected' : ''}}>Position</option>
+                                    <option value="insurance_company" {{ request('grouptype')=='insurance_company' ? 'selected' : ''}}>{{__('messages.sold_policies_by_location.grouptype_insurance_company')}}</option>
+                                    <option value="client_name" {{ request('grouptype')=='client_name' ? 'selected' : ''}}>{{__('messages.sold_policies_by_location.grouptype_client_name')}}</option>
+                                    <option value="policy_type" {{ request('grouptype')=='policy_type' ? 'selected' : ''}}>{{__('messages.sold_policies_by_location.grouptype_policy_type')}}</option>
+                                    <option value="city" {{ request('grouptype')=='city' ? 'selected' : ''}}>{{__('messages.sold_policies_by_location.grouptype_city')}}</option>
+                                    <option value="district" {{ request('grouptype')=='district' ? 'selected' : ''}}>{{__('messages.sold_policies_by_location.grouptype_district')}}</option>
+                                    <option value="position" {{ request('grouptype')=='position' ? 'selected' : ''}}>{{__('messages.sold_policies_by_location.grouptype_position')}}</option>
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="insurance_company">Insurance Company</label>
+                                <label for="insurance_company">{{__('messages.sold_policies_by_location.insurance_company')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="insurance_company" id="insurance_company">
-                                    <option value="">Select Company</option>
+                                    <option value="">{{__('messages.sold_policies_by_location.select_company')}}</option>
                                     @foreach ($insuranceCompanies as $company)
                                     <option value="{{ $company->id }}" {{ request('insurance_company')==$company->id ? 'selected' : ''}}>{{ $company->company_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="issue_date">Sold Policies From Date(ISSUE DATE)</label>
+                                <label for="issue_date">{{__('messages.sold_policies_by_location.from_date')}}</label>
                                 <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                     <input type="date" name="issue_date" id="issue_date" value="{{request('issue_date')}}">
                                 </div>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="expiry_date">Sold Policies To Date</label>
+                                <label for="expiry_date">{{__('messages.sold_policies_by_location.to_date')}}</label>
                                 <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                     <input type="date" name="expiry_date" id="expiry_date" value="{{request('expiry_date')}}">
                                 </div>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="agent_name">Agent Name</label>
+                                <label for="agent_name">{{__('messages.sold_policies_by_location.agent_name')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="agent_name" id="agent_name">
-                                    <option value="">Select Agent</option>
+                                    <option value="">{{__('messages.sold_policies_by_location.select_agent')}}</option>
                                     @foreach ($agents as $agent)
                                     <option value="{{ $agent->id }}" {{ request('agent_name')==$agent->id ? 'selected' : ''}}>{{ $agent->first_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="client_name">Clients’ Name</label>
+                                <label for="client_name">{{__('messages.sold_policies_by_location.client_name')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="client_name" id="client_name">
-                                    <option value="">Select Clients’ Name</option>
+                                    <option value="">{{__('messages.sold_policies_by_location.select_client_name')}}</option>
                                     @foreach ($clients as $client)
                                     <option value="{{ $client->id }}" {{ request('client_name')==$client->id ? 'selected' : ''}}>{{ $client->first_name }} {{ $client->father_name }} {{ $client->surname }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="policy_type">Policy Type</label>
+                                <label for="policy_type">{{__('messages.sold_policies_by_location.policy_type')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="policy_type" id="policy_type">
-                                    <option value="">Select Policy Type</option>
+                                    <option value="">{{__('messages.sold_policies_by_location.select_policy_type')}}</option>
                                     @foreach ($policyTypes as $type)
                                     <option value="{{ $type['id'] }}" {{ request('policy_type')==$type['id'] ? 'selected' : ''}}>{{ $type['name'] }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="client_city">Client City</label>
+                                <label for="client_city">{{__('messages.sold_policies_by_location.client_city')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="client_city" id="client_city">
-                                    <option value="">Select Client City</option>
+                                    <option value="">{{__('messages.sold_policies_by_location.select_client_city')}}</option>
                                     @foreach ($city as $city)
                                     <option value="{{ $city->id }}" {{ request('client_city')==$city->id ? 'selected' : ''}}>{{ $city->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="client_district">Client district</label>
+                                <label for="client_district">{{__('messages.sold_policies_by_location.client_district')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="client_district" id="client_district">
-                                    <option value="">Select Client district</option>
+                                    <option value="">{{__('messages.sold_policies_by_location.select_client_district')}}</option>
                                     @foreach ($district as $district)
                                     <option value="{{ $district->id }}" {{ request('client_district')==$district->id ? 'selected' : ''}}>{{ $district->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="client_position">Client Position</label>
+                                <label for="client_position">{{__('messages.sold_policies_by_location.client_position')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="client_position" id="client_position">
-                                    <option value="">Select Client Position</option>
+                                    <option value="">{{__('messages.sold_policies_by_location.select_client_position')}}</option>
                                     @foreach ($positions as $position)
                                     <option value="{{ $position->id }}" {{ request('client_position')==$position->id ? 'selected' : ''}}>{{ $position->name }}</option>
                                     @endforeach
@@ -184,7 +184,7 @@
         </form>
         <div class="m-2 text-center">
             <img class="p-3" src="{{asset('img/DashboardSotariaLogo.png')}}" alt="">
-            <h4>Sales by
+            <!-- <h4>Sales by
                 @php
                 switch(request('grouptype'))
                 {
@@ -215,7 +215,40 @@
                 }
                 @endphp
             </h4>
-            <p>From: {{ request('issue_date') ?? '--' }} To: {{ request('expiry_date') ?? '--' }}</p>
+            <p>From: {{ request('issue_date') ?? '--' }} To: {{ request('expiry_date') ?? '--' }}</p> -->
+  <h4>{{__('messages.sold_policies_by_location.sales_by')}}
+                @php
+                switch(request('grouptype'))
+                {
+                case 'insurance_company':
+                echo __('messages.sold_policies_by_location.heading_insurance_company');
+                break;
+                case 'position':
+                echo __('messages.sold_policies_by_location.heading_position');
+                break;
+                case 'policy_type':
+                echo __('messages.sold_policies_by_location.heading_policy_type');
+                break;
+                case 'agent_name':
+                echo __('messages.sold_policies_by_location.heading_agent_name');
+                break;
+                case 'client_name':
+                echo __('messages.sold_policies_by_location.heading_client_name');
+                break;
+                case 'city':
+                echo __('messages.sold_policies_by_location.heading_city');
+                break;
+                case 'district':
+                echo __('messages.sold_policies_by_location.heading_district');
+                break;
+                default:
+                echo __('messages.sold_policies_by_location.heading_insurance_company');
+                break;
+                }
+                @endphp
+            </h4>
+            <p>{{__('messages.sold_policies_by_location.from')}} {{ request('issue_date') ?? __('messages.sold_policies_by_location.no_date') }} {{__('messages.sold_policies_by_location.to')}} {{ request('expiry_date') ?? __('messages.sold_policies_by_location.no_date') }}</p>
+  
         </div>
         <div class="body bg-white py-4 px-4 d-flex flex-column gap-3 pb-5">
             @if ($policies)
@@ -255,14 +288,14 @@
                     @endforeach
                     <!-- Totals Row -->
                     <tr>
-                        <td colspan="10"><strong>TOTAL</strong></td>
+                        <td colspan="10"><strong>{{__('messages.sold_policies_by_location.total')}}</strong></td>
                         <td>{{ $data['totals']['total_gross_premium'] }}</td>
                     </tr>
                 </tbody>
             </table>
             @endforeach
             @else
-            <h4 class="text-center">No Record Found</h4>
+            <h4 class="text-center">{{__('messages.sold_policies_by_location.no_record')}}</h4>
             @endif
         </div>
     </div>

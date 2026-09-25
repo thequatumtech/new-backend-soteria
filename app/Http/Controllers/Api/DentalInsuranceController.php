@@ -10,6 +10,7 @@ use PDF;
 use App\Models\Client;
 use Carbon\Carbon;
 use App\Models\Currency;
+use App\Helpers\InsurancePlanHelper;
 
 class DentalInsuranceController extends Controller
 {
@@ -21,6 +22,7 @@ class DentalInsuranceController extends Controller
 
         return is_numeric($clean) ? (float)$clean : 0;
     }
+
     private function normalizeRestricted($value)
     {
         if (!$value) return [];
@@ -36,15 +38,18 @@ class DentalInsuranceController extends Controller
         if (is_numeric($value)) {
             return [(int)$value];
         }
+
         return [];
     }
 
     private function restrictionError($type)
     {
-        $message = "You are not eligible for this plan due to {$type} restriction.";
+        $message = __('messages.api.dental_restriction_message', [
+            'type' => __('messages.api.dental_restriction_' . $type)
+        ]);
 
         if ($type === 'country') {
-            $message .= ' Please contact us for further information.';
+            $message .= __('messages.api.dental_country_contact');
         }
 
         return response()->json([
@@ -54,6 +59,7 @@ class DentalInsuranceController extends Controller
             'data' => []
         ], 422);
     }
+
     private function normalizeDate($date)
     {
         if (!$date) return null;
@@ -120,7 +126,6 @@ class DentalInsuranceController extends Controller
     //         $clientDistrict = $client->district_id;
 
     //         $clientAge = Carbon::parse($client->birth_date)->age;
-
 
     //         $restrictedCountries = $this->normalizeRestricted($plan->restricted_country_ids);
     //         $restrictedCities    = $this->normalizeRestricted($plan->restricted_city_ids);
@@ -267,6 +272,7 @@ class DentalInsuranceController extends Controller
     //         ]);
     //     }
     // }
+
     public function storeDentalInsurance(Request $request)
     {
         try {
@@ -304,15 +310,17 @@ class DentalInsuranceController extends Controller
                 'payment_status' => 'nullable',
             ]);
 
-            $plan = DentalPlan::findOrFail($data['plan_id']);
+            // $plan = DentalPlan::findOrFail($data['plan_id']);
+            $plan = DentalPlan::with('insurance_company.currency')->findOrFail($data['plan_id']);
             $data['insurance_company_id'] = $plan->insurance_company_id ?? 0;
 
             $client = Client::find($request->user_id);
+
             if (!$client) {
                 return response()->json([
                     'status' => false,
                     'status_code' => 422,
-                    'message' => 'Client not found.',
+                    'message' => __('messages.api.client_not_found'),
                     'data' => []
                 ], 422);
             }
@@ -345,6 +353,7 @@ class DentalInsuranceController extends Controller
 
                 if (str_contains($range, '-')) {
                     [$min, $max] = explode('-', $range);
+
                     if ($clientAge >= (int)$min && $clientAge <= (int)$max) {
                         return $this->restrictionError('age');
                     }
@@ -360,6 +369,7 @@ class DentalInsuranceController extends Controller
             if ($existingDental) {
 
                 $dental = ClientDentalsInsurance::find($existingDental->policy_id);
+
                 if ($dental) {
                     $dental->update($data);
                 }
@@ -383,11 +393,11 @@ class DentalInsuranceController extends Controller
             $data = ClientDentalsInsurance::getDentalsInsuranceDetails($data['policy_id']);
 
             $directory = public_path('insurance_pdfs/dentals_policy');
+
             if (!file_exists($directory)) mkdir($directory, 0755, true);
 
             $filename = uniqid() . '_policy_' . $dental->id . '.pdf';
             $path = $directory . '/' . $filename;
-
 
             $policy_limit = $this->cleanNumber($plan->limit);
 
@@ -415,7 +425,12 @@ class DentalInsuranceController extends Controller
             $cbjSalesTaxAmount = ($cbjContribution * $cbjSalesTaxPercentage) / 100;
 
             // Total Gross Premium
-            $grossPremium = $net_premium + $issuanceFees + $stampAmount + $salesTaxAmount + $cbjContribution + $cbjSalesTaxAmount;
+            $grossPremium = $net_premium
+                + $issuanceFees
+                + $stampAmount
+                + $salesTaxAmount
+                + $cbjContribution
+                + $cbjSalesTaxAmount;
 
             $purchase['net_premium']       = $net_premium;
             $purchase['fees']              = $issuanceFees;
@@ -435,13 +450,25 @@ class DentalInsuranceController extends Controller
             $purchase['commission_percentage'] = $data->commission_percentage;
             $purchase['policy_pdf_url']       = $path;
 
-
             PurchasePolicy::updatePurchasePolicy($purchase);
 
             $purchaseData = PurchasePolicy::where('id', $dental->id)->first();
             $plan_data = DentalPlan::with('policy_covers')->find($data['plan_id']);
+
+            // $client = Client::with('country.currency')->find($request->user_id);
+            // $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
+
             $client = Client::with('country.currency')->find($request->user_id);
-            $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
+
+            // Get insurance company currency first
+            $insuranceCompany = $plan->insurance_company;
+
+            if ($insuranceCompany && $insuranceCompany->currency) {
+                $abbr = $insuranceCompany->currency->abbreviation;
+            } else {
+                // Fallback to client's country currency
+                $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
+            }
 
             $pdf = PDF::loadView('pdf.dentals_policy', [
                 'data' => $data,
@@ -454,9 +481,7 @@ class DentalInsuranceController extends Controller
 
             $data['url'] = url('insurance_pdfs/dentals_policy/' . $filename);
             $data->purchase_id = $dental->id;
-
-
-
+            $data->purchase_policy_id = $dental->id;
 
             $data->net_premium       = number_format($purchase['net_premium'], 2) . ' ' . $abbr;
             $data->fees              = number_format($purchase['fees'], 2) . ' ' . $abbr;
@@ -470,11 +495,11 @@ class DentalInsuranceController extends Controller
             return response()->json([
                 'status' => true,
                 'status_code' => 200,
-                'message' => 'Dental Insurance Plan added successfully',
+                'message' => __('messages.api.dental_insurance_plan_added_successfully'),
                 'data' => $data
             ]);
         } catch (\Exception $e) {
-  \Illuminate\Support\Facades\Log::error('Dental Insurance Purchase Error: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Dental Insurance Purchase Error: ' . $e->getMessage());
             \Illuminate\Support\Facades\Log::error($e->getTraceAsString());
 
             return response()->json([
@@ -486,31 +511,55 @@ class DentalInsuranceController extends Controller
         }
     }
 
-
     public function getDentalInsurancePlan(Request $request)
     {
         try {
-            $data = DentalPlan::with('policy_covers', 'insurance_company')
-            ->whereHas('insurance_company', function ($q) {
-                $q->whereNull('deleted_at');
-            })
-                ->where('plan_name', 'LIKE', '%' . $request->limit . '%')
-                ->get();
 
+            $query = DentalPlan::with([
+                'policy_covers',
+                'insurance_company',
+                'insurance_company.currency'
+            ])
+                ->whereHas('insurance_company', function ($q) {
+                    $q->whereNull('deleted_at');
+                })
+                ->where('plan_name', $request->limit);
+
+            // Filter plans according to client's currency
+            $query = InsurancePlanHelper::filterByClientCurrency(
+                $query,
+                $request->user_id
+            );
+
+            $data = $query->get();
+
+            // dd($data);
             $data->transform(function ($item) {
                 if (!empty($item->insurance_policy_pdf)) {
-                    $item->insurance_policy_pdf = url('uploads/insurance_plans/' . $item->id . '/' . $item->insurance_policy_pdf);
+                    $item->insurance_policy_pdf = url(
+                        'uploads/insurance_plans/' .
+                            $item->id .
+                            '/' .
+                            $item->insurance_policy_pdf
+                    );
                 }
+
                 if (!empty($item->insurance_company->privacy_policy)) {
-                    $item->insurance_company->privacy_policy = url('insurance/' . $item->insurance_company->id . '/' . $item->insurance_company->privacy_policy);
+                    $item->insurance_company->privacy_policy = url(
+                        'insurance/' .
+                            $item->insurance_company->id .
+                            '/' .
+                            $item->insurance_company->privacy_policy
+                    );
                 }
+
                 return $item;
             });
 
             return response()->json([
                 'status' => true,
                 'status_code' => 200,
-                'message' => 'Dental Insurance Plans fetched successfully',
+                'message' => __('messages.api.dental_insurance_plans_fetched_successfully'),
                 'data' => $data
             ]);
         } catch (\Exception $e) {

@@ -31,10 +31,10 @@ class ChatController extends Controller
 
         $chat = Chat::where(function ($q) use ($userId, $userType, $request) {
             $q->where('user_one_id', $userId)->where('user_one_type', $userType)
-              ->where('user_two_id', $request->receiver_id)->where('user_two_type', $request->receiver_type);
+                ->where('user_two_id', $request->receiver_id)->where('user_two_type', $request->receiver_type);
         })->orWhere(function ($q) use ($userId, $userType, $request) {
             $q->where('user_one_id', $request->receiver_id)->where('user_one_type', $request->receiver_type)
-              ->where('user_two_id', $userId)->where('user_two_type', $userType);
+                ->where('user_two_id', $userId)->where('user_two_type', $userType);
         })->first();
 
         if (!$chat) {
@@ -95,6 +95,12 @@ class ChatController extends Controller
 
         $this->updateChatSummaryAndNotify($request->chat_id, 'client', $request->message, $fileType, $fileName);
 
+        event(new \App\Events\ClientMessageToAdmin(
+            chatId: $request->chat_id,
+            clientId: $userId,
+            messagePreview: $request->message ?: ($fileName ?? __('messages.api.sent_an_attachment'))
+        ));
+
         return response()->json(['status' => true, 'data' => $message]);
     }
 
@@ -115,7 +121,7 @@ class ChatController extends Controller
     public function markAsRead($chatId)
     {
         Message::where('chat_id', $chatId)->where('sender_type', 'admin')->update(['is_read' => true]);
-    
+
         $chat = Chat::find($chatId);
         if ($chat) {
             $userId = request()->user_id;
@@ -128,7 +134,7 @@ class ChatController extends Controller
                 'unread_count'    => 0,
             ]);
         }
-    
+
         return response()->json(['status' => true]);
     }
 
@@ -137,10 +143,10 @@ class ChatController extends Controller
         $userId = $request->user_id;
 
         $chats = Chat::where(function ($q) use ($userId) {
-                $q->where('user_one_id', $userId)->where('user_one_type', 'client');
-            })->orWhere(function ($q) use ($userId) {
-                $q->where('user_two_id', $userId)->where('user_two_type', 'client');
-            })
+            $q->where('user_one_id', $userId)->where('user_one_type', 'client');
+        })->orWhere(function ($q) use ($userId) {
+            $q->where('user_two_id', $userId)->where('user_two_type', 'client');
+        })
             ->withCount(['messages as live_unread_count' => function ($q) {
                 $q->where('sender_type', 'admin')->where('is_read', false);
             }])
@@ -182,10 +188,10 @@ class ChatController extends Controller
         $preview = $messageText;
         if (!$preview && $fileType) {
             $preview = match ($fileType) {
-                'image' => '📷 Photo',
-                'video' => '🎥 Video',
-                'pdf', 'doc' => '📄 ' . $fileName,
-                default => '📎 Attachment',
+                'image'      => __('messages.api.photo_attachment'),
+                'video'      => __('messages.api.video_attachment'),
+                'pdf', 'doc' => __('messages.api.document_attachment') . $fileName,
+                default      => __('messages.api.file_attachment'),
             };
         }
 

@@ -226,7 +226,7 @@
                         <div>{{__('messages.plans.policy_holder_age_restriction')}}</div>
                         <select name="restricted_age_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
                             @foreach($ages as $single)
-                            <option value="{{$single->id}}" {{in_array($single->id,old('restricted_age_ids',[]))}}>{{$single->age}}</option>
+                            <option value="{{$single->id}}" {{in_array($single->id,old('restricted_age_ids',[]))}}>{{$single->age}}{{$single->type}}</option>
                             @endforeach
                         </select>
                     </div>
@@ -369,7 +369,7 @@
                     <tbody>
                         @for($i=1;$i<=10;$i++)
                             <tr>
-                            <td width="50%"> Year {{$i}}</td>
+                            <td width="50%">{{__('messages.plans.year')}} {{$i}}</td>
                             <td width="50%">
                                 <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                     <input type="text" name="discount[{{$i}}]" oninput="this.value = this.value.replace(/[^0-9.]/g, '').split('.').slice(0, 2).join('.');" style="border: none;" required placeholder="{{__('messages.plans.example').' '.($i*2.5)}}"
@@ -504,13 +504,13 @@
                             <td>
                                 <div class="row">
                                     <div class="col-lg-6">
-                                        <label for="from">from</label>
+                                        <label for="from">{{__('messages.plans.from')}}</label>
                                         <div class="shadow1 p-2 mb-3" style="padding-bottom: 2.5rem;">
                                             <input type="text" name="comprehensive_schedule[0][from]" oninput="this.value = this.value.replace(/[^0-9.]/g, '').split('.').slice(0, 2).join('.');" class="border" required>
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
-                                        <label for="to">To</label>
+                                        <label for="to">{{__('messages.plans.to')}}</label>
                                         <div class="shadow1 p-2 mb-3" style="padding-bottom: 2.5rem;">
                                             <input type="text" name="comprehensive_schedule[0][to]" oninput="this.value = this.value.replace(/[^0-9.]/g, '').split('.').slice(0, 2).join('.');" class="border" style="border: none;" required>
                                         </div>
@@ -570,13 +570,13 @@
                             <td width="30%">
                                 <div class="row">
                                     <div class="col-lg-6">
-                                        <label for="from" class="form-label">From</label>
+                                        <label for="from" class="form-label">{{__('messages.plans.from')}}</label>
                                         <div class="shadow1 p-2 mb-3" style="padding-bottom: 2.5rem;">
                                             <input type="text" name="commission_schedule[0][from]" oninput="this.value = this.value.replace(/[^0-9.]/g, '').split('.').slice(0, 2).join('.');" class="form-control border-0" required>
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
-                                        <label for="to" class="form-label">To</label>
+                                        <label for="to" class="form-label">{{__('messages.plans.to')}}</label>
                                         <div class="shadow1 p-2 mb-3" style="padding-bottom: 2.5rem;">
                                             <input type="text" name="commission_schedule[0][to]" oninput="this.value = this.value.replace(/[^0-9.]/g, '').split('.').slice(0, 2).join('.');" class="form-control border-0" required>
                                         </div>

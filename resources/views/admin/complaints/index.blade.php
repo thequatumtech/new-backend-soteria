@@ -127,8 +127,8 @@
                         <td>{{ $single->complaint_number }}</td>
                         <td>{{\Carbon\Carbon::parse($single->complaint_date)->format('d/m/Y')}}</td>
                         <td>{{$single->client->full_name}}</td>
-                        <td>{{$single->line_of_business_id?$single->line_of_business->name:''}}</td>
-                        <td>{{$single->insurance_company_id?$single->insurance_company->company_name:''}}</td>
+                        <td>{{$single->line_of_business->name ?? '-'}}</td>
+                        <td>{{ optional($single->insurance_company)->company_name ?? '' }}</td>
                         <td>{{$single->client->mobile_no}}</td>
                         <td>{{ $single->status->name }}</td>
                         <td>

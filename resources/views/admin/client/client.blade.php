@@ -42,261 +42,268 @@
 @endsection
 
 @section('content')
-<main class="flex-grow-1 pt-5">
-    <div class="container-fluid">
-        <div class="header d-flex justify-content-between p-3 py-2 align-items-center">
-            <div class="text-white group-title fw-bold">{{__('messages.clients.client')}}</div>
-            @if(is_admin_authorized('client.add'))
-            <a href="{{route('client.add')}}" class="btn pe-0">
-                <img src="{{asset('img/icon-add.png')}}" alt="">
-            </a>
-            @endif
-        </div>
-        <div class="col-12 col-lg-6">
-            <div class="pt-4 row" style="border: none;">
-                @if(is_admin_authorized('client_send_message'))
-                <div class="col-lg-4">
-                    <button type="button" id="send_message_btn"
-                        class="btn rounded-1 w-100 text-white opacity-50 p-2"
-                        style="background-color: #EF7C00;">{{__('messages.clients.send_message')}}</button>
-                </div>
-                @endif
-                <div class="col-lg-4">
-                    <a href="{{route('coupons')}}" class="btn rounded-1 w-100 text-white opacity-50 p-2"
-                        style="background-color: #EF7C00;">{{__('messages.clients.coupon_code')}}</a>
-                </div>
-                <!-- {{-- TODO changes in add to blacklist--}} -->
-                @if(is_admin_authorized('client_add_to_blacklist'))
-                <div class="col-lg-4">
-                    <button type="button" id="add_to_blacklist_btn"
-                        class="btn rounded-1 w-100 text-white opacity-50 p-2"
-                        style="background-color: #EF7C00;">{{__('messages.clients.add_to_blacklist')}}</button>
-                </div>
+    <main class="flex-grow-1 pt-5">
+        <div class="container-fluid">
+            <div class="header d-flex justify-content-between p-3 py-2 align-items-center">
+                <div class="text-white group-title fw-bold">{{__('messages.clients.client')}}</div>
+                @if(is_admin_authorized('client.add'))
+                <a href="{{route('client.add')}}" class="btn pe-0">
+                    <img src="{{asset('img/icon-add.png')}}" alt="">
+                </a>
                 @endif
             </div>
-        </div>
+            <div class="col-12 col-lg-6">
+                <div class="pt-4 row" style="border: none;">
+                    @if(is_admin_authorized('client_send_message'))
+                    <div class="col-lg-4">
+                        <button type="button" id="send_message_btn"
+                            class="btn rounded-1 w-100 text-white opacity-50 p-2"
+                            style="background-color: #EF7C00;">{{__('messages.clients.send_message')}}</button>
+                    </div>
+                    @endif
+                    <div class="col-lg-4">
+                        <a href="{{route('coupons')}}" class="btn rounded-1 w-100 text-white opacity-50 p-2"
+                            style="background-color: #EF7C00;">{{__('messages.clients.coupon_code')}}</a>
+                    </div>
+                    <!-- {{-- TODO changes in add to blacklist--}} -->
+                    @if(is_admin_authorized('client_add_to_blacklist'))
+                    <div class="col-lg-4">
+                        <button type="button" id="add_to_blacklist_btn"
+                            class="btn rounded-1 w-100 text-white opacity-50 p-2"
+                            style="background-color: #EF7C00;">{{__('messages.clients.add_to_blacklist')}}</button>
+                    </div>
+                    @endif
+                </div>
+            </div>
 
-        <div class="body bg-white py-4 px-4 d-flex flex-column gap-3 pb-5">
-            <table id="example" class="table table-striped " style="width:100%">
-                <thead>
-                    <tr>
-                        <th class="no-search">{{__('messages.clients.id')}}</th>
-                        <th>{{__('messages.clients.full_name')}}</th>
-                        <th>{{__('messages.clients.mobile_no')}}</th>
-                        <th class="no-search">{{__('messages.clients.occupation')}}</th>
-                        <th class="no-search">{{__('messages.clients.agent')}}</th>
-                        <th class="no-search">{{__('messages.clients.no_of_policies')}}</th>
-                        <th class="no-order no-search">{{__('messages.clients.action')}}</th>
-                        {{-- <th class="no-order no-search">{{__('messages.clients.select')}}<br /> --}}
-                        <th class="no-order no-search">{{__('messages.clients.select')}}<input class="form-check-input select-all-checkbox" type="checkbox" id="select_all_clients" title="Select All">
-                            <!-- {{--<input class="form-check-input select-all-checkbox" type="checkbox">--}}</th> -->
-                        <th class="no-show">Email Address</th>
-                        <th class="no-show">National Id/Passport</th>
-                        <th class="no-show">Residence No.</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($clients as $key=> $data)
-                    <tr>
-                        <td>{{ $key + 1 }}</td>
-                        <td>
-                            @if($data->profile_pic)
-                            <img class="border profile-pic-circle"
-                                src="{{asset('uploads/clients').'/'.$data->id.'/'.$data->profile_pic}}"
-                                alt="profile">
-                            @else
-                            <img class="border profile-pic-circle" src="{{asset('img/myAvatar.png')}}" alt="profile">
-                            @endif
-                            &nbsp;
-                            {{$data->full_name}}
-                        </td>
-                        <td>{{$data->mobile_no}}</td>
-                        <td>{{isset($data->occupation)?$data->occupation->name:'-'}}</td>
-                        <td>{{$data->agent_id && $data->agent ? $data->agent->full_name :'-'}}</td>
-                        <td><a href="javascript:void(0);" class="{{is_admin_authorized('client.purchased_policy')?'purchased_policy':''}}" data-client_id="{{$data->id}}">{{$data->purchased_policies->count()}}</a></td>
-                        <td>
-                            <div class="d-flex gap-3 justify-content-evenly align-items-center px-2">
-                                <!-- {{-- <a href="" class="" style="color: #939EAA !important;">More</a>--}} -->
-                                @if(is_admin_authorized('client.view'))
-                                <a href="javascript:void(0);" class="btn p-0 m-0 btn-custom viewbtn {{is_admin_authorized('client.purchased_policy')?'purchased_policy':''}}" data-client_id="{{$data->id}}" title="View">
-                                    <img src="{{asset('img/icon-eye.png')}}" alt="">
-                                </a>
-                                @endif
-                                @if(is_admin_authorized('client.edit'))
-                                <a href="{{route('client.edit',$data->id)}}" class="btn p-0 m-0" title="Edit">
-                                    <img src="{{asset('img/icon-edit.png')}}" alt="">
-                                </a>
-                                @endif
-                                @if(is_admin_authorized('client.delete'))
-                                    <button class="btn p-0 m-0 deletebtn" value="{{$data->id}}" title="Delete">
-                                        <img src="{{asset('img/icon-delete.png')}}" alt="">
-                                    </button>
-                                @endif
-                                <!-- {{-- <button class="btn p-0 m-0 deletebtn" value="{{$data->id}}" title="Delete"><img src="{{asset('img/icon-delete.png')}}" alt=""></button>--}} -->
-                            </div>
-                        </td>
-                        <td><input class="form-check-input select-checkbox" type="checkbox" data-client_id="{{$data->id}}" data-client_name="{{$data->full_name}}"></td>
-                        <td>{{$data->email_id}}</td>
-                        <td>{{$data->national_id_number}}</td>
-                        <td>{{$data->residence_id_number}}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <input type="hidden" id="selected_client_id">
-    <input type="hidden" id="selected_client_names">
-</main>
-<div class="modal fade " id="PurchasedPolicyModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-md">
-        <div class="modal-content">
-            <div class="modal-header text-white " style="background-color: #104E9E;">
-                <h1 class="modal-title fs-5">{{__('messages.clients.purchased_policies')}}</h1>
-                <button data-bs-dismiss="modal" class="btn">
-                    <img src="{{asset('img/icon-close.svg')}}" alt="">
-                </button>
-            </div>
-            <div class="modal-body">
-                <table class="table">
+            <div class="body bg-white py-4 px-4 d-flex flex-column gap-3 pb-5">
+                <table id="example" class="table table-striped " style="width:100%">
                     <thead>
                         <tr>
-                            <th scope="col">{{__('messages.clients.policy_type')}}</th>
-                            <th scope="col">{{__('messages.clients.insurance_company')}}</th>
-                            <th scope="col">{{__('messages.clients.action')}}</th>
+                            <th class="no-search">{{__('messages.clients.id')}}</th>
+                            <th>{{__('messages.clients.full_name')}}</th>
+                            <th>{{__('messages.clients.mobile_no')}}</th>
+                            <th class="no-search">{{__('messages.clients.occupation')}}</th>
+                            <th class="no-search">{{__('messages.clients.agent')}}</th>
+                            <th class="no-search">{{__('messages.clients.no_of_policies')}}</th>
+                            <th class="no-order no-search">{{__('messages.clients.action')}}</th>
+                            {{-- <th class="no-order no-search">{{__('messages.clients.select')}}<br /> --}}
+                            <th class="no-order no-search">{{__('messages.clients.select')}}<input class="form-check-input select-all-checkbox" type="checkbox" id="select_all_clients" title="Select All">
+                                <!-- {{--<input class="form-check-input select-all-checkbox" type="checkbox">--}}</th> -->
+                            <th class="no-show">Email Address</th>
+                            <th class="no-show">National Id/Passport</th>
+                            <th class="no-show">Residence No.</th>
                         </tr>
                     </thead>
-                    <tbody class="purchased_policy_table_body">
+                    <tbody>
+                        @foreach($clients as $key=> $data)
+                            <tr>
+                                <td>{{ $key + 1 }}</td>
+                                <td>
+                                    @if($data->profile_pic)
+                                    <img class="border profile-pic-circle"
+                                        src="{{asset('uploads/clients').'/'.$data->id.'/'.$data->profile_pic}}"
+                                        alt="profile">
+                                    @else
+                                    <img class="border profile-pic-circle" src="{{asset('img/myAvatar.png')}}" alt="profile">
+                                    @endif
+                                    &nbsp;
+                                    {{$data->full_name}}
+                                </td>
+                                <td>{{$data->mobile_no}}</td>
+                                <td>{{isset($data->occupation)?$data->occupation->name:'-'}}</td>
+                                <td>{{$data->agent_id && $data->agent ? $data->agent->full_name :'-'}}</td>
+                                <td><a href="javascript:void(0);" class="{{is_admin_authorized('client.purchased_policy')?'purchased_policy':''}}" data-client_id="{{$data->id}}">{{$data->purchased_policies->count()}}</a></td>
+                                <td>
+                                    <div class="d-flex gap-3 justify-content-evenly align-items-center px-2">
+                                          @if(is_admin_authorized('client.purchased_policy'))
+                                                <a href="{{ route('client.getAllPolicies', $data->id) }}"
+                                                   class="btn p-0 m-0"
+                                                   title="All Policies">
+                                                {{__('messages.clients.all_policies')}}
+                                                </a>
+                                            @endif
+                                        <!-- {{-- <a href="" class="" style="color: #939EAA !important;">More</a>--}} -->
+                                        @if(is_admin_authorized('client.view'))
+                                        <a href="javascript:void(0);" class="btn p-0 m-0 btn-custom viewbtn {{is_admin_authorized('client.purchased_policy')?'purchased_policy':''}}" data-client_id="{{$data->id}}" title="View">
+                                            <img src="{{asset('img/icon-eye.png')}}" alt="">
+                                        </a>
+                                        @endif
+                                        @if(is_admin_authorized('client.edit'))
+                                            <a href="{{route('client.edit', encrypt($data->id))}}" class="btn p-0 m-0" title="Edit">
+                                                <img src="{{asset('img/icon-edit.png')}}" alt="">
+                                            </a>
+                                        @endif
+                                        @if(is_admin_authorized('client.delete'))
+                                            <button class="btn p-0 m-0 deletebtn" value="{{$data->id}}" title="Delete">
+                                                <img src="{{asset('img/icon-delete.png')}}" alt="">
+                                            </button>
+                                        @endif
+                                        <!-- {{-- <button class="btn p-0 m-0 deletebtn" value="{{$data->id}}" title="Delete"><img src="{{asset('img/icon-delete.png')}}" alt=""></button>--}} -->
+                                    </div>
+                                </td>
+                                <td><input class="form-check-input select-checkbox" type="checkbox" data-client_id="{{$data->id}}" data-client_name="{{$data->full_name}}"></td>
+                                <td>{{$data->email_id}}</td>
+                                <td>{{$data->national_id_number}}</td>
+                                <td>{{$data->residence_id_number}}</td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
         </div>
-    </div>
-</div>
-
-<div class="modal fade " id="DeleteModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
-        <div class="modal-content">
-            <div class="modal-header text-white " style="background-color: #104E9E;">
-                <h1 class="modal-title fs-5">{{__('messages.clients.delete_client')}}</h1>
-                <button data-bs-dismiss="modal" class="btn">
-                    <img src="{{asset('img/icon-close.svg')}}" alt="">
-                </button>
-            </div>
-
-            <form action="{{route('client.delete')}}" method="post">
-
-                @csrf
-                <div class="modal-body">
-                    <div class="row p-3" style="color: #92959A;">
-                        <div class="container">
-                            <div class="row pt-5">
-                                <div class="col-12 col-lg-9">
-                                    <h4>{{__('messages.clients.delete_confirm')}}</h4>
-                                    <input type="hidden" id="deleteing_id" name="delete_customer_id">
-                                </div>
-                            </div>
-                            <div class="col-12 col-lg-3">
-                                <div class="pt-4 " style="border: none;">
-                                    <button type="submit" class="btn rounded-1 w-100 text-white opacity-50 p-2" style="background-color: #EF7C00;">{{__('messages.clients.delete')}}</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <input type="hidden" id="selected_client_id">
+        <input type="hidden" id="selected_client_names">
+    </main>
+    <div class="modal fade " id="PurchasedPolicyModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content">
+                <div class="modal-header text-white " style="background-color: #104E9E;">
+                    <h1 class="modal-title fs-5">{{__('messages.clients.purchased_policies')}}</h1>
+                    <button data-bs-dismiss="modal" class="btn">
+                        <img src="{{asset('img/icon-close.svg')}}" alt="">
+                    </button>
                 </div>
-            </form>
+                <div class="modal-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">{{__('messages.clients.policy_type')}}</th>
+                                <th scope="col">{{__('messages.clients.insurance_company')}}</th>
+                                <th scope="col">{{__('messages.clients.action')}}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="purchased_policy_table_body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- END Delete Customers -->
+    <div class="modal fade " id="DeleteModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header text-white " style="background-color: #104E9E;">
+                    <h1 class="modal-title fs-5">{{__('messages.clients.delete_client')}}</h1>
+                    <button data-bs-dismiss="modal" class="btn">
+                        <img src="{{asset('img/icon-close.svg')}}" alt="">
+                    </button>
+                </div>
 
-<!-- START Send Message -->
-<div class="modal fade " id="SendMessageModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
-        <div class="modal-content">
-            <div class="modal-header text-white " style="background-color: #104E9E;">
-                <h1 class="modal-title fs-5">{{__('messages.clients.messages')}}</h1>
-                <button data-bs-dismiss="modal" class="btn">
-                    <img src="{{asset('img/icon-close.svg')}}" alt="">
-                </button>
-            </div>
+                <form action="{{route('client.delete')}}" method="post">
 
-            <form action="{{route('client.send_message')}}" method="post">
-
-                @csrf
-                <div class="modal-body">
-                    <div class="row p-3" style="color: #92959A;">
-                        <div class="container">
-                            <div class="row pt-5">
-                                <div class="col-12 col-lg-9">
-                                    <h4>{{__('messages.clients.messages')}}</h4>
-                                    <input type="hidden" id="send_client_id" name="send_client_id">
-                                    <div class="shadow-1 p-2">
-                                        <textarea class="input-1" name="message" style="resize: none;min-height: 6.5rem;width: 100%;" required placeholder="{{__('messages.clients.type_here')}}"></textarea>
+                    @csrf
+                    <div class="modal-body">
+                        <div class="row p-3" style="color: #92959A;">
+                            <div class="container">
+                                <div class="row pt-5">
+                                    <div class="col-12 col-lg-9">
+                                        <h4>{{__('messages.clients.delete_confirm')}}</h4>
+                                        <input type="hidden" id="deleteing_id" name="delete_customer_id">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-3">
+                                    <div class="pt-4 " style="border: none;">
+                                        <button type="submit" class="btn rounded-1 w-100 text-white opacity-50 p-2" style="background-color: #EF7C00;">{{__('messages.clients.delete')}}</button>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-lg-3">
-                                <div class="pt-4 " style="border: none;">
-                                    <button type="submit" class="btn rounded-1 w-100 text-white opacity-50 p-2" style="background-color: #EF7C00;">{{__('messages.clients.send')}}</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- END Delete Customers -->
+
+    <!-- START Send Message -->
+    <div class="modal fade " id="SendMessageModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header text-white " style="background-color: #104E9E;">
+                    <h1 class="modal-title fs-5">{{__('messages.clients.messages')}}</h1>
+                    <button data-bs-dismiss="modal" class="btn">
+                        <img src="{{asset('img/icon-close.svg')}}" alt="">
+                    </button>
+                </div>
+
+                <form action="{{route('client.send_message')}}" method="post">
+
+                    @csrf
+                    <div class="modal-body">
+                        <div class="row p-3" style="color: #92959A;">
+                            <div class="container">
+                                <div class="row pt-5">
+                                    <div class="col-12 col-lg-9">
+                                        <h4>{{__('messages.clients.messages')}}</h4>
+                                        <input type="hidden" id="send_client_id" name="send_client_id">
+                                        <div class="shadow-1 p-2">
+                                            <textarea class="input-1" name="message" style="resize: none;min-height: 6.5rem;width: 100%;" required placeholder="{{__('messages.clients.type_here')}}"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-3">
+                                    <div class="pt-4 " style="border: none;">
+                                        <button type="submit" class="btn rounded-1 w-100 text-white opacity-50 p-2" style="background-color: #EF7C00;">{{__('messages.clients.send')}}</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-</div>
-<!-- END Send Message-->
-<!-- START Add to blacklist -->
-<div class="modal fade " id="AddToBlacklistModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
-        <div class="modal-content">
-            <div class="modal-header text-white " style="background-color: #104E9E;">
-                <h1 class="modal-title fs-5">{{__('messages.clients.add_to_blacklist')}}</h1>
-                <button data-bs-dismiss="modal" class="btn">
-                    <img src="{{asset('img/icon-close.svg')}}" alt="">
-                </button>
-            </div>
+    <!-- END Send Message-->
+    <!-- START Add to blacklist -->
+    <div class="modal fade " id="AddToBlacklistModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header text-white " style="background-color: #104E9E;">
+                    <h1 class="modal-title fs-5">{{__('messages.clients.add_to_blacklist')}}</h1>
+                    <button data-bs-dismiss="modal" class="btn">
+                        <img src="{{asset('img/icon-close.svg')}}" alt="">
+                    </button>
+                </div>
 
-            <form action="{{route('client.add_to_blacklist')}}" method="post">
+                <form action="{{route('client.add_to_blacklist')}}" method="post">
 
-                @csrf
-                <div class="modal-body">
-                    <div class="row p-3" style="color: #92959A;">
-                        <div class="container">
-                            <div class="row pt-5">
-                                <div class="col-12 col-lg-9">
-                                    <h4>{{__('messages.clients.add_to_blacklist_header')}}</h4>
-                                    <span id="add_to_blacklist_clients"></span>
-                                    <input type="hidden" id="add_to_blacklist_client_id" name="add_to_blacklist_client_id">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="row p-3" style="color: #92959A;">
+                            <div class="container">
+                                <div class="row pt-5">
+                                    <div class="col-12 col-lg-9">
+                                        <h4>{{__('messages.clients.add_to_blacklist_header')}}</h4>
+                                        <span id="add_to_blacklist_clients"></span>
+                                        <input type="hidden" id="add_to_blacklist_client_id" name="add_to_blacklist_client_id">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-12 col-lg-3">
-                                <div class="pt-4 " style="border: none;">
-                                    <button type="submit" class="btn rounded-1 w-100 text-white opacity-50 p-2" style="background-color: #EF7C00;">{{__('messages.clients.yes')}}</button>
+                                <div class="col-12 col-lg-3">
+                                    <div class="pt-4 " style="border: none;">
+                                        <button type="submit" class="btn rounded-1 w-100 text-white opacity-50 p-2" style="background-color: #EF7C00;">{{__('messages.clients.yes')}}</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-</div>
-<!-- END Send Message-->
-<div class="toast-container position-fixed bottom-0 start-50 translate-middle-x w-100">
-    <div class="p-3 col-12 col-lg-8 mx-auto">
-        <div class="toast align-items-center text-bg-danger border-0 col-12 col-lg-8 w-100" data-bs-delay="3000" role="alert" aria-live="assertive" aria-atomic="true" id="clientSelectToast">
-            <div class="d-flex">
-                <div class="toast-body px-5 fw-bold py-3" style="font-size: 1.375rem;">
+    <!-- END Send Message-->
+    <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x w-100">
+        <div class="p-3 col-12 col-lg-8 mx-auto">
+            <div class="toast align-items-center text-bg-danger border-0 col-12 col-lg-8 w-100" data-bs-delay="3000" role="alert" aria-live="assertive" aria-atomic="true" id="clientSelectToast">
+                <div class="d-flex">
+                    <div class="toast-body px-5 fw-bold py-3" style="font-size: 1.375rem;">
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 
 @endsection

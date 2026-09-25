@@ -10,12 +10,13 @@ use App\Models\LineOfBusiness;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-
+use Illuminate\Support\Facades\Mail;
 class ComplaintController extends Controller
 {
     public function index(Request $request)
     {
-        $complaints = Complaint::all();
+        $complaints = Complaint::with('line_of_business')->get();
+        // dd($complaints);
         return view('admin.complaints.index', compact('complaints'));
     }
 
@@ -44,9 +45,49 @@ class ComplaintController extends Controller
         return view('admin.complaints.edit_complaint', compact('complaint','attachments','insurance_companies','line_of_businesses','complaint_statuses'));
     }
 
+    public function send_email(Request $request)
+    {
+        $request->validate([
+            'complaint_id' => 'required|exists:complaints,id',
+            'subject' => 'required|string',
+            'content' => 'required|string',
+        ]);
+
+        $complaint = Complaint::with([
+            'client',
+            'insurance_company',
+        ])->findOrFail($request->complaint_id);
+
+        $email = $complaint->client?->email_id;
+
+        if (!$email) {
+            return response()->json([
+                'message' => 'Client email not found.'
+            ], 422);
+        }
+
+        Mail::send([], [], function ($message) use ($email, $request) {
+
+            $message->to($email)
+                ->subject($request->subject)
+                ->html($request->content);
+
+            $message->from(
+                env('MAIL_USERNAME'),
+                env('MAIL_FROM_NAME')
+            );
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Email sent successfully.'
+        ]);
+    }
+
     public function save_complaint(Request $request)
     {
         $complaint = Complaint::find($request->complaint_id);
+        $old_status_id = $complaint->complaint_status_id;
         $complaint->insurance_company_id = $request->insurance_company_id;
         $complaint->line_of_business_id = $request->line_of_business_id;
         $complaint->complaint_status_id = $request->complaint_status_id;
@@ -79,6 +120,14 @@ class ComplaintController extends Controller
         $attachments_arr = array_merge($attachments,$new_attachments);
         $complaint->attachments = implode(',',$attachments_arr);
         $complaint->save();
+        
+        if ($old_status_id != $complaint->complaint_status_id) {
+            event(new \App\Events\ComplaintStatusUpdated(
+                recipientUserId: $complaint->client_id,
+                complaintId: $complaint->id,
+                status: $complaint->status->name
+            ));
+        }
         return redirect()->route('complaints')->with('success','Updated Successfully');
     }
 

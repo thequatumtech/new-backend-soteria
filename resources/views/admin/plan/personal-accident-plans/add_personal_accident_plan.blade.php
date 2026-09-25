@@ -186,7 +186,7 @@
                                 <div>{{__('messages.plans.policy_holder_age_restriction')}}</div>
                                 <select name="restricted_age_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
                                     @foreach($ages as $single)
-                                    <option value="{{$single->id}}" {{in_array($single->id, old('restricted_age_ids', []))}}>{{$single->age}}</option>
+                                    <option value="{{$single->id}}" {{in_array($single->id, old('restricted_age_ids', []))}}>{{$single->age}} {{$single->type}}</option>
                                     @endforeach
                                 </select>
                             </div>

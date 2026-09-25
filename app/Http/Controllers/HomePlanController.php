@@ -11,6 +11,8 @@ use App\Models\InsurancePlanModels\HomePlan;
 use App\Models\InsurancePlanModels\HomePlanPolicyCover;
 use App\Models\LineOfBusiness;
 use Illuminate\Http\Request;
+use App\Models\ProtectionSystem;
+use Illuminate\Support\Facades\Crypt;
 
 
 class HomePlanController extends Controller
@@ -28,58 +30,41 @@ class HomePlanController extends Controller
     {
         $insurance_companies = InsuranceCompany::where('line_of_business_id', 'like', '%"3"%')->get();
         $line_of_businesses = LineOfBusiness::where('id', self::line_of_business_id)->first()->name;
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
-        return view('admin.plan.home-plans.add_home_plan', compact('insurance_companies', 'line_of_businesses', 'countries', 'cities', 'districts', 'ages'));
+        $protection_systems = ProtectionSystem::all();
+        return view('admin.plan.home-plans.add_home_plan', compact('insurance_companies', 'line_of_businesses', 'countries', 'cities', 'districts', 'ages', 'protection_systems'));
     }
 
-    // public function edit_home_plan(Request $request, $id)
-    // {
-    //     $insurance_companies = InsuranceCompany::where('line_of_business_id','like','%"3"%')->get();
-    //     $line_of_businesses = LineOfBusiness::all();
-    //     $plan = HomePlan::find($id);
-    //     $countries = Country::all();
-    //     $cities = Cities::all();
-    //     $districts = District::all();
-    // /*   if($plan->restricted_country_ids) {
-    //         $cities = Cities::whereIn('country_id', json_decode($plan->restricted_country_ids))->get();
-    //         if($plan->restricted_city_ids) {
-    //             $districts = District::whereIn('city_id', json_decode($plan->restricted_city_ids))->get();
-    //         } else {
-    //             $districts = [];
-    //         }
-    //     } else {
-    //         $cities = $districts = [];
-    //     }*/
-    //     $ages = Ages::all();
-    //     return view('admin.plan.home-plans.edit_home_plan',compact('insurance_companies','line_of_businesses','countries','cities','districts','ages','plan'));
-    // }
 
     public function edit_home_plan(Request $request, $id)
     {
+        // $insurance_companies = InsuranceCompany::where('line_of_business_id', 'like', '%"3"%')->get();
+        // $line_of_businesses = LineOfBusiness::all();
+        // $plan = HomePlan::find($id);
+
+        $decryptedId = Crypt::decrypt($id);
+
         $insurance_companies = InsuranceCompany::where('line_of_business_id', 'like', '%"3"%')->get();
         $line_of_businesses = LineOfBusiness::all();
-        $plan = HomePlan::find($id);
-        $countries = Country::all();
+        $plan = HomePlan::find($decryptedId);
+
+        $countries = Country::orderBy('name', 'asc')->get();
 
         // Decode stored country and city IDs
         $selected_country_ids = $plan->restricted_country_ids ? json_decode($plan->restricted_country_ids, true) : [];
         $selected_city_ids = $plan->restricted_city_ids ? json_decode($plan->restricted_city_ids, true) : [];
         $selected_district_ids = $plan->restricted_district_ids ? json_decode($plan->restricted_district_ids, true) : [];
 
-        // Load only related cities and districts
-        // $cities = count($selected_country_ids) > 0
-        //     ? Cities::whereIn('country_id', $selected_country_ids)->get()
-        //     : collect(); // empty collection
 
-        // $districts = count($selected_city_ids) > 0
-        //     ? District::whereIn('city_id', $selected_city_ids)->get()
-        //     : collect(); // empty collection
-        $cities = Cities::all();
-        $districts = District::all();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
+        $protection_systems = ProtectionSystem::all();
+        $selected_home_age_ids = $plan->restricted_home_age_ids ? json_decode($plan->restricted_home_age_ids, true) : [];
+        $selected_protection_system_ids = $plan->restricted_protection_system_ids ? json_decode($plan->restricted_protection_system_ids, true) : [];
 
         return view('admin.plan.home-plans.edit_home_plan', compact(
             'insurance_companies',
@@ -91,7 +76,10 @@ class HomePlanController extends Controller
             'plan',
             'selected_country_ids',
             'selected_city_ids',
-            'selected_district_ids'
+            'selected_district_ids',
+            'protection_systems',
+            'selected_protection_system_ids',
+            'selected_home_age_ids'
         ));
     }
 
@@ -108,6 +96,8 @@ class HomePlanController extends Controller
             $home_insurance_plan->restricted_city_ids = $request->restricted_city_ids ? json_encode($request->restricted_city_ids) : null;
             $home_insurance_plan->restricted_district_ids = $request->restricted_district_ids ? json_encode($request->restricted_district_ids) : null;
             $home_insurance_plan->restricted_age_ids = $request->restricted_age_ids ? json_encode($request->restricted_age_ids) : null;
+            $home_insurance_plan->restricted_protection_system_ids = $request->restricted_protection_system_ids ? json_encode($request->restricted_protection_system_ids) : null;
+            $home_insurance_plan->restricted_home_age_ids = $request->restricted_home_age_ids ? json_encode($request->restricted_home_age_ids) : null;
             $home_insurance_plan->limit = $request->limit;
             // $home_insurance_plan->limit = str_replace(',', '', $request->limit);
             $home_insurance_plan->net_premium = $request->net_premium;
@@ -156,6 +146,8 @@ class HomePlanController extends Controller
             $home_insurance_plan->restricted_city_ids = $request->restricted_city_ids ? json_encode($request->restricted_city_ids) : null;
             $home_insurance_plan->restricted_district_ids = $request->restricted_district_ids ? json_encode($request->restricted_district_ids) : null;
             $home_insurance_plan->restricted_age_ids = $request->restricted_age_ids ? json_encode($request->restricted_age_ids) : null;
+            $home_insurance_plan->restricted_protection_system_ids = $request->restricted_protection_system_ids ? json_encode($request->restricted_protection_system_ids) : null;
+            $home_insurance_plan->restricted_home_age_ids = $request->restricted_home_age_ids ? json_encode($request->restricted_home_age_ids) : null;
             $home_insurance_plan->limit = $request->limit;
             // $home_insurance_plan->limit = str_replace(',', '', $request->limit);
             $home_insurance_plan->net_premium = $request->net_premium;
@@ -191,16 +183,7 @@ class HomePlanController extends Controller
                 ->whereNotIn('id', $requestCoverIds)
                 ->delete();
             foreach ($request->policy_covers as $single) {
-                // dd($single);
-                // $home_insurance_plan_policy_covers = new HomePlanPolicyCover();
-                // $home_insurance_plan_policy_covers->home_plan_id = $plan_id;
-                // $home_insurance_plan_policy_covers->cover_name = $single['cover_name'];
-                // // $home_insurance_plan_policy_covers->cover_limit = $single['cover_limit'];
-                // $home_insurance_plan_policy_covers->cover_limit = str_replace(',', '', $single['cover_limit']);
-                // $home_insurance_plan_policy_covers->cover_deductible = $single['cover_deductible'];
-                // $home_insurance_plan_policy_covers->cover_rate = $single['cover_rate'];
-                // $home_insurance_plan_policy_covers->cover_premium = $single['cover_premium'];
-                // $home_insurance_plan_policy_covers->save();
+
                 if (!empty($single['id'])) {
                     $cover = HomePlanPolicyCover::find($single['id']);
                     if ($cover) {

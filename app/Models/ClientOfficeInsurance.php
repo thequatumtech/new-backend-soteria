@@ -69,7 +69,10 @@ class ClientOfficeInsurance extends Model
         'practice_documents',
         'company_tax_certi_documents',
         'plan_id',
-        'payment_status'
+        'payment_status',
+        'restricted_protection_system_ids',
+        'restricted_office_age_ids',
+        'office_age',
     ];
     public static function getOfficeInsuranceDetails($id)
     {
@@ -82,7 +85,8 @@ class ClientOfficeInsurance extends Model
         'office_plans.sales_tax_cbj',
         'office_plans.gross_premium',
         'office_plans.commission_percentage',
-        'insurance_companies.company_name','insurance_company_documents.company_stamp','insurance_company_documents.logo','insurance_company_documents.authorized_signature','insurance_companies.id as insurance_company_id')
+        'insurance_companies.company_name','insurance_company_documents.company_stamp','insurance_company_documents.logo',
+            'insurance_company_documents.letterhead','insurance_company_documents.authorized_signature','insurance_companies.id as insurance_company_id')
             ->leftJoin('office_plans', 'client_office_insurances.plan_id', '=', 'office_plans.id')
             ->leftJoin('insurance_companies', 'office_plans.insurance_company_id', '=', 'insurance_companies.id')
             ->leftJoin('insurance_company_documents', 'insurance_companies.id', '=', 'insurance_company_documents.insurance_id')

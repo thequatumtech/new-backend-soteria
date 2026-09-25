@@ -202,7 +202,7 @@
                                     @foreach($ages as $single)
                                     <option value="{{$single->id}}"
                                         {{ in_array($single->id, old('restricted_age_ids', json_decode($plan->restricted_age_ids, true) ?? [])) ? 'selected' : '' }}>
-                                        {{$single->age}}
+                                        {{$single->age}} {{$single->type}}
                                     </option>
                                     @endforeach
                                 </select>
@@ -378,7 +378,7 @@
                                     $no_claim_discount = $matchingCondition ? $matchingCondition->discount : 0;
                                     @endphp
                                     <tr>
-                                        <td width="50%"> Year {{$i}}</td>
+                                        <td width="50%">{{__('messages.plans.year')}} {{$i}}</td>
                                         <td width="50%">
                                             <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                                 <input type="text" name="discount[{{$i}}]" style="border: none;" required placeholder="{{__('messages.plans.example').' '.($i*2.5)}}"

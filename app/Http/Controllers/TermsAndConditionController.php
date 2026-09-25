@@ -80,7 +80,7 @@ class TermsAndConditionController extends Controller
                     $terms->message = $request->message;
                 }
 
-                if ($request->hasFile('upload_file')) {
+                if ($request->hasFile('terms_file')) {
                     $uploadedFile = $request->file('upload_file');
                     $newFilename = $uploadedFile->getClientOriginalName();
                     $uploadedFile->move(public_path('uploads/terms_and_conditions'), $newFilename);
@@ -121,31 +121,85 @@ class TermsAndConditionController extends Controller
             // Handle errors here
         }
     }
-    public function update(Request $request)
-    {
-        $request->validate([
-            'id' => 'required|exists:terms_and_conditions,id',
-            'message' => 'required_without:terms_file',
-            'terms_file' => 'file|mimes:jpg,jpeg,png,gif,bmp,pdf'
-        ]);
+    // public function update(Request $request)
+    // {
+    //     $request->validate([
+    //         'id' => 'required|exists:terms_and_conditions,id',
+    //         'message' => 'required_without:terms_file',
+    //         'terms_file' => 'file|mimes:jpg,jpeg,png,gif,bmp,pdf'
+    //     ]);
 
-        $terms = TermsAndCondition::find($request->id);
-        $terms->message = $request->message;
+    //     $terms = TermsAndCondition::find($request->id);
+    //     $terms->message = $request->message;
 
-        if ($request->hasFile('terms_file')) {
-            if ($terms->file && file_exists(public_path('uploads/terms_and_conditions/' . $terms->file))) {
-                unlink(public_path('uploads/terms_and_conditions/' . $terms->file));
-            }
+    //     if ($request->hasFile('terms_file')) {
+    //         if ($terms->file && file_exists(public_path('uploads/terms_and_conditions/' . $terms->file))) {
+    //             unlink(public_path('uploads/terms_and_conditions/' . $terms->file));
+    //         }
 
-            $file = $request->file('terms_file');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('uploads/terms_and_conditions'), $filename);
+    //         $file = $request->file('terms_file');
+    //         $filename = time() . '_' . $file->getClientOriginalName();
+    //         $file->move(public_path('uploads/terms_and_conditions'), $filename);
 
-            $terms->file = $filename;
+    //         $terms->file = $filename;
+    //     }
+
+    //     $terms->save();
+
+    //     return back()->with('success', 'Terms updated successfully.');
+    // }
+     
+public function update(Request $request)
+{
+    $request->validate([
+        'id' => 'required|exists:terms_and_conditions,id',
+        'message' => 'required_without:terms_file',
+        'terms_file' => 'file|mimes:jpg,jpeg,png,gif,bmp,pdf'
+    ]);
+
+    $terms = TermsAndCondition::find($request->id);
+
+    $terms->message = $request->message;
+
+    if ($request->hasFile('terms_file')) {
+
+        // Delete old file if it exists
+        if (
+            $terms->file &&
+            file_exists(
+                public_path('uploads/terms_and_conditions/' . $terms->file)
+            )
+        ) {
+            unlink(
+                public_path('uploads/terms_and_conditions/' . $terms->file)
+            );
         }
 
-        $terms->save();
+        // Get uploaded file
+        $file = $request->file('terms_file');
 
-        return back()->with('success', 'Terms updated successfully.');
+        // Get original filename
+        $originalName = $file->getClientOriginalName();
+
+        // Replace all spaces/whitespace with underscore
+        $originalName = preg_replace('/\s+/', '_', $originalName);
+
+        // Create unique filename
+        $filename = time() . '_' . $originalName;
+
+        // Move file to upload directory
+        $file->move(
+            public_path('uploads/terms_and_conditions'),
+            $filename
+        );
+
+        // Save filename in database
+        $terms->file = $filename;
     }
+
+    $terms->save();
+
+    return back()->with('success', 'Terms updated successfully.');
+}
+
 }

@@ -42,7 +42,8 @@ class ClientTravelInsurance extends Model
         'plan_id',
         'payment_status',
         'multiple_destination',
-        'dangerous_activities'
+        'dangerous_activities',
+        'restricted_destination_country_ids',
     ];
 
     public static function getTravelsInsuranceDetails($id)
@@ -61,6 +62,7 @@ class ClientTravelInsurance extends Model
             'insurance_companies.company_name',
             'insurance_company_documents.company_stamp',
             'insurance_company_documents.logo',
+            'insurance_company_documents.letterhead',
             'insurance_company_documents.authorized_signature',
             'insurance_companies.id as insurance_company_id'
         )

@@ -84,8 +84,8 @@ class ReportController extends Controller
         ];
         // $positions = DB::table('clients')->select('position')->whereNotNull('position')->groupBy('position')->get();
         $positions = Occupations::get();
-        $district = District::all();
-        $city = Cities::all();
+        $district = District::orderBy('name', 'asc')->get();
+        $city = Cities::orderBy('name', 'asc')->get();
         $supervisor = SupervisorModel::all();
         $ages = Ages::all();
         $clients = Client::all();
@@ -1104,8 +1104,8 @@ class ReportController extends Controller
         $clients = Client::select('id', 'first_name')->get();  // Fetch only necessary fields
         $policyTypes = $this->getPolicyTypes();
         $positions = DB::table('clients')->select('position')->distinct()->whereNotNull('position')->get();
-        $districts = District::all();
-        $cities = Cities::all();
+        $districts = District::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
         $supervisors = SupervisorModel::all();
         $ages = Ages::all();
 
@@ -1160,8 +1160,8 @@ class ReportController extends Controller
             ['id' => 12, 'name' => 'Motor Insurance']
         ];
         $positions = Occupations::get();
-        $district = District::all();
-        $city = Cities::all();
+        $district = District::orderBy('name', 'asc')->get();
+        $city = Cities::orderBy('name', 'asc')->get();
         $supervisor = SupervisorModel::all();
         $ages = Ages::all();
         $policy_plan = PurchasePolicy::select('plan_name')
@@ -1227,8 +1227,8 @@ class ReportController extends Controller
             ['id' => 11, 'name' => 'Marine Insurance'],
             ['id' => 12, 'name' => 'Motor Insurance']
         ];
-        $district = District::all();
-        $city = Cities::all();
+        $district = District::orderBy('name', 'asc')->get();
+        $city = Cities::orderBy('name', 'asc')->get();
         $supervisor = SupervisorModel::all();
         $ages = Ages::all();
 
@@ -1256,7 +1256,7 @@ class ReportController extends Controller
         $clients = Client::get();
         // Predefined insurance types for the dropdown
         $periods = InsurancePeriod::all();
-        $countries = Country::all();
+        $countries = Country::orderBy('name', 'asc')->get();
         $ages = Ages::all();
 
         return view('admin.reports.travel_policies_report', compact('policies', 'insuranceCompanies', 'agents', 'periods', 'clients', 'countries', 'ages'));
@@ -1285,8 +1285,8 @@ class ReportController extends Controller
         $clients = Client::get();
         $breed = ClientPetsInsurance::select('breed')->groupBy('breed')->get();
         $positions = DB::table('clients')->select('position')->whereNotNull('position')->groupBy('position')->get();
-        $districts = District::all();
-        $cities = Cities::all();
+        $districts = District::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
         $supervisor = SupervisorModel::all();
         $ages = Ages::all();
 
@@ -1399,8 +1399,8 @@ class ReportController extends Controller
             ['id' => 12, 'name' => 'Motor Insurance']
         ];
         $positions = DB::table('clients')->select('position')->whereNotNull('position')->groupBy('position')->get();
-        $district = District::all();
-        $city = Cities::all();
+        $district = District::orderBy('name', 'asc')->get();
+        $city = Cities::orderBy('name', 'asc')->get();
         $supervisor = SupervisorModel::all();
         $ages = Ages::all();
 
@@ -1445,8 +1445,8 @@ class ReportController extends Controller
             ['id' => 12, 'name' => 'Motor Insurance']
         ];
         $positions = Occupations::get();
-        $district = District::all();
-        $city = Cities::all();
+        $district = District::orderBy('name', 'asc')->get();
+        $city = Cities::orderBy('name', 'asc')->get();
         $supervisor = SupervisorModel::all();
         $ages = Ages::all();
         $clients = Client::all();
@@ -1485,8 +1485,8 @@ class ReportController extends Controller
             ['id' => 12, 'name' => 'Motor Insurance']
         ];
         $positions = Occupations::get();
-        $district = District::all();
-        $city = Cities::all();
+        $district = District::orderBy('name', 'asc')->get();
+        $city = Cities::orderBy('name', 'asc')->get();
         $supervisor = SupervisorModel::all();
         $ages = Ages::all();
         $clients = Client::all();

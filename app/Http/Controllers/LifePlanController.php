@@ -14,6 +14,7 @@ use App\Models\InsurancePlanModels\LifePlanPricingSchedule;
 use App\Models\LineOfBusiness;
 use App\Models\Occupations;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 
 class LifePlanController extends Controller
 {
@@ -30,48 +31,34 @@ class LifePlanController extends Controller
     {
         $insurance_companies = InsuranceCompany::where('line_of_business_id','like','%"2"%')->get();
         $line_of_businesses = LineOfBusiness::find(self::line_of_business_id)->name;
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
         $occupations = Occupations::all();
         $chronics = ChronicDisease::all();
         return view('admin.plan.life-plans.add_life_plan',compact('insurance_companies','line_of_businesses','countries','cities','districts','ages','occupations','chronics'));
     }
 
-    
+
     public function edit_life_plan(Request $request, $id)
     {
+            $decryptedId = Crypt::decrypt($id);
+
+
         $insurance_companies = InsuranceCompany::where('line_of_business_id','like','%"2"%')->get();
         $line_of_businesses = LineOfBusiness::find(self::line_of_business_id)->name;
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
-        $plan = LifePlan::find($id);
-/*        if($plan->restricted_country_ids) {
-            $cities = Cities::whereIn('country_id', json_decode($plan->restricted_country_ids))->get();
-            if($plan->restricted_city_ids) {
-                $districts = District::whereIn('city_id', json_decode($plan->restricted_city_ids))->get();
-            } else {
-                $districts = [];
-            }
-        } else {
-            $cities = $districts = [];
-        }*/
+        $plan = LifePlan::find($decryptedId);
+
          // Decode stored country and city IDs
         $selected_country_ids = $plan->restricted_country_ids ? json_decode($plan->restricted_country_ids, true) : [];
         $selected_city_ids = $plan->restricted_city_ids ? json_decode($plan->restricted_city_ids, true) : [];
         $selected_district_ids = $plan->restricted_district_ids ? json_decode($plan->restricted_district_ids, true) : [];
 
-        // Load only related cities and districts
-        // $cities = count($selected_country_ids) > 0
-        //     ? Cities::whereIn('country_id', $selected_country_ids)->get()
-        //     : collect(); // empty collection
-
-        // $districts = count($selected_city_ids) > 0
-        //     ? District::whereIn('city_id', $selected_city_ids)->get()
-        //     : collect(); // empty collection
 
         $occupations = Occupations::all();
         $chronics = ChronicDisease::all();
@@ -100,7 +87,7 @@ class LifePlanController extends Controller
             $life_insurance_plan->sales_tax = $request->sales_tax;
             $life_insurance_plan->cbj = $request->cbj;
             $life_insurance_plan->sales_tax_cbj = $request->salextaxcbj;
-           
+
             $life_insurance_plan->gross_premium = (float)($request->net_premium) + (float)($request->fees) + (float)($request->stamps) + (float)($request->sales_tax);
             $life_insurance_plan->commission_percentage = $request->commission_percentage;
             $life_insurance_plan->commission_amount = $request->commission_amount;
@@ -122,7 +109,7 @@ class LifePlanController extends Controller
                 $life_insurance_plan_policy_covers->life_plan_id = $life_insurance_plan->id;
                 $life_insurance_plan_policy_covers->cover_name = $single['cover_name'];
                 // $life_insurance_plan_policy_covers->cover_limit = $single['cover_limit'];
-                $life_insurance_plan_policy_covers->cover_limit = str_replace(',', '', $single['cover_limit']); 
+                $life_insurance_plan_policy_covers->cover_limit = str_replace(',', '', $single['cover_limit']);
                 $life_insurance_plan_policy_covers->save();
             }
 
@@ -166,7 +153,7 @@ class LifePlanController extends Controller
             $life_insurance_plan->sales_tax = $request->sales_tax;
             $life_insurance_plan->cbj = $request->cbj;
             $life_insurance_plan->sales_tax_cbj = $request->salextaxcbj;
-         
+
             $life_insurance_plan->gross_premium = (float)($request->net_premium) + (float)($request->fees) + (float)($request->stamps) + (float)($request->sales_tax);
             $life_insurance_plan->commission_percentage = $request->commission_percentage;
             $life_insurance_plan->commission_amount = $request->commission_amount;
@@ -205,7 +192,7 @@ class LifePlanController extends Controller
                     if ($cover) {
                         $cover->update([
                             'cover_name' => $single['cover_name'],
-                            'cover_limit' => str_replace(',', '', $single['cover_limit']),                        
+                            'cover_limit' => str_replace(',', '', $single['cover_limit']),
                         ]);
                     }
                 } else {

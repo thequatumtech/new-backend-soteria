@@ -10,6 +10,7 @@ use PDF;
 use App\Models\Client;
 use Carbon\Carbon;
 use App\Models\Currency;
+use App\Helpers\InsurancePlanHelper;
 use Illuminate\Support\Facades\Log;
 use App\Models\Ages;
 use App\Models\PetBreed;
@@ -24,6 +25,7 @@ class PetInsuranceController extends Controller
 
         return is_numeric($clean) ? (float)$clean : 0;
     }
+
     private function normalizeRestricted($value)
     {
         if (!$value) return [];
@@ -39,15 +41,29 @@ class PetInsuranceController extends Controller
         if (is_numeric($value)) {
             return [(int)$value];
         }
+
         return [];
     }
 
     private function restrictionError($type)
     {
-        $message = "You are not eligible for this plan due to {$type} restriction.";
+        $restrictionTypes = [
+            'country' => __('messages.api.pet_restriction_country'),
+            'city' => __('messages.api.pet_restriction_city'),
+            'district' => __('messages.api.pet_restriction_district'),
+            'age' => __('messages.api.pet_restriction_age'),
+            'pet age' => __('messages.api.pet_restriction_pet_age'),
+            'breed' => __('messages.api.pet_restriction_breed'),
+        ];
+
+        $restrictionType = $restrictionTypes[$type] ?? $type;
+
+        $message = __('messages.api.pet_restriction_message', [
+            'type' => $restrictionType
+        ]);
 
         if ($type === 'country') {
-            $message .= ' Please contact us for further information.';
+            $message .= __('messages.api.pet_country_contact');
         }
 
         return response()->json([
@@ -57,6 +73,7 @@ class PetInsuranceController extends Controller
             'data' => []
         ], 422);
     }
+
     private function normalizeDate($date)
     {
         if (!$date) return null;
@@ -101,15 +118,17 @@ class PetInsuranceController extends Controller
                 'payment_status' => 'nullable',
             ]);
 
-            $plan_data = PetPlan::find($data['plan_id']);
+            // $plan_data = PetPlan::find($data['plan_id']);
+            $plan_data = PetPlan::with('insurance_company.currency')->find($data['plan_id']);
             $data['insurance_company_id'] = $plan_data->insurance_company_id ?? 0;
 
             $client = Client::find($request->user_id);
+
             if (!$client) {
                 return response()->json([
                     'status' => false,
                     'status_code' => 422,
-                    'message' => 'Client not found.',
+                    'message' => __('messages.api.client_not_found'),
                     'data' => []
                 ], 422);
             }
@@ -119,10 +138,13 @@ class PetInsuranceController extends Controller
             $clientDistrict = $client->district_id;
 
             $clientAge = Carbon::parse($client->birth_date)->age;
+
             $petAge = 0;
+
             if (!empty($data['pets_dob'])) {
                 $petAge = Carbon::parse($data['pets_dob'])->age;
             }
+
             $restrictedCountries  = $this->normalizeRestricted($plan_data->restricted_country_ids);
             $restrictedCities     = $this->normalizeRestricted($plan_data->restricted_city_ids);
             $restrictedDistricts  = $this->normalizeRestricted($plan_data->restricted_district_ids);
@@ -147,6 +169,7 @@ class PetInsuranceController extends Controller
 
                 if (str_contains($range, '-')) {
                     [$min, $max] = explode('-', $range);
+
                     if ($clientAge >= (int)$min && $clientAge <= (int)$max) {
                         return $this->restrictionError('age');
                     }
@@ -156,19 +179,26 @@ class PetInsuranceController extends Controller
                     }
                 }
             }
+
             if (!empty($restrictedPetAgeIds)) {
-                $petDob = !empty($data['pets_dob']) ? Carbon::parse($data['pets_dob']) : null;
+
+                $petDob = !empty($data['pets_dob'])
+                    ? Carbon::parse($data['pets_dob'])
+                    : null;
 
                 if ($petDob) {
+
                     $petAgeInYears  = $petDob->age;
                     $petAgeInMonths = (int) $petDob->diffInMonths(Carbon::now());
 
                     $restrictedAgeRecords = Ages::whereIn('id', $restrictedPetAgeIds)->get();
 
                     foreach ($restrictedAgeRecords as $ageRecord) {
+
                         if ($ageRecord->type === 'year' && $petAgeInYears == $ageRecord->age) {
                             return $this->restrictionError('pet age');
                         }
+
                         if ($ageRecord->type === 'month' && $petAgeInMonths == $ageRecord->age) {
                             return $this->restrictionError('pet age');
                         }
@@ -177,6 +207,7 @@ class PetInsuranceController extends Controller
             }
 
             if (!empty($restrictedBreedIds) && !empty($data['breed'])) {
+
                 $breedInput = strtolower(trim($data['breed']));
 
                 $restrictedBreeds = PetBreed::whereIn('id', $restrictedBreedIds)
@@ -190,7 +221,9 @@ class PetInsuranceController extends Controller
             }
 
             if (!empty($data['inception_date'])) {
-                $inceptionDate = Carbon::parse($this->normalizeDate($data['inception_date']));
+                $inceptionDate = Carbon::parse(
+                    $this->normalizeDate($data['inception_date'])
+                );
             } else {
                 $inceptionDate = Carbon::today();
                 $data['inception_date'] = $inceptionDate->format('Y-m-d');
@@ -207,10 +240,13 @@ class PetInsuranceController extends Controller
             if ($existingPet) {
 
                 $pets = ClientPetsInsurance::find($existingPet->policy_id);
+
                 if ($pets) $pets->update($data);
 
                 $data['purchase_id'] = $existingPet->id;
+
                 $pet = PurchasePolicy::updatePurchasePolicy($data);
+
                 $data['policy_id'] = $pet->policy_id;
             } else {
 
@@ -228,11 +264,11 @@ class PetInsuranceController extends Controller
             $data = ClientPetsInsurance::getPetsInsuranceDetails($data['policy_id']);
 
             $directory = public_path('insurance_pdfs/pet_policy');
+
             if (!file_exists($directory)) mkdir($directory, 0755, true);
 
             $filename = uniqid() . '_policy_' . $pet->id . '.pdf';
             $path = $directory . '/' . $filename;
-
 
             $policy_limit = $this->cleanNumber($plan_data->limit);
 
@@ -260,7 +296,13 @@ class PetInsuranceController extends Controller
             $cbjSalesTaxAmount = ($cbjContribution * $cbjSalesTaxPercentage) / 100;
 
             // Total Gross Premium
-            $grossPremium = $net_premium + $issuanceFees + $stampAmount + $salesTaxAmount + $cbjContribution + $cbjSalesTaxAmount;
+            $grossPremium =
+                $net_premium
+                + $issuanceFees
+                + $stampAmount
+                + $salesTaxAmount
+                + $cbjContribution
+                + $cbjSalesTaxAmount;
 
             $purchase['net_premium']       = $net_premium;
             $purchase['fees']              = $issuanceFees;
@@ -270,6 +312,7 @@ class PetInsuranceController extends Controller
             $purchase['sales_tax_cbj']     = $cbjSalesTaxAmount;
             $purchase['gross_premium']     = $grossPremium;
             $purchase['commission_amount'] = ($plan_data->commission_percentage ?? 0) / 100 * $net_premium;
+
             $purchase['purchase_id']          = $pet->id;
             $purchase['plan_id']              = $data->plan_id;
             $purchase['plan_name']            = $plan_data->plan_name;
@@ -283,11 +326,30 @@ class PetInsuranceController extends Controller
             PurchasePolicy::updatePurchasePolicy($purchase);
 
             $data->purchase_id = $pet->id;
+            $data->purchase_policy_id = $pet->id;
+
+            // $purchaseData = PurchasePolicy::where('id', $pet->id)->first();
+            // $plan_data = PetPlan::with('policy_covers')->find($data['plan_id']);
+            // $client = Client::with('country.currency')->find($request->user_id);
+            // $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
 
             $purchaseData = PurchasePolicy::where('id', $pet->id)->first();
-            $plan_data = PetPlan::with('policy_covers')->find($data['plan_id']);
+            $plan_data = PetPlan::with(
+                'policy_covers',
+                'insurance_company.currency'
+            )->find($data['plan_id']);
+
             $client = Client::with('country.currency')->find($request->user_id);
-            $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
+
+            // Get insurance company currency first
+            $insuranceCompany = $plan_data->insurance_company;
+
+            if ($insuranceCompany && $insuranceCompany->currency) {
+                $abbr = $insuranceCompany->currency->abbreviation;
+            } else {
+                // Fallback to client's country currency
+                $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
+            }
 
             $pdf = Pdf::loadView('pdf/pet_policy', [
                 'data' => $data,
@@ -301,8 +363,6 @@ class PetInsuranceController extends Controller
             $url = url('insurance_pdfs/pet_policy/' . $filename);
             $data['url'] = $url;
 
-
-
             $data->net_premium       = number_format($purchase['net_premium'], 2) . ' ' . $abbr;
             $data->fees              = number_format($purchase['fees'], 2) . ' ' . $abbr;
             $data->gross_premium     = number_format($purchase['gross_premium'], 2) . ' ' . $abbr;
@@ -315,10 +375,11 @@ class PetInsuranceController extends Controller
             return response()->json([
                 'status' => true,
                 'status_code' => 200,
-                'message' => 'Add Pet Insurance Plan successfully',
+                'message' => __('messages.api.add_pet_insurance_plan_successfully'),
                 'data' => $data
             ]);
         } catch (\Exception $e) {
+
             return response()->json([
                 'status' => false,
                 'status_code' => 500,
@@ -332,19 +393,42 @@ class PetInsuranceController extends Controller
     {
         try {
 
-            $data = PetPlan::with('policy_covers', 'insurance_company')
-            ->whereHas('insurance_company', function ($q) {
-                $q->whereNull('deleted_at');
-            })
-            ->where('plan_name', 'LIKE', '%' . $request->limit . '%')
-            ->get();
+            $query = PetPlan::with([
+                'policy_covers',
+                'insurance_company',
+                'insurance_company.currency'
+            ])
+                ->whereHas('insurance_company', function ($q) {
+                    $q->whereNull('deleted_at');
+                })
+                ->where('plan_name', $request->limit);
+
+            // Filter plans according to client's currency
+            $query = InsurancePlanHelper::filterByClientCurrency(
+                $query,
+                $request->user_id
+            );
+
+            $data = $query->get();
 
             $data->transform(function ($item) {
+
                 if (!empty($item->insurance_policy_pdf)) {
-                    $item->insurance_policy_pdf = url('uploads/insurance_plans/' . $item->id . '/' . $item->insurance_policy_pdf);
+                    $item->insurance_policy_pdf = url(
+                        'uploads/insurance_plans/' .
+                            $item->id .
+                            '/' .
+                            $item->insurance_policy_pdf
+                    );
                 }
+
                 if (!empty($item->insurance_company->privacy_policy)) {
-                    $item->insurance_company->privacy_policy = url('insurance/' . $item->insurance_company->id . '/' . $item->insurance_company->privacy_policy);
+                    $item->insurance_company->privacy_policy = url(
+                        'insurance/' .
+                            $item->insurance_company->id .
+                            '/' .
+                            $item->insurance_company->privacy_policy
+                    );
                 }
 
                 $item->period_days = (int)$item->policy_period;
@@ -355,7 +439,7 @@ class PetInsuranceController extends Controller
             return response()->json([
                 'status'      => true,
                 'status_code' => 200,
-                'message'     => 'Get Pets Insurance Plan successfully',
+                'message'     => __('messages.api.get_pets_insurance_plan_successfully'),
                 'data'        => $data
             ]);
         } catch (\Exception $e) {
@@ -368,6 +452,7 @@ class PetInsuranceController extends Controller
             ]);
         }
     }
+
     // public function getPetsInsurancePlan(Request $request)
     // {
     //     try {

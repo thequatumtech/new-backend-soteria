@@ -108,290 +108,224 @@
 @section('content')
 
 
-<main class="flex-grow-1 pt-5">
-    <div class="container-fluid">
-        <div class="header d-flex justify-content-between p-3 py-2 align-items-center">
-            <div class="text-white group-title fw-bold">{{$table_title}}</div>
-        </div>
+    <main class="flex-grow-1 pt-5">
+        <div class="container-fluid">
+            <div class="header d-flex justify-content-between p-3 py-2 align-items-center">
+                <div class="text-white group-title fw-bold">{{$table_title}}</div>
+            </div>
 
-        <div class="col-12">
-            <div class="row pt-4 pb-3 align-items-end g-3">
+            <div class="col-12">
+                <div class="row pt-4 pb-3 align-items-end g-3">
 
-                @if($is_active_policies)
-                <div class="col-md-3">
-                    <button type="button" id="notify_btn" data-route="{{ route('notify_renewal') }}"
-                        class="btn w-100 text-white p-2 renewal_section_btn"
-                        style="background-color: #EF7C00;">
-                        {{ __('messages.renewal_section.notify') }}
-                    </button>
-                </div>
-                @endif
-                @if ($is_active_policies && !$is_expired_policies)
-                <div class="col-md-3">
-                    <button type="button" id="cancel_btn" data-route="{{ route('cancel_policy') }}"
-                        class="btn w-100 text-white p-2 renewal_section_btn"
-                        style="background-color: #EF7C00;">
-                        {{ __('messages.renewal_section.cancel') }}
-                    </button>
-                </div>
-                @endif
-                @if(auth()->user()->is_super_admin == 1)
-                <div class="col-md-3">
-                    <button type="button" id="renew_btn" data-route="{{ route('renew_policy') }}"
-                        class="btn w-100 text-white p-2 renewal_section_btn"
-                        style="background-color: #EF7C00;">
-                        {{ __('messages.renewal_section.renew') }}
-                    </button>
-                </div>
-                @endif
-                <div class="col-md-6">
-                    <div class="card p-3 border-0 shadow-sm">
-                        <div class="mb-2">
-                            <label for="search_type" class="form-label fw-semibold">Search Active Policies By:</label>
-                            <select id="search_type" class="form-select">
-                                <option value="">-- Select Criteria --</option>
-                                <option value="mobile">Mobile Number</option>
-                                <option value="first_name">First Name (Arabic/English)</option>
-                                <option value="last_name">Last Name (Arabic/English)</option>
-                                <option value="email">Email Address</option>
-                                <option value="national_id">National I.D.</option>
-                                <option value="passport">Passport Number</option>
-                                <option value="residence">Residence Number</option>
-                                <option value="policy_number">Policy Number</option>
-                                <option value="renewal_date">Renewal Dates (From - To)</option>
-                            </select>
-                        </div>
-
-                        <div id="search_inputs" class="row g-2">
-                        </div>
-
-                        <button type="button" id="search_btn" data-route="{{ $search_route }}"
-                            class="btn mt-3 text-white w-100"
+                    @if($is_active_policies)
+                    <div class="col-md-3">
+                        <button type="button" id="notify_btn" data-route="{{ route('notify_renewal') }}"
+                            class="btn w-100 text-white p-2 renewal_section_btn"
                             style="background-color: #EF7C00;">
-                            {{ __('messages.renewal_section.search') }}
+                            {{ __('messages.renewal_section.notify') }}
                         </button>
                     </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card p-3 border-0 shadow-sm">
-
-                        <div class="mb-2">
-                            <label for="mail_type" class="form-label fw-semibold">
-                                Select Mail Type:
-                            </label>
-
-                            <select id="mail_type" class="form-select">
-                                <option value="">-- Select Mail Type --</option>
-                                <option value="client">Client Mail</option>
-                                <option value="agent">Agent Mail</option>
-                            </select>
-                        </div>
-
-                        <button type="button"
-                            id="preview_mail_btn"
-                            class="btn mt-3 text-white w-100"
-                            style="background-color:#EF7C00;">
-                            Preview Mail
+                    @endif
+                    @if ($is_active_policies && !$is_expired_policies)
+                    <div class="col-md-3">
+                        <button type="button" id="cancel_btn" data-route="{{ route('cancel_policy') }}"
+                            class="btn w-100 text-white p-2 renewal_section_btn"
+                            style="background-color: #EF7C00;">
+                            {{ __('messages.renewal_section.cancel') }}
                         </button>
+                    </div>
+                    @endif
+                    @if(auth()->user()->is_super_admin == 1)
+                    <div class="col-md-3">
+                        <button type="button" id="renew_btn" data-route="{{ route('renew_policy') }}"
+                            class="btn w-100 text-white p-2 renewal_section_btn"
+                            style="background-color: #EF7C00;">
+                            {{ __('messages.renewal_section.renew') }}
+                        </button>
+                    </div>
+                    @endif
+                    <div class="col-md-6">
+                        <div class="card p-3 border-0 shadow-sm">
+                            <div class="mb-2">
+                                <label for="search_type" class="form-label fw-semibold">Search Active Policies By:</label>
+                                <select id="search_type" class="form-select">
+                                    <option value="">-- Select Criteria --</option>
+                                    <option value="mobile">Mobile Number</option>
+                                    <option value="first_name">First Name (Arabic/English)</option>
+                                    <option value="last_name">Last Name (Arabic/English)</option>
+                                    <option value="email">Email Address</option>
+                                    <option value="national_id">National I.D.</option>
+                                    <option value="passport">Passport Number</option>
+                                    <option value="residence">Residence Number</option>
+                                    <option value="policy_number">Policy Number</option>
+                                    <option value="renewal_date">Renewal Dates (From - To)</option>
+                                </select>
+                            </div>
 
+                            <div id="search_inputs" class="row g-2">
+                            </div>
+
+                            <button type="button" id="search_btn" data-route="{{ $search_route }}"
+                                class="btn mt-3 text-white w-100"
+                                style="background-color: #EF7C00;">
+                                {{ __('messages.renewal_section.search') }}
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card p-3 border-0 shadow-sm">
+
+                            <div class="mb-2">
+                                <label for="mail_type" class="form-label fw-semibold">
+                                    Select Mail Type:
+                                </label>
+
+                                <select id="mail_type" class="form-select">
+                                    <option value="">-- Select Mail Type --</option>
+                                    <option value="client">Client Mail</option>
+                                    <option value="agent">Agent Mail</option>
+                                </select>
+                            </div>
+
+                            <button type="button"
+                                id="preview_mail_btn"
+                                class="btn mt-3 text-white w-100"
+                                style="background-color:#EF7C00;">
+                                Preview Mail
+                            </button>
+
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const searchType = document.getElementById('search_type');
-                const searchInputs = document.getElementById('search_inputs');
-                const searchBtn = document.getElementById('search_btn');
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const searchType = document.getElementById('search_type');
+                    const searchInputs = document.getElementById('search_inputs');
+                    const searchBtn = document.getElementById('search_btn');
 
-                searchType.addEventListener('change', function() {
-                    const value = this.value;
-                    searchInputs.innerHTML = '';
+                    searchType.addEventListener('change', function() {
+                        const value = this.value;
+                        searchInputs.innerHTML = '';
 
-                    if (value === 'renewal_date') {
-                        searchInputs.innerHTML = `
-                    <div class="col">
-                        <input type="date" name="from_date" class="form-control" placeholder="From Date" required />
-                    </div>
-                    <div class="col">
-                        <input type="date" name="to_date" class="form-control" placeholder="To Date" required />
-                    </div>
-                `;
-                    } else if (value) {
-                        const label = this.options[this.selectedIndex].text;
-                        searchInputs.innerHTML = `
-                    <div class="col-12">
-                        <input type="text" name="${value}" class="form-control" placeholder="Enter ${label}" required />
-                    </div>
-                `;
-                    }
-                });
-
-                searchBtn.addEventListener('click', function() {
-                    const route = this.getAttribute('data-route');
-                    const type = searchType.value;
-
-                    if (!type) {
-                        alert('Please select a search criteria.');
-                        return;
-                    }
-
-                    const data = {
-                        _token: '{{ csrf_token() }}'
-                    };
-                    const inputFields = searchInputs.querySelectorAll('input');
-                    let valid = true;
-
-                    inputFields.forEach(input => {
-                        if (!input.value) {
-                            input.classList.add('is-invalid');
-                            valid = false;
-                        } else {
-                            input.classList.remove('is-invalid');
-                            data[input.name] = input.value;
+                        if (value === 'renewal_date') {
+                            searchInputs.innerHTML = `
+                        <div class="col">
+                            <input type="date" name="from_date" class="form-control" placeholder="From Date" required />
+                        </div>
+                        <div class="col">
+                            <input type="date" name="to_date" class="form-control" placeholder="To Date" required />
+                        </div>
+                    `;
+                        } else if (value) {
+                            const label = this.options[this.selectedIndex].text;
+                            searchInputs.innerHTML = `
+                        <div class="col-12">
+                            <input type="text" name="${value}" class="form-control" placeholder="Enter ${label}" required />
+                        </div>
+                    `;
                         }
                     });
 
-                    if (!valid) return;
+                    searchBtn.addEventListener('click', function() {
+                        const route = this.getAttribute('data-route');
+                        const type = searchType.value;
 
-                    fetch(route, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify(data)
-                        })
-                        .then(async response => {
-                            const text = await response.text();
+                        if (!type) {
+                            alert('Please select a search criteria.');
+                            return;
+                        }
 
-                            try {
-                                const result = JSON.parse(text);
-                                const tbody = document.getElementById('policy_table_body');
-                                tbody.innerHTML = '';
+                        const data = {
+                            _token: '{{ csrf_token() }}'
+                        };
+                        const inputFields = searchInputs.querySelectorAll('input');
+                        let valid = true;
 
-                                if (result.status === 'success') {
-                                    if (result.policies.length === 0) {
-                                        tbody.innerHTML = `<tr><td colspan="7" class="text-center">No policies found.</td></tr>`;
-                                        return;
+                        inputFields.forEach(input => {
+                            if (!input.value) {
+                                input.classList.add('is-invalid');
+                                valid = false;
+                            } else {
+                                input.classList.remove('is-invalid');
+                                data[input.name] = input.value;
+                            }
+                        });
+
+                        if (!valid) return;
+
+                        fetch(route, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify(data)
+                            })
+                            .then(async response => {
+                                const text = await response.text();
+
+                                try {
+                                    const result = JSON.parse(text);
+                                    const tbody = document.getElementById('policy_table_body');
+                                    tbody.innerHTML = '';
+
+                                    if (result.status === 'success') {
+                                        if (result.policies.length === 0) {
+                                            tbody.innerHTML = `<tr><td colspan="7" class="text-center">No policies found.</td></tr>`;
+                                            return;
+                                        }
+
+                                        result.policies.forEach(policy => {
+                                            const row = document.createElement('tr');
+
+                                            const clientName = policy.client?.full_name ?? 'N/A';
+                                            const policyType = policyTypeTranslations[policy.policy_type] ?? policy.policy_type;
+                                            const expiryDate = new Date(policy.expiry_date).toLocaleDateString('en-GB');
+                                            const premiumPaid = policy.gross_premium ?? 'N/A';
+                                            const companyName = policy.insurance_company?.company_name ?? '';
+
+                                            row.innerHTML = `
+                                    <td>${clientName}</td>
+                                    <td>${policyType}</td>
+                                    <td>${expiryDate}</td>
+                                    <td>${premiumPaid}</td>
+                                    <td>${companyName}</td>
+                                    <td>
+                                        <div class="d-flex gap-3 justify-content-evenly align-items-center px-2">
+                                            <a href="javascript:void(0);" type="button" class="btn p-0 m-0 btn-custom viewbtn">
+                                                <img src="{{ asset('img/icon-eye.png') }}" alt="View" title="View">
+                                            </a>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input class="form-check-input select-checkbox" type="checkbox" data-policy_id="${policy.id}">
+                                    </td>
+                                `;
+                                            tbody.appendChild(row);
+                                        });
+                                    } else {
+                                        alert('Failed to load data. Please try again.');
                                     }
 
-                                    result.policies.forEach(policy => {
-                                        const row = document.createElement('tr');
-
-                                        const clientName = policy.client?.full_name ?? 'N/A';
-                                        const policyType = policyTypeTranslations[policy.policy_type] ?? policy.policy_type;
-                                        const expiryDate = new Date(policy.expiry_date).toLocaleDateString('en-GB');
-                                        const premiumPaid = policy.gross_premium ?? 'N/A';
-                                        const companyName = policy.insurance_company?.company_name ?? '';
-
-                                        row.innerHTML = `
-                                <td>${clientName}</td>
-                                <td>${policyType}</td>
-                                <td>${expiryDate}</td>
-                                <td>${premiumPaid}</td>
-                                <td>${companyName}</td>
-                                <td>
-                                    <div class="d-flex gap-3 justify-content-evenly align-items-center px-2">
-                                        <a href="javascript:void(0);" type="button" class="btn p-0 m-0 btn-custom viewbtn">
-                                            <img src="{{ asset('img/icon-eye.png') }}" alt="View" title="View">
-                                        </a>
-                                    </div>
-                                </td>
-                                <td>
-                                    <input class="form-check-input select-checkbox" type="checkbox" data-policy_id="${policy.id}">
-                                </td>
-                            `;
-                                        tbody.appendChild(row);
-                                    });
-                                } else {
-                                    alert('Failed to load data. Please try again.');
+                                } catch (e) {
+                                    console.error('Invalid JSON:', text);
+                                    alert('Unexpected response from server.');
                                 }
-
-                            } catch (e) {
-                                console.error('Invalid JSON:', text);
-                                alert('Unexpected response from server.');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Search error:', error);
-                            alert('An error occurred during the search.');
-                        });
+                            })
+                            .catch(error => {
+                                console.error('Search error:', error);
+                                alert('An error occurred during the search.');
+                            });
+                    });
                 });
-            });
-        </script>
+            </script>
 
 
-        <div class="body bg-white py-4 px-4 d-flex flex-column gap-3">
-            <table id="example" class="table table-striped " style="width:100%">
-                <thead>
-                    <tr>
-                        <th>{{__('messages.renewal_section.client_name')}}</th>
-                        <th>{{__('messages.renewal_section.policy_type')}}</th>
-                        <th>{{__('messages.renewal_section.expiry_date')}}</th>
-                        <th>{{__('messages.renewal_section.premium_paid')}}</th>
-                        <th>{{__('messages.renewal_section.insurance_company')}}</th>
-                        <th class="no-order no-search">{{__('messages.renewal_section.action')}}</th>
-                        {{-- <th class="no-order no-search">{{__('messages.renewal_section.select')}}</th> --}}
-                         <th class="no-order no-search">
-                                                       <input class="form-check-input" type="checkbox" id="select_all_checkbox" title="Select All">
-
-                        </th>
-                    </tr>
-                </thead>
-                <tbody id="policy_table_body">
-                    @foreach($policies as $single)
-                    <tr>
-                        <td>{{ $single->client->full_name?? '' }}</td>
-                        <td>{{ __('messages.policy_types.'.$single->policy_type) }}</td>
-                        <td>{{ \Carbon\Carbon::parse($single->expiry_date)->format('d/m/Y') }}</td>
-                        <td>{{ $single->gross_premium }}</td>
-                        <td>{{ $single->insurance_company_id ? $single->insurance_company->company_name ?? '' : '' }}</td>
-                        <td>
-                            <div class="d-flex gap-3 justify-content-evenly align-items-center px-2">
-                                <a href="javascript:void(0);" class="btn p-0 m-0 btn-custom viewbtn {{is_admin_authorized('client.purchased_policy')?'purchased_policy':''}}" data-client_id="{{ $single->client->id ?? '' }}" title="View">
-                                    <img src="{{asset('img/icon-eye.png')}}" alt="">
-                                </a>
-                                {{--route('client.edit',$data->id)--}}
-                                <a href="javascript:void(0);" class="btn p-0 m-0" title="Edit">
-                                    <img src="{{asset('img/icon-edit.png')}}" alt="">
-                                </a>
-                            </div>
-                        </td>
-                        <td>
-                            <input class="form-check-input select-checkbox" type="checkbox" data-policy_id="{{ $single->id }}">
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <input type="hidden" id="selected_policy_id">
-</main>
-<div class="toast-container position-fixed bottom-0 start-50 translate-middle-x w-100">
-    <div class="p-3 col-12 col-lg-8 mx-auto">
-        <div class="toast align-items-center border-0 col-12 col-lg-8 w-100" style="background-color: #104E9E; color: white" data-bs-delay="3000" role="alert" aria-live="assertive" aria-atomic="true" id="clientSelectToast">
-            <div class="d-flex">
-                <div class="toast-body px-5 fw-bold py-3" style="font-size: 1.375rem;">
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal fade " id="PurchasedPolicyModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-md">
-        <div class="modal-content">
-            <div class="modal-header text-white " style="background-color: #104E9E;">
-                <h1 class="modal-title fs-5">{{__('messages.clients.purchased_policies')}}</h1>
-                <button data-bs-dismiss="modal" class="btn">
-                    <img src="{{asset('img/icon-close.svg')}}" alt="">
-                </button>
-            </div>
-            <div class="modal-body">
-                <table class="table">
+            <div class="body bg-white py-4 px-4 d-flex flex-column gap-3">
+                <table id="example" class="table table-striped " style="width:100%">
                     <thead>
                         <tr>
                             <th>{{__('messages.renewal_section.client_name')}}</th>
@@ -399,43 +333,114 @@
                             <th>{{__('messages.renewal_section.expiry_date')}}</th>
                             <th>{{__('messages.renewal_section.premium_paid')}}</th>
                             <th>{{__('messages.renewal_section.insurance_company')}}</th>
-                            <!-- <th scope="col">{{__('messages.clients.policy_type')}}</th> -->
-                            <!-- <th scope="col">{{__('messages.clients.action')}}</th> -->
+                            <th class="no-order no-search">{{__('messages.renewal_section.action')}}</th>
+                            {{-- <th class="no-order no-search">{{__('messages.renewal_section.select')}}</th> --}}
+                             <th class="no-order no-search">
+                                                           <input class="form-check-input" type="checkbox" id="select_all_checkbox" title="Select All">
+
+                            </th>
                         </tr>
                     </thead>
-                    <tbody class="purchased_policy_table_body">
+                    <tbody id="policy_table_body">
+                        @foreach($policies as $single)
+                            <tr>
+                                <td>{{ $single->client->full_name ?? '' }}</td>
+                                <td>{{ __('messages.policy_types.' . $single->policy_type) }}</td>
+                                <td>{{ \Carbon\Carbon::parse($single->expiry_date)->format('d/m/Y') }}</td>
+                                <td>{{ $single->gross_premium }}</td>
+                                <td>{{ $single->insurance_company_id ? $single->insurance_company->company_name ?? '' : '' }}</td>
+                                <td>
+                                    <div class="d-flex gap-3 justify-content-evenly align-items-center px-2">
+                                        <a href="javascript:void(0);" class="btn p-0 m-0 btn-custom viewbtn {{is_admin_authorized('client.purchased_policy') ? 'purchased_policy' : ''}}" data-client_id="{{ $single->client->id ?? '' }}" title="View">
+                                            <img src="{{asset('img/icon-eye.png')}}" alt="">
+                                        </a>
+                                        {{--route('client.edit',$data->id)--}}
+                                        <a href="javascript:void(0);" class="btn p-0 m-0" title="Edit">
+                                            <img src="{{asset('img/icon-edit.png')}}" alt="">
+                                        </a>
+
+                                        <a href="{{ route('purchase-policy.show', $single->id) }}" class="btn btn-sm btn-primary text-white">
+                                           View
+                                        </a>
+
+                                    </div>
+                                </td>
+                                <td>
+                                    <input class="form-check-input select-checkbox" type="checkbox" data-policy_id="{{ $single->id }}">
+                                </td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
         </div>
-    </div>
-</div>
-<div class="modal fade" id="MailPreviewModal" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content">
-
-            <div class="modal-header text-white" style="background-color:#104E9E;">
-                <h5 class="modal-title">Mail Preview</h5>
-                <button type="button" class="btn" data-bs-dismiss="modal">
-                    <img src="{{asset('img/icon-close.svg')}}" alt="">
-                </button>
+        <input type="hidden" id="selected_policy_id">
+    </main>
+    <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x w-100">
+        <div class="p-3 col-12 col-lg-8 mx-auto">
+            <div class="toast align-items-center border-0 col-12 col-lg-8 w-100" style="background-color: #104E9E; color: white" data-bs-delay="3000" role="alert" aria-live="assertive" aria-atomic="true" id="clientSelectToast">
+                <div class="d-flex">
+                    <div class="toast-body px-5 fw-bold py-3" style="font-size: 1.375rem;">
+                    </div>
+                </div>
             </div>
-
-            <div class="modal-body">
-                <textarea name="mail_content" id="mail_preview_editor"></textarea>
-            </div>
-
-            <div class="modal-footer d-flex justify-content-end">
-                <button type="button" id="send_mail_btn"
-                    class="btn text-white px-4"
-                    style="background-color:#104E9E;">
-                    Send Mail
-                </button>
-            </div>
-
         </div>
     </div>
-</div>
+    <div class="modal fade " id="PurchasedPolicyModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content">
+                <div class="modal-header text-white " style="background-color: #104E9E;">
+                    <h1 class="modal-title fs-5">{{__('messages.clients.purchased_policies')}}</h1>
+                    <button data-bs-dismiss="modal" class="btn">
+                        <img src="{{asset('img/icon-close.svg')}}" alt="">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>{{__('messages.renewal_section.client_name')}}</th>
+                                <th>{{__('messages.renewal_section.policy_type')}}</th>
+                                <th>{{__('messages.renewal_section.expiry_date')}}</th>
+                                <th>{{__('messages.renewal_section.premium_paid')}}</th>
+                                <th>{{__('messages.renewal_section.insurance_company')}}</th>
+                                <!-- <th scope="col">{{__('messages.clients.policy_type')}}</th> -->
+                                <!-- <th scope="col">{{__('messages.clients.action')}}</th> -->
+                            </tr>
+                        </thead>
+                        <tbody class="purchased_policy_table_body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="MailPreviewModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header text-white" style="background-color:#104E9E;">
+                    <h5 class="modal-title">Mail Preview</h5>
+                    <button type="button" class="btn" data-bs-dismiss="modal">
+                        <img src="{{asset('img/icon-close.svg')}}" alt="">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <textarea name="mail_content" id="mail_preview_editor"></textarea>
+                </div>
+
+                <div class="modal-footer d-flex justify-content-end">
+                    <button type="button" id="send_mail_btn"
+                        class="btn text-white px-4"
+                        style="background-color:#104E9E;">
+                        Send Mail
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
 @endsection
 <script>
     const policyTypeTranslations = @json(trans('messages.policy_types'));
@@ -706,6 +711,6 @@
 </script>
 
 
-   
+
 <script src="{{asset('js/renewal_section.js')}}?v={{ time() }}"></script>
 @endsection

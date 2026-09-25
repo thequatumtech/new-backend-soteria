@@ -30,5 +30,7 @@ class HomeInsurancePlan extends Model
         'PlaateNo',
         'PlotNo',
         'NoResident',
+        'restricted_protection_system_ids',
+        'restricted_home_age_ids',
     ];
 }

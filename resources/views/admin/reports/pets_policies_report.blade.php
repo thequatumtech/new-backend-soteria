@@ -59,93 +59,95 @@
                     <div class="container">
                         <div class="row">
                             <div class="col-12 col-lg-12 pt-4 d-flex flex-column">
-                                <label for="grouptype">Group Report By</label>
+                               <label for="grouptype">{{__('messages.pets_policies_report.group_report_by')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="grouptype" id="grouptype" onchange="toggleDateFields()">
-                                    <option value="insurance_company" {{ request('grouptype')=='insurance_company' ? 'selected' : ''}}>Insurance Company</option>
-                                    <option value="pets_type" {{ request('grouptype')=='pets_type' ? 'selected' : ''}}>Pet Type</option>
-                                    <option value="pet_breed" {{ request('grouptype')=='pet_breed' ? 'selected' : ''}}>Pet Breed</option>
-                                    <option value="agent_name" {{ request('grouptype')=='agent_name' ? 'selected' : ''}}>Agent Name</option>
-                                    <option value="owner_city" {{ request('grouptype')=='owner_city' ? 'selected' : ''}}>Owner City</option>
-                                    <option value="owner_district" {{ request('grouptype')=='owner_district' ? 'selected' : ''}}>Owner District</option>
-                                    <option value="owner_age" {{ request('grouptype')=='owner_age' ? 'selected' : ''}}>Owner Age</option>
+                                    <option value="insurance_company" {{ request('grouptype')=='insurance_company' ? 'selected' : ''}}>{{__('messages.pets_policies_report.grouptype_insurance_company')}}</option>
+                                    <option value="pets_type" {{ request('grouptype')=='pets_type' ? 'selected' : ''}}>{{__('messages.pets_policies_report.grouptype_pets_type')}}</option>
+                                    <option value="pet_breed" {{ request('grouptype')=='pet_breed' ? 'selected' : ''}}>{{__('messages.pets_policies_report.grouptype_pet_breed')}}</option>
+                                    <option value="agent_name" {{ request('grouptype')=='agent_name' ? 'selected' : ''}}>{{__('messages.pets_policies_report.grouptype_agent_name')}}</option>
+                                    <option value="owner_city" {{ request('grouptype')=='owner_city' ? 'selected' : ''}}>{{__('messages.pets_policies_report.grouptype_owner_city')}}</option>
+                                    <option value="owner_district" {{ request('grouptype')=='owner_district' ? 'selected' : ''}}>{{__('messages.pets_policies_report.grouptype_owner_district')}}</option>
+                                    <option value="owner_age" {{ request('grouptype')=='owner_age' ? 'selected' : ''}}>{{__('messages.pets_policies_report.grouptype_owner_age')}}</option>
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="insurance_company">Insurance Company</label>
+                                <label for="insurance_company">{{__('messages.pets_policies_report.insurance_company')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="insurance_company" id="insurance_company">
-                                    <option value="">Select Company</option>
+                                 <option value="">{{__('messages.pets_policies_report.select_company')}}</option>
                                     @foreach ($insuranceCompanies as $company)
                                     <option value="{{ $company->id }}" {{ request('insurance_company')==$company->id ? 'selected' : ''}}>{{ $company->company_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="issue_date">From Date</label>
+                               <label for="issue_date">{{__('messages.pets_policies_report.from_date')}}</label>
+
                                 <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                     <input type="date" name="issue_date" id="issue_date" value="{{request('issue_date')}}">
                                 </div>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="expiry_date">To Date</label>
+                                <label for="expiry_date">{{__('messages.pets_policies_report.to_date')}}</label>
                                 <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                     <input type="date" name="expiry_date" id="expiry_date" value="{{request('expiry_date')}}">
                                 </div>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="pets_type">Pet Type</label>
-                                <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="pets_type" id="pets_type">
-                                    <option value="">Select Pet Type</option>
-                                    <option value="1" {{ request('pets_type')==1 ? 'selected' : ''}}>Dog</option>
-                                    <option value="2" {{ request('pets_type')==2 ? 'selected' : ''}}>Cat</option>
-                                </select>
+                                    <label for="pets_type">{{__('messages.pets_policies_report.pets_type')}}</label>
+                               <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="pets_type" id="pets_type">
+                                <option value="">{{__('messages.pets_policies_report.select_pets_type')}}</option>
+                                <option value="1" {{ request('pets_type')==1 ? 'selected' : ''}}>{{__('messages.pets_policies_report.dog')}}</option>
+                                <option value="2" {{ request('pets_type')==2 ? 'selected' : ''}}>{{__('messages.pets_policies_report.cat')}}</option>
+                            </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="pet_breed">Pet Breed</label>
+                               <label for="pet_breed">{{__('messages.pets_policies_report.pet_breed')}}</label>
+
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="pet_breed" id="pet_breed">
-                                    <option value="">Select Pet Breed</option>
+    <option value="">{{__('messages.pets_policies_report.select_pet_breed')}}</option>
                                     @foreach ($breed as $breeds)
                                     <option value="{{ $breeds->breed }}" {{ request('pet_breed')==$breeds->breed ? 'selected' : ''}}>{{ $breeds->breed }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="agent_name">Agent Name</label>
+<label for="agent_name">{{__('messages.pets_policies_report.agent_name')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="agent_name" id="agent_name">
-                                    <option value="">Select Agent</option>
+    <option value="">{{__('messages.pets_policies_report.select_agent')}}</option>
                                     @foreach ($agents as $agent)
                                     <option value="{{ $agent->id }}" {{ request('agent_name')==$agent->id ? 'selected' : ''}}>{{ $agent->first_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="owner_city">Owner City</label>
+<label for="owner_city">{{__('messages.pets_policies_report.owner_city')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="owner_city" id="owner_city">
-                                    <option value="">Select Owner City</option>
+    <option value="">{{__('messages.pets_policies_report.select_owner_city')}}</option>
                                     @foreach ($cities as $city)
                                     <option value="{{ $city->id }}" {{ request('owner_city')==$city->id ? 'selected' : ''}}>{{ $city->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="owner_district">Owner district</label>
+<label for="owner_district">{{__('messages.pets_policies_report.owner_district')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="owner_district" id="owner_district">
-                                    <option value="">Select Owner district</option>
+    <option value="">{{__('messages.pets_policies_report.select_owner_district')}}</option>
                                     @foreach ($districts as $district)
                                     <option value="{{ $district->id }}" {{ request('owner_district')==$district->id ? 'selected' : ''}}>{{ $district->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="owner_age">Owner Age</label>
+<label for="owner_age">{{__('messages.pets_policies_report.owner_age')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="owner_age" id="owner_age">
-                                    <option value="">Owner Age</option>
+    <option value="">{{__('messages.pets_policies_report.owner_age')}}</option>
                                     @foreach ($ages as $age)
                                     <option value="{{ $age->id }}" {{ request('owner_age')==$age->id ? 'selected' : ''}}>{{ $age->age }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <button type="submit" class="btn rounded-1 text-white opacity-50 p-2" style="background-color: #EF7C00;">Generate Report</button>
+                                <button type="submit" class="btn rounded-1 text-white opacity-50 p-2" style="background-color: #EF7C00;">{{__('messages.pets_policies_report.generate_report')}}</button>
                             </div>
                         </div>
                     </div>
@@ -154,38 +156,38 @@
         </form>
         <div class="m-2 text-center">
             <img class="p-3" src="{{asset('img/DashboardSotariaLogo.png')}}" alt="">
-            <h4>Policies by
-                @php
-                switch(request('grouptype'))
-                {
-                case 'pets_type':
-                echo "Pet Type";
-                break;
-                case 'pet_breed':
-                echo "Pet Breed";
-                break;
-                case 'agent_name':
-                echo "Agent Name";
-                break;
-                case 'owner_city':
-                echo "Owner City";
-                break;
-                case 'owner_district':
-                echo "Owner Districts";
-                break;
-                case 'owner_age':
-                echo "Owner Age";
-                break;
-                case 'insurance_company':
-                echo "Insurance Company";
-                break;
-                default:
-                echo "Insurance Company";
-                break;
-                }
-                @endphp
-            </h4>
-            <p>From: {{ request('issue_date') ?? '--' }} To: {{ request('expiry_date') ?? '--' }}</p>
+           <h4>{{__('messages.pets_policies_report.policies_by')}}
+    @php
+    switch(request('grouptype'))
+    {
+    case 'pets_type':
+    echo __('messages.pets_policies_report.heading_pets_type');
+    break;
+    case 'pet_breed':
+    echo __('messages.pets_policies_report.heading_pet_breed');
+    break;
+    case 'agent_name':
+    echo __('messages.pets_policies_report.heading_agent_name');
+    break;
+    case 'owner_city':
+    echo __('messages.pets_policies_report.heading_owner_city');
+    break;
+    case 'owner_district':
+    echo __('messages.pets_policies_report.heading_owner_district');
+    break;
+    case 'owner_age':
+    echo __('messages.pets_policies_report.heading_owner_age');
+    break;
+    case 'insurance_company':
+    echo __('messages.pets_policies_report.heading_insurance_company');
+    break;
+    default:
+    echo __('messages.pets_policies_report.heading_insurance_company');
+    break;
+    }
+    @endphp
+</h4>
+<p>{{__('messages.pets_policies_report.from')}} {{ request('issue_date') ?? __('messages.pets_policies_report.no_date') }} {{__('messages.pets_policies_report.to')}} {{ request('expiry_date') ?? __('messages.pets_policies_report.no_date') }}</p>
         </div>
         <div class="body bg-white py-4 px-4 d-flex flex-column gap-3 pb-5">
             @if($policies)
@@ -225,16 +227,17 @@
                     @endforeach
                     <!-- Totals Row -->
                     <tr>
-                        <td colspan="9"><strong>TOTAL</strong></td>
+                                <td colspan="9"><strong>{{__('messages.pets_policies_report.total')}}</strong></td>
+
                         <td>{{ $data['totals']['total_net_premium'] }}</td>
                         <td>{{ $data['totals']['total_gross_premium'] }}</td>
                     </tr>
                 </tbody>
             </table>
-            @endforeach
-            @else
-            <h4 class="text-center">No Record Found</h4>
-            @endif
+           @endforeach
+@else
+<h4 class="text-center">{{__('messages.pets_policies_report.no_record')}}</h4>
+@endif
         </div>
     </div>
     <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">

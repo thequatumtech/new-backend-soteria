@@ -26,7 +26,7 @@ class PetBreedController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Pet breeds fetched successfully.',
+            'message' => __('messages.api.pet_breeds_fetched_successfully'),
             'data' => $breeds,
         ]);
     }
@@ -34,21 +34,21 @@ class PetBreedController extends Controller
     /**
      * Get a single pet breed.
      */
- public function show($type)
-{
-    $breeds = PetBreed::where('type', $type)->get();
+    public function show($type)
+    {
+        $breeds = PetBreed::where('type', $type)->get();
 
-    if ($breeds->isEmpty()) {
+        if ($breeds->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => __('messages.api.pet_breeds_not_found'),
+            ], 404);
+        }
+
         return response()->json([
-            'success' => false,
-            'message' => 'Pet breeds not found.',
-        ], 404);
+            'success' => true,
+            'message' => __('messages.api.pet_breeds_fetched_successfully'),
+            'data' => $breeds,
+        ]);
     }
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Pet breeds fetched successfully.',
-        'data' => $breeds,
-    ]);
-}
 }

@@ -15,6 +15,8 @@ class BannersController extends Controller
                     'title'        => $banner->title,
                     'image'        => url($banner->image),
                     'redirect_url' => $banner->redirect_url,
+                     'runtime' => $banner->runtime,
+
                 ];
             });
 
@@ -85,6 +87,8 @@ class BannersController extends Controller
             'name'  => 'required|string|max:150',
             'image' => 'required|file|mimes:jpeg,png,jpg,mp4,webm,ogg,mov|max:51200',
             'link'  => 'nullable|url|max:255',
+            'runtime' => 'required|integer|in:5,10,15,20,25,30,35,40,45,50,55,60',
+
         ]);
 
         $uploadPath = public_path('uploads/banner');
@@ -102,6 +106,8 @@ class BannersController extends Controller
             'image'        => 'uploads/banner/' . $file,
             'redirect_url' => $request->link,
             'is_active'    => true,
+         'runtime' => $request->runtime,
+
         ]);
 
         return redirect()
@@ -166,6 +172,8 @@ class BannersController extends Controller
             'image' => 'nullable|file|mimes:jpeg,png,jpg,mp4,webm,ogg,mov|max:51200',
             'link'  => 'nullable|url|max:255',
             'status' => 'required|in:0,1',
+             'runtime' => 'required|integer|in:5,10,15,20,25,30,35,40,45,50,55,60',
+
         ]);
 
         $banner = Banner::findOrFail($request->cd_id);
@@ -193,6 +201,8 @@ class BannersController extends Controller
         $banner->title        = $request->name;
         $banner->redirect_url = $request->link;
         $banner->is_active    = $request->status;
+                $banner->runtime = $request->runtime;
+
 
         $banner->save();
 

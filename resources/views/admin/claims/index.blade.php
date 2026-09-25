@@ -102,80 +102,83 @@
 @endsection
 
 @section('content')
-<main class="flex-grow-1 pt-5">
-    <div class="container-fluid">
-        <div class="header d-flex justify-content-between p-3 py-2 align-items-center">
-            <div class="text-white group-title fw-bold">{{__('messages.claims.claims_list')}}</div>
-{{--
-            <a href="{{route('claims.add')}}" class="btn pe-0">
-                <img src="{{asset('img/icon-add.png')}}" alt="">
-            </a>
---}}
+    <main class="flex-grow-1 pt-5">
+        <div class="container-fluid">
+            <div class="header d-flex justify-content-between p-3 py-2 align-items-center">
+                <div class="text-white group-title fw-bold">{{__('messages.claims.claims_list')}}</div>
+    {{--
+                <a href="{{route('claims.add')}}" class="btn pe-0">
+                    <img src="{{asset('img/icon-add.png')}}" alt="">
+                </a>
+    --}}
+            </div>
+            @if(is_admin_authorized('claims.view'))
+                <div class="col-12 col-lg-12">
+                    <div class="pt-4 row" style="border: none;">
+                        <div class="col-lg-3">
+                            <button type="button" id="manage_claim_btn" data-route="{{route('claims.view')}}" class="btn rounded-1 w-100 text-white opacity-50 p-2"
+                                    style="background-color: #EF7C00;">{{__('messages.claims.manage_claim')}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @endif
+            <div class="body bg-white py-4 px-4 d-flex flex-column gap-3">
+                <table id="example" class="table table-striped " style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>{{__('messages.claims.client_name')}}</th>
+                            <th>{{__('messages.claims.policy_type')}}</th>
+                            <th>{{__('messages.claims.expiry_date')}}</th>
+                            <th>{{__('messages.claims.claim_no')}}</th>
+                            <th>{{__('messages.claims.insurance_company')}}</th>
+                            <th class="no-order no-search">{{__('messages.claims.status')}}</th>
+                            <th class="no-order no-search">{{__('messages.claims.view')}}</th>
+                            <th class="no-order no-search">{{__('messages.claims.select')}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($claims as $single)
+                                                <tr>
+                                                    <td>{{ $single->client->full_name }}</td>
+                                                    <td>{{ __('messages.policy_types.' . $single->policy_type) }}</td>
+                                                    <td>{{\Carbon\Carbon::parse($single->expiry_date)->format('d/m/Y')}}</td>
+                                                    <td>{{$single->claim_no}}</td>
+                                                    <td>{{$single->insurance_company_id ? $single->insurance_company->company_name : ''}}</td>
+                                                    <td>{{$single->status}}</td>
+                                                    <td>
+                                                        <div class="d-flex gap-3 justify-content-evenly align-items-center px-2">
+                                                              @if(is_admin_authorized('claims.view'))
+                                                            <a href="{{ route('purchase-policy.show', $single->policy_id) }}" type="button" class="btn p-0 m-0 btn-custom viewbtn">
+                                                                <img src="{{asset('img/icon-eye.png')}}" alt="View" title="View">
+                                                            </a>
+                                                            @endif
+
+                            {{--  @if(is_admin_authorized('claims.view'))
+                                                            <a href="{{route('complaints.edit',$single->id)}}" class="btn p-0 m-0" title="Edit">
+                                                                <img src="{{asset('img/icon-edit.png')}}" alt="">
+                                                            </a>
+                            --}}
+                                                        </div>
+                                                    </td>
+                                                    <td><input class="form-check-input select-checkbox" type="checkbox" data-claim_id="{{$single->id}}"></td>
+                                                </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
-        @if(is_admin_authorized('claims.view'))
-            <div class="col-12 col-lg-12">
-                <div class="pt-4 row" style="border: none;">
-                    <div class="col-lg-3">
-                        <button type="button" id="manage_claim_btn" data-route="{{route('claims.view')}}" class="btn rounded-1 w-100 text-white opacity-50 p-2"
-                                style="background-color: #EF7C00;">{{__('messages.claims.manage_claim')}}
-                        </button>
+    </main>
+    <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x w-100">
+        <div class="p-3 col-12 col-lg-8 mx-auto">
+            <div class="toast align-items-center border-0 col-12 col-lg-8 w-100" style="background-color: #104E9E; color: white" data-bs-delay="3000" role="alert" aria-live="assertive" aria-atomic="true" id="clientSelectToast">
+                <div class="d-flex">
+                    <div class="toast-body px-5 fw-bold py-3" style="font-size: 1.375rem;">
                     </div>
                 </div>
             </div>
-        @endif
-        <div class="body bg-white py-4 px-4 d-flex flex-column gap-3">
-            <table id="example" class="table table-striped " style="width:100%">
-                <thead>
-                    <tr>
-                        <th>{{__('messages.claims.client_name')}}</th>
-                        <th>{{__('messages.claims.policy_type')}}</th>
-                        <th>{{__('messages.claims.expiry_date')}}</th>
-                        <th>{{__('messages.claims.claim_no')}}</th>
-                        <th>{{__('messages.claims.insurance_company')}}</th>
-                        <th class="no-order no-search">{{__('messages.claims.status')}}</th>
-                        <th class="no-order no-search">{{__('messages.claims.view')}}</th>
-                        <th class="no-order no-search">{{__('messages.claims.select')}}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($claims as $single)
-                    <tr>
-                        <td>{{ $single->client->full_name }}</td>
-                        <td>{{ __('messages.policy_types.'.$single->policy_type) }}</td>
-                        <td>{{\Carbon\Carbon::parse($single->expiry_date)->format('d/m/Y')}}</td>
-                        <td>{{$single->claim_no}}</td>
-                        <td>{{$single->insurance_company_id?$single->insurance_company->company_name:''}}</td>
-                        <td>{{$single->status}}</td>
-                        <td>
-                            <div class="d-flex gap-3 justify-content-evenly align-items-center px-2">
-                                <a href="javascript:void(0);" type="button" class="btn p-0 m-0 btn-custom viewbtn">
-                                    <img src="{{asset('img/icon-eye.png')}}" alt="View" title="View">
-                                </a>
-{{--
-                                <a href="{{route('complaints.edit',$single->id)}}" class="btn p-0 m-0" title="Edit">
-                                    <img src="{{asset('img/icon-edit.png')}}" alt="">
-                                </a>
---}}
-                            </div>
-                        </td>
-                        <td><input class="form-check-input select-checkbox" type="checkbox" data-claim_id="{{$single->id}}"></td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
         </div>
     </div>
-</main>
-<div class="toast-container position-fixed bottom-0 start-50 translate-middle-x w-100">
-    <div class="p-3 col-12 col-lg-8 mx-auto">
-        <div class="toast align-items-center border-0 col-12 col-lg-8 w-100" style="background-color: #104E9E; color: white" data-bs-delay="3000" role="alert" aria-live="assertive" aria-atomic="true" id="clientSelectToast">
-            <div class="d-flex">
-                <div class="toast-body px-5 fw-bold py-3" style="font-size: 1.375rem;">
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 @endsection
 

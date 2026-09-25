@@ -58,4 +58,12 @@ class InOutPatientPlan extends Model
             ->groupBy('plan_name', 'policy_period')
             ->get();
     }
+       public function pricing_schedule()
+    {
+        return $this->hasMany(
+            InOutPatientPlanPricingSchedule::class,
+            'in_out_patient_plan_id',
+            'id'
+        );
+    }
 }

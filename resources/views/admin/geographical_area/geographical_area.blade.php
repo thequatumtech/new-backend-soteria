@@ -14,7 +14,7 @@
                     <tr>
                         <th class="no-show"> {{__('messages.table_headers.id')}} </th>
                         <th width="45%"> {{__('messages.geographical_area.geographical_area')}} </th>
-                        <!-- <th width="45%"> {{__('Countries')}} </th> -->
+                      <th width="45%"> {{__('Countries')}} </th>
                         <th class="no-order" width="10%"></th>
                     </tr>
                 </thead>
@@ -24,20 +24,19 @@
                     <tr>
                         <td>{{ $key + 1 }}</td>
                         <td>{{ $value->name }}</td>
-                        {{-- <td>
+                        <td>
                             @php
                             $areaCountryIds = $value->countries ?? [];
                             $areaCountryNames = $countries->whereIn('id', $areaCountryIds)->pluck('name')->toArray();
                             @endphp
                             {{ implode(', ', $areaCountryNames) ?: '—' }}
-                        </td>--}}
-                        <!-- data-countries="{{ json_encode($value->countries ?? []) }}" -->
+                        </td>
                         <td>
                             <div class="d-flex gap-3 justify-content-evenly align-items-center px-2">
                                 <button class="btn p-0 m-0 editbtn"
                                     value="{{ $value->id }}"
                                     data-val="{{ $value->name }}"
-                                    
+                                   data-countries="{{ json_encode($value->countries ?? []) }}"                                    
                                     data-bs-toggle="modal"
                                     data-bs-target="#editModal">
                                     <img src="{{asset('img/icon-edit.png')}}" alt="">
@@ -78,7 +77,7 @@
                                         <input type="text" name="name" style="border: none;" maxlength="50" required>
                                     </div>
                                 </div>
-                                {{-- <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                                <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
                                     <div>{{__('Countries')}}</div>
                                     <select name="countries[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2-add" style="height: 3.5rem;" multiple>
                                         @foreach($countries as $single)
@@ -87,7 +86,7 @@
                                         </option>
                                         @endforeach
                                     </select>
-                                </div> --}}
+                                </div> 
                             </div>
                             <div class="row pt-5">
                                 <div class="col-12 col-lg-9"></div>
@@ -133,14 +132,14 @@
                                         <input type="text" id="name_edit" name="name" style="border: none;" maxlength="50" required>
                                     </div>
                                 </div>
-                                {{-- <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
+                           <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
                                     <div>{{__('Countries')}}</div>
                                     <select name="countries[]" id="edit_countries" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2-edit" style="height: 3.5rem;" multiple>
                                         @foreach($countries as $single)
                                         <option value="{{$single->id}}">{{$single->name}}</option>
                                         @endforeach
                                     </select>
-                                </div> --}}
+                                </div> 
                             </div>
                             <div class="row pt-5">
                                 <div class="col-12 col-lg-9"></div>
@@ -223,17 +222,17 @@
             ]
         });
 
-        // $('.select2-add').select2({
-        //     dropdownParent: $('#add_geographical_area'),
-        //     placeholder: "Select countries",
-        //     allowClear: true
-        // });
+         $('.select2-add').select2({
+             dropdownParent: $('#add_geographical_area'),
+             placeholder: "Select countries",
+             allowClear: true
+         });
 
-        // $('.select2-edit').select2({
-        //     dropdownParent: $('#editModal'),
-        //     placeholder: "Select countries",
-        //     allowClear: true
-        // });
+         $('.select2-edit').select2({
+             dropdownParent: $('#editModal'),
+             placeholder: "Select countries",
+             allowClear: true
+        });
 
         $("#add").validate();
     });
@@ -248,16 +247,16 @@
     $(document).on('click', '.editbtn', function() {
         var id = $(this).val();
         var name = $(this).data('val');
-        // var countries = $(this).data('countries');
+         var countries = $(this).data('countries');
 
         $("#cd_id").val(id);
         $("#name_edit").val(name);
 
-        // var $editSelect = $('#edit_countries');
-        // $editSelect.val(null).trigger('change');
-        // if (countries && countries.length) {
-        //     $editSelect.val(countries.map(String)).trigger('change');
-        // }
+        var $editSelect = $('#edit_countries');
+         $editSelect.val(null).trigger('change');
+         if (countries && countries.length) {
+             $editSelect.val(countries.map(String)).trigger('change');
+         }
 
         $('#editModal').modal('show');
         $("#edit_cd").validate();

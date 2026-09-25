@@ -85,7 +85,8 @@ class ClientMarineInsurance extends Model
         'marine_plans.sales_tax_cbj',
         'marine_plans.gross_premium',
         'marine_plans.commission_percentage',
-        'insurance_companies.company_name','insurance_company_documents.company_stamp','insurance_company_documents.logo','insurance_company_documents.authorized_signature','insurance_companies.id as insurance_company_id')
+        'insurance_companies.company_name','insurance_company_documents.company_stamp','insurance_company_documents.logo',
+            'insurance_company_documents.letterhead','insurance_company_documents.authorized_signature','insurance_companies.id as insurance_company_id')
             ->leftJoin('marine_plans', 'client_marine_insurances.plan_id', '=', 'marine_plans.id')
             ->leftJoin('insurance_companies', 'marine_plans.insurance_company_id', '=', 'insurance_companies.id')
             ->leftJoin('insurance_company_documents', 'insurance_companies.id', '=', 'insurance_company_documents.insurance_id')

@@ -10,6 +10,7 @@ use PDF;
 use App\Models\Client;
 use Carbon\Carbon;
 use App\Models\Currency;
+use App\Helpers\InsurancePlanHelper;
 
 class MarineInsuranceController extends Controller
 {
@@ -21,6 +22,7 @@ class MarineInsuranceController extends Controller
 
         return is_numeric($clean) ? (float)$clean : 0;
     }
+
     private function normalizeRestricted($value)
     {
         if (!$value) return [];
@@ -36,15 +38,28 @@ class MarineInsuranceController extends Controller
         if (is_numeric($value)) {
             return [(int)$value];
         }
+
         return [];
     }
 
     private function restrictionError($type)
     {
-        $message = "You are not eligible for this plan due to {$type} restriction.";
+        $restrictionTypes = [
+            'country' => __('messages.api.marine_restriction_country'),
+            'city' => __('messages.api.marine_restriction_city'),
+            'district' => __('messages.api.marine_restriction_district'),
+            'age' => __('messages.api.marine_restriction_age'),
+            'shipment origin / destination country' => __('messages.api.marine_restriction_shipment_country'),
+        ];
+
+        $restrictionType = $restrictionTypes[$type] ?? $type;
+
+        $message = __('messages.api.marine_restriction_message', [
+            'type' => $restrictionType
+        ]);
 
         if ($type === 'country') {
-            $message .= ' Please contact us for further information.';
+            $message .= __('messages.api.marine_country_contact');
         }
 
         return response()->json([
@@ -54,6 +69,7 @@ class MarineInsuranceController extends Controller
             'data' => []
         ], 422);
     }
+
     private function normalizeDate($date)
     {
         if (!$date) return null;
@@ -156,15 +172,21 @@ class MarineInsuranceController extends Controller
 
             $data['inception_date'] = $data['effective_date'] ?? null;
 
-            $plan_data = MarinePlan::find($data['plan_id']);
+            // $plan_data = MarinePlan::find($data['plan_id']);
+            $plan_data = MarinePlan::with([
+                'policy_covers',
+                'insurance_company.currency'
+            ])->find($data['plan_id']);
+
             $data['insurance_company_id'] = $plan_data->insurance_company_id;
 
             $client = Client::find($request->user_id);
+
             if (!$client) {
                 return response()->json([
                     'status' => false,
                     'status_code' => 422,
-                    'message' => 'Client not found.',
+                    'message' => __('messages.api.client_not_found'),
                     'data' => []
                 ], 422);
             }
@@ -174,14 +196,13 @@ class MarineInsuranceController extends Controller
             $clientDistrict = $client->district_id;
             $clientDestinationCountry = $data['destination_country_id'] ?? null;
 
-
             $clientAge = Carbon::parse($client->birth_date)->age;
 
             $restrictedCountries = $this->normalizeRestricted($plan_data->restricted_country_ids);
             $restrictedCities    = $this->normalizeRestricted($plan_data->restricted_city_ids);
             $restrictedDistricts = $this->normalizeRestricted($plan_data->restricted_district_ids);
             $restrictedAges      = $this->normalizeRestricted($plan_data->restricted_age_ids);
-            $restrictedShipmentCountries      = $this->normalizeRestricted($plan_data->shipment_origin_and_destination_country);
+            $restrictedShipmentCountries = $this->normalizeRestricted($plan_data->shipment_origin_and_destination_country);
 
             if ($clientCountry && in_array($clientCountry, $restrictedCountries)) {
                 return $this->restrictionError('country');
@@ -194,16 +215,17 @@ class MarineInsuranceController extends Controller
             if ($clientDistrict && in_array($clientDistrict, $restrictedDistricts)) {
                 return $this->restrictionError('district');
             }
+
             if ($clientDestinationCountry && in_array($clientDestinationCountry, $restrictedShipmentCountries)) {
                 return $this->restrictionError('shipment origin / destination country');
             }
-
 
             foreach ($restrictedAges as $range) {
                 $range = str_replace(' ', '', $range);
 
                 if (str_contains($range, '-')) {
                     [$min, $max] = explode('-', $range);
+
                     if ($clientAge >= (int)$min && $clientAge <= (int)$max) {
                         return $this->restrictionError('age');
                     }
@@ -218,10 +240,12 @@ class MarineInsuranceController extends Controller
 
             if ($existingMarine) {
                 $Marine = ClientMarineInsurance::find($existingMarine->policy_id);
+
                 if ($Marine) $Marine->update($data);
 
                 $data['purchase_id'] = $existingMarine->id;
                 $data['inception_date'] = $data['effective_date'];
+
                 $Marine = PurchasePolicy::updatePurchasePolicy($data);
                 $data['policy_id'] = $Marine->policy_id;
             } else {
@@ -240,7 +264,10 @@ class MarineInsuranceController extends Controller
             $data = ClientMarineInsurance::getMarineInsuranceDetails($data['policy_id']);
 
             $directory = public_path('insurance_pdfs/marine_policy');
-            if (!file_exists($directory)) mkdir($directory, 0755, true);
+
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+            }
 
             $filename = uniqid() . '_policy_' . $Marine->id . '.pdf';
             $path = $directory . '/' . $filename;
@@ -270,7 +297,12 @@ class MarineInsuranceController extends Controller
             $cbjSalesTaxAmount = ($cbjContribution * $cbjSalesTaxPercentage) / 100;
 
             // Total Gross Premium
-            $grossPremium = $net_premium + $issuanceFees + $stampAmount + $salesTaxAmount + $cbjContribution + $cbjSalesTaxAmount;
+            $grossPremium = $net_premium
+                + $issuanceFees
+                + $stampAmount
+                + $salesTaxAmount
+                + $cbjContribution
+                + $cbjSalesTaxAmount;
 
             $purchase['net_premium']       = $net_premium;
             $purchase['fees']              = $issuanceFees;
@@ -291,13 +323,31 @@ class MarineInsuranceController extends Controller
             $purchase['commission_percentage'] = $data->commission_percentage ?? $plan_data->commission_percentage;
             $purchase['policy_pdf_url']        = $path;
 
-
             PurchasePolicy::updatePurchasePolicy($purchase);
 
             $data->purchase_id = $Marine->id;
-            $plan_data = MarinePlan::with('policy_covers')->find($data['plan_id']);
+            $data->purchase_policy_id = $Marine->id;
+
+            // $plan_data = MarinePlan::with('policy_covers')->find($data['plan_id']);
+            // $client = Client::with('country.currency')->find($request->user_id);
+            // $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
+
+            $plan_data = MarinePlan::with([
+                'policy_covers',
+                'insurance_company.currency'
+            ])->find($data['plan_id']);
+
             $client = Client::with('country.currency')->find($request->user_id);
-            $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
+
+            // Get insurance company currency first
+            $insuranceCompany = $plan_data->insurance_company;
+
+            if ($insuranceCompany && $insuranceCompany->currency) {
+                $abbr = $insuranceCompany->currency->abbreviation;
+            } else {
+                // Fallback to client's country currency
+                $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
+            }
 
             $pdf = PDF::loadView('pdf/marine_policy', [
                 'data' => $data,
@@ -305,11 +355,10 @@ class MarineInsuranceController extends Controller
                 'plan' => $plan_data,
                 'purchase' => PurchasePolicy::where('id', $Marine->id)->first()
             ]);
+
             $pdf->save($path);
 
             $data['url'] = url('insurance_pdfs/marine_policy/' . $filename);
-
-
 
             $data->net_premium       = number_format($purchase['net_premium'], 2) . ' ' . $abbr;
             $data->fees              = number_format($purchase['fees'], 2) . ' ' . $abbr;
@@ -321,7 +370,7 @@ class MarineInsuranceController extends Controller
             return response()->json([
                 'status' => true,
                 'status_code' => 200,
-                'message' => 'Add Marine Insurance Plan successfully',
+                'message' => __('messages.api.add_marine_insurance_plan_successfully'),
                 'data' => $data
             ]);
         } catch (\Exception $e) {
@@ -333,16 +382,28 @@ class MarineInsuranceController extends Controller
             ]);
         }
     }
+
     public function getMarineInsurancePlan(Request $request)
     {
         try {
 
-            $data = MarinePlan::with('policy_covers', 'insurance_company')
+            $query = MarinePlan::with([
+                'policy_covers',
+                'insurance_company',
+                'insurance_company.currency'
+            ])
                 ->whereHas('insurance_company', function ($q) {
                     $q->whereNull('deleted_at');
                 })
-                ->where('limit', 'LIKE', '%' . $request->limit . '%')
-                ->get();
+                ->where('limit', $request->limit);
+
+            // Filter plans according to client's currency
+            $query = InsurancePlanHelper::filterByClientCurrency(
+                $query,
+                $request->user_id
+            );
+
+            $data = $query->get();
 
             $data->transform(function ($item) {
 
@@ -362,7 +423,7 @@ class MarineInsuranceController extends Controller
             return response()->json([
                 'status' => true,
                 'status_code' => 200,
-                'message' => 'Get Marine Insurance Plan successfully',
+                'message' => __('messages.api.get_marine_insurance_plan_successfully'),
                 'data' => $data
             ]);
         } catch (\Exception $e) {
@@ -376,3 +437,4 @@ class MarineInsuranceController extends Controller
         }
     }
 }
+

@@ -205,7 +205,7 @@
                                     @foreach($districts as $single)
                                         <option value="{{$single->id}}" {{in_array($single->id,old('restricted_district_ids',[]))}}>{{$single->name}}</option>
                         @endforeach
-                        </select> 
+                        </select>
                         <!-- <select name="restricted_district_ids[]"
                             id="restricted_district_ids"
                             class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2"
@@ -218,7 +218,7 @@
                         <div>{{__('messages.plans.policy_holder_age_restriction')}}</div>
                         <select name="restricted_age_ids[]" class="form-select rounded-0 flex-grow-1 border-0 shadow1 select2" style="height: 3.5rem;" multiple>
                             @foreach($ages as $single)
-                            <option value="{{$single->id}}" {{in_array($single->id,old('restricted_age_ids',[]))}}>{{$single->age}}</option>
+                            <option value="{{$single->id}}" {{in_array($single->id,old('restricted_age_ids',[]))}}>{{$single->age}} {{$single->type}}</option>
                             @endforeach
                         </select>
                     </div>
@@ -361,7 +361,7 @@
                     <tbody>
                         @for($i=1;$i<=10;$i++)
                             <tr>
-                            <td width="50%"> Year {{$i}}</td>
+                            <td width="50%">{{__('messages.plans.year')}} {{$i}}</td>
                             <td width="50%">
                                 <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                     <input type="text" name="discount[{{$i}}]" style="border: none;" required placeholder="{{__('messages.plans.example').' '.($i*2.5)}}"

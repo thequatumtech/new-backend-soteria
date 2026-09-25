@@ -16,6 +16,7 @@ use App\Models\InsurancePlanModels\TravelPlanDiscountBand;
 use App\Models\DangerousActivities;
 use App\Models\LineOfBusiness;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 
 class TravelPlanController extends Controller
 {
@@ -33,9 +34,9 @@ class TravelPlanController extends Controller
     {
         $insurance_companies = InsuranceCompany::where('line_of_business_id', 'like', '%"10"%')->get();
         $line_of_businesses = LineOfBusiness::where('id', self::line_of_business_id)->first()->name;
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
         $geographical_areas = GeographicalArea::all();
         $dangerous_activities = DangerousActivities::all();
@@ -44,34 +45,29 @@ class TravelPlanController extends Controller
 
     public function edit_travel_plan(Request $request, $id)
     {
+        $decryptedId = Crypt::decrypt($id);
+
         $insurance_companies = InsuranceCompany::where('line_of_business_id', 'like', '%"10"%')->get();
         $line_of_businesses = LineOfBusiness::all();
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
         $geographical_areas = GeographicalArea::all();
-        $plan = TravelPlan::find($id);
+        $plan = TravelPlan::find($decryptedId);
         $selected_country_ids = $plan->restricted_country_ids ? json_decode($plan->restricted_country_ids, true) : [];
         $selected_city_ids = $plan->restricted_city_ids ? json_decode($plan->restricted_city_ids, true) : [];
         $selected_district_ids = $plan->restricted_district_ids ? json_decode($plan->restricted_district_ids, true) : [];
+        $selected_destination_country_ids = $plan->restricted_destination_country_ids ? json_decode($plan->restricted_destination_country_ids, true) : [];
 
-        // Load only related cities and districts
-        // $cities = count($selected_country_ids) > 0
-        //     ? Cities::whereIn('country_id', $selected_country_ids)->get()
-        //     : collect(); // empty collection
-
-        // $districts = count($selected_city_ids) > 0
-        //     ? District::whereIn('city_id', $selected_city_ids)->get()
-        //     : collect(); // empty collection
         $dangerous_activities = DangerousActivities::all();
-        return view('admin.plan.travel-plans.edit_travel_plan', compact('insurance_companies', 'line_of_businesses', 'countries', 'cities', 'districts', 'ages', 'geographical_areas', 'plan', 'selected_country_ids', 'selected_city_ids', 'selected_district_ids', 'dangerous_activities'));
+        return view('admin.plan.travel-plans.edit_travel_plan', compact('insurance_companies', 'line_of_businesses', 'countries', 'cities', 'districts', 'ages', 'geographical_areas', 'plan', 'selected_country_ids', 'selected_city_ids', 'selected_district_ids', 'dangerous_activities', 'selected_destination_country_ids'));
     }
 
     public function save_travel_plan(Request $request)
     {
         if ($request->form_type == 'add') {
-            // dd($request->all());    
+            // dd($request->all());
             $travel_insurance_plan = new TravelPlan();
             $travel_insurance_plan->line_of_business_id = self::line_of_business_id;
             $travel_insurance_plan->insurance_company_id = $request->insurance_company_id;
@@ -83,9 +79,10 @@ class TravelPlanController extends Controller
             $travel_insurance_plan->restricted_district_ids = $request->restricted_district_ids ? json_encode($request->restricted_district_ids) : null;
             $travel_insurance_plan->restricted_age_ids = $request->restricted_age_ids ? json_encode($request->restricted_age_ids) : null;
             $travel_insurance_plan->restricted_dangerous_activities_ids = $request->restricted_dangerous_activities_ids ? json_encode($request->restricted_dangerous_activities_ids) : null;
+            $travel_insurance_plan->restricted_destination_country_ids = $request->restricted_destination_country_ids ? json_encode($request->restricted_destination_country_ids) : null;
             // $travel_insurance_plan->geographical_areas_ids = $request->geographical_areas_ids;
             $travel_insurance_plan->geographical_areas_ids = $request->geographical_areas_ids;
-            $travel_insurance_plan->countries = $request->countries;
+            // $travel_insurance_plan->countries = $request->countries;
             $travel_insurance_plan->limit = $request->limit;
             $travel_insurance_plan->net_premium = $request->net_premium ?? 0;
             $travel_insurance_plan->fees = $request->fees;
@@ -172,8 +169,9 @@ class TravelPlanController extends Controller
             $travel_insurance_plan->restricted_district_ids = $request->restricted_district_ids ? json_encode($request->restricted_district_ids) : null;
             $travel_insurance_plan->restricted_age_ids = $request->restricted_age_ids ? json_encode($request->restricted_age_ids) : null;
             $travel_insurance_plan->restricted_dangerous_activities_ids = $request->restricted_dangerous_activities_ids ? json_encode($request->restricted_dangerous_activities_ids) : null;
+            $travel_insurance_plan->restricted_destination_country_ids = $request->restricted_destination_country_ids ? json_encode($request->restricted_destination_country_ids) : null;
             $travel_insurance_plan->geographical_areas_ids = $request->geographical_areas_ids;
-            $travel_insurance_plan->countries = $request->countries;
+            // $travel_insurance_plan->countries = $request->countries;
             $travel_insurance_plan->limit = $request->limit;
             $travel_insurance_plan->net_premium = $request->net_premium ?? 0;
             $travel_insurance_plan->fees = $request->fees;

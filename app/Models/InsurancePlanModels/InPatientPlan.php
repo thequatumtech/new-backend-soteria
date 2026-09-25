@@ -63,4 +63,12 @@ class InPatientPlan extends Model
             ->get();
         return $plan;
     }
+       public function pricing_schedule()
+    {
+        return $this->hasMany(
+            InPatientPlanPricingSchedule::class,
+            'in_patient_plan_id',
+            'id'
+        );
+    }
 }

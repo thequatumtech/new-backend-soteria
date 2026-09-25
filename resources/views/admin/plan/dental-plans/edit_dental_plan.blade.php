@@ -192,7 +192,7 @@
                                     @foreach($ages as $single)
                                     <option value="{{$single->id}}"
                                         {{ in_array($single->id, old('restricted_age_ids', !empty($plan->restricted_age_ids) ? json_decode($plan->restricted_age_ids) : [])) ? 'selected' : '' }}>
-                                        {{$single->age}}
+                                        {{$single->age}} {{$single->type}}
                                     </option>
                                     @endforeach
                                 </select>
@@ -249,7 +249,8 @@
                                     </td>
                                     <td>
                                         <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                            <input type="text" name="policy_covers[{{ $index }}][cover_limit]" value="{{ number_format($single->cover_limit) }}" style="border: none;" required>
+                                            <input type="text" name="policy_covers[{{ $index }}][cover_limit]" value="{{ $single->cover_limit }}" style="border: none;" required>
+                                            {{--<input type="text" name="policy_covers[{{ $index }}][cover_limit]" value="{{ number_format($single->cover_limit) }}" style="border: none;" required>--}}
                                             {{-- <input type="text" name="policy_covers[{{ $index }}][cover_limit]" value="{{ $single->cover_limit }}" style="border: none;" required> --}}
                                         </div>
                                     </td>

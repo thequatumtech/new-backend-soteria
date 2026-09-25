@@ -16,7 +16,8 @@ class CitiesController extends Controller
     public function index()
     {
         $cities = Cities::withTrashed()->orderBy('name')->get();
-        $countries = Country::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+
         return view('admin.cities.cities', ['cities' => $cities,'all_countries' => $countries]);
     }
 

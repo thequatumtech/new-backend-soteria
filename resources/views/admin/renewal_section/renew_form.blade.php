@@ -114,21 +114,53 @@ $previousUrl = url()->previous();
                 {{-- Editable dates --}}
                 <div class="row mt-3">
                     <div class="col-md-6 form-group">
-                        <label class="fw-bold">{{ __('messages.renewal_section.inception_date')}}</label>
-                        <div class="old-value">{{ __('messages.renewal_section.old')}} {{ $policy->inception_date }}</div>
-                        <input type="date" name="inception_date"
+                        <label class="fw-bold">
+                            {{ __('messages.renewal_section.inception_date') }}
+                        </label>
+
+                        <div class="old-value">
+                            {{ __('messages.renewal_section.old') }} {{ $policy->inception_date }}
+                        </div>
+
+                        <input
+                            type="date"
+                            name="inception_date"
+                            id="inception_date"
                             value="{{ old('inception_date', $policy->inception_date ?? date('Y-m-d')) }}"
                             required
                             min="{{ date('Y-m-d') }}">
+
+                        @error('inception_date')
+                        <div class="text-danger mt-1">
+                            {{ $message }}
+                        </div>
+                        @enderror
                     </div>
 
                     <div class="col-md-6 form-group">
-                        <label class="fw-bold">{{ __('messages.renewal_section.expiry_date')}}</label>
-                        <div class="old-value">{{ __('messages.renewal_section.old')}} {{ $policy->expiry_date }}</div>
-                        <input type="date" name="expiry_date"
+                        <label class="fw-bold">
+                            {{ __('messages.renewal_section.expiry_date') }}
+                        </label>
+
+                        <div class="old-value">
+                            {{ __('messages.renewal_section.old') }} {{ $policy->expiry_date }}
+                        </div>
+
+                        <input
+                            type="date"
+                            name="expiry_date"
+                            id="expiry_date"
                             value="{{ old('expiry_date', $policy->expiry_date ?? date('Y-m-d')) }}"
                             required
                             min="{{ date('Y-m-d') }}">
+
+                        <div id="expiry_date_error" class="text-danger mt-1"></div>
+
+                        @error('expiry_date')
+                        <div class="text-danger mt-1">
+                            {{ $message }}
+                        </div>
+                        @enderror
                     </div>
                 </div>
 
@@ -144,21 +176,108 @@ $previousUrl = url()->previous();
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const successMsg = document.getElementById('successMessage');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const redirectUrl = @json($previousUrl);
+
+        const renewForm = document.getElementById('renewForm');
+        const inceptionDate = document.getElementById('inception_date');
+        const expiryDate = document.getElementById('expiry_date');
+        const expiryDateError = document.getElementById('expiry_date_error');
+
         if (successMsg) {
             setTimeout(() => {
                 successMsg.style.transition = "opacity 0.5s";
                 successMsg.style.opacity = '0';
-                setTimeout(() => successMsg.remove(), 500);
+
+                setTimeout(() => {
+                    successMsg.remove();
+                }, 500);
             }, 5000);
         }
 
-        const cancelBtn = document.getElementById('cancelBtn');
-        const redirectUrl = "{{ $previousUrl }}";
+        if (cancelBtn) {
+            cancelBtn.addEventListener("click", function(e) {
+                e.preventDefault();
+                window.location.href = redirectUrl;
+            });
+        }
 
-        cancelBtn.addEventListener("click", function(e) {
-            e.preventDefault();
-            window.location.href = redirectUrl;
+        function validateDates() {
+
+            const inceptionValue = inceptionDate.value;
+            const expiryValue = expiryDate.value;
+
+            expiryDateError.textContent = '';
+
+            expiryDate.setCustomValidity('');
+
+            if (!inceptionValue) {
+                return true;
+            }
+
+            expiryDate.min = inceptionValue;
+
+            if (expiryValue && expiryValue <= inceptionValue) {
+
+                expiryDateError.textContent =
+                    'Expiry date must be greater than the inception date.';
+
+                expiryDate.setCustomValidity(
+                    'Expiry date must be greater than the inception date.'
+                );
+
+                return false;
+            }
+
+            return true;
+        }
+
+        inceptionDate.addEventListener('change', function() {
+
+            validateDates();
+
+            if (
+                expiryDate.value &&
+                expiryDate.value <= inceptionDate.value
+            ) {
+                expiryDate.value = '';
+            }
         });
+        expiryDate.addEventListener('change', function() {
+            validateDates();
+        });
+
+        renewForm.addEventListener('submit', function(e) {
+
+            if (!validateDates()) {
+                e.preventDefault();
+
+                expiryDate.reportValidity();
+
+                expiryDate.focus();
+                return false;
+            }
+
+            if (!expiryDate.value) {
+
+                expiryDateError.textContent =
+                    'Please enter an expiry date.';
+
+                expiryDate.setCustomValidity(
+                    'Please enter an expiry date.'
+                );
+
+                e.preventDefault();
+
+                expiryDate.reportValidity();
+
+                expiryDate.focus();
+
+                return false;
+            }
+        });
+
+        validateDates();
     });
 </script>
 @endsection

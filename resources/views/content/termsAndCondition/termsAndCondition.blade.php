@@ -24,18 +24,16 @@
         <div class="header d-flex justify-content-between p-3 py-2 align-items-center">
             <div class="text-white group-title fw-bold"> {{ __('messages.terms_and_conditions.terms_and_condition') }}
             </div>
-            {{-- @if (empty($termsAndCondition->id)) --}}
             <button data-bs-toggle="modal" data-bs-target="#addContactUs" class="btn pe-0">
                 <img src="{{ asset('img/icon-add.png') }}" alt="">
             </button>
-            {{-- @endif --}}
         </div>
         <div class="body bg-white py-4 px-4 d-flex flex-column gap-3 pb-5">
             <table id="example" class="table table-striped" style="width:100%">
                 <thead>
                     <tr>
                         <th>{{ __('messages.terms_and_conditions.terms_and_condition') }}</th>
-                        <th class="no-order" width="5%">Action</th>
+                        <th class="no-order" width="5%">{{ __('messages.terms_and_conditions.action') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -61,9 +59,7 @@
                                 </button>
 
                                 @endif
-                                <button class="btn p-0 m-0 deletebtn" value="{{ $item->id }}">
-                                    <img src="{{ asset('img/icon-delete.png') }}" alt="Delete">
-                                </button>
+                             
                             </div>
                         </td>
                     </tr>
@@ -103,7 +99,7 @@
                                 </div>
                             </div>
                             <div class="mt-4">
-                                <label for="upload_file" class="form-label">Upload</label>
+                                <label for="upload_file" class="form-label">{{ __('messages.terms_and_conditions.upload') }}</label>
                                 <input type="file" class="form-control" id="upload_file" name="upload_file">
                             </div>
                             <div class="row pt-5">

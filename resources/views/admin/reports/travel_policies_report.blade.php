@@ -58,7 +58,7 @@
                     <div class="container">
                         <div class="row">
                             <div class="col-12 col-lg-12 pt-4 d-flex flex-column">
-                                <label for="grouptype">Group Report By</label>
+                                <label for="grouptype">{{__('messages.travel_policies_report.group_report_by')}}</label>
                                 {{-- <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="grouptype" id="grouptype" onchange="toggleDateFields()">
                                     <option value="period_of_travel" {{ request('grouptype')=='period_of_travel' ? 'selected' : ''}}>Period of travel</option>
                                     <option value="destination" {{ request('grouptype')=='destination' ? 'selected' : ''}}>Destination</option>
@@ -67,77 +67,85 @@
                                     <option value="insurance_company" {{ request('grouptype')=='client_name' ? 'selected' : ''}}>Insurance company</option>
                                     <option value="travel_plan" {{ request('grouptype')=='client_name' ? 'selected' : ''}}>Travel plans</option>
                                 </select> --}}
-                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="grouptype" id="grouptype" onchange="toggleDateFields()">
-                                    <option value="insurance_company" {{ request('grouptype')=='insurance_company' || empty(request('grouptype')) ? 'selected' : ''}}>Insurance company</option>
-                                    <option value="period_of_travel" {{ request('grouptype')=='period_of_travel' ? 'selected' : ''}}>Period of travel</option>
-                                    <option value="destination" {{ request('grouptype')=='destination' ? 'selected' : ''}}>Destination</option>
-                                    <option value="client_age" {{ request('grouptype')=='client_age' ? 'selected' : ''}}>Client age</option>
-                                    <option value="agent_name" {{ request('grouptype')=='agent_name' ? 'selected' : ''}}>Agent name</option>
-                                    <option value="travel_plan" {{ request('grouptype')=='travel_plan' ? 'selected' : ''}}>Travel plans</option>
+                                <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="grouptype" id="grouptype" onchange="toggleDateFields()">
+                                    <option value="insurance_company" {{ request('grouptype')=='insurance_company' || empty(request('grouptype')) ? 'selected' : ''}}>{{__('messages.travel_policies_report.grouptype_insurance_company')}}</option>
+                                    <option value="period_of_travel" {{ request('grouptype')=='period_of_travel' ? 'selected' : ''}}>{{__('messages.travel_policies_report.grouptype_period_of_travel')}}</option>
+                                    <option value="destination" {{ request('grouptype')=='destination' ? 'selected' : ''}}>{{__('messages.travel_policies_report.grouptype_destination')}}</option>
+                                    <option value="client_age" {{ request('grouptype')=='client_age' ? 'selected' : ''}}>{{__('messages.travel_policies_report.grouptype_client_age')}}</option>
+                                    <option value="agent_name" {{ request('grouptype')=='agent_name' ? 'selected' : ''}}>{{__('messages.travel_policies_report.grouptype_agent_name')}}</option>
+                                    <option value="travel_plan" {{ request('grouptype')=='travel_plan' ? 'selected' : ''}}>{{__('messages.travel_policies_report.grouptype_travel_plan')}}</option>
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="insurance_company">Insurance Company</label>
+                               <label for="insurance_company">{{__('messages.travel_policies_report.insurance_company')}}</label>
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="insurance_company" id="insurance_company">
-                                    <option value="">Select Company</option>
+                                        <option value="">{{__('messages.travel_policies_report.select_company')}}</option>
                                     @foreach ($insuranceCompanies as $company)
                                     <option value="{{ $company->id }}" {{ request('insurance_company')==$company->id ? 'selected' : ''}}>{{ $company->company_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="issue_date">From Date</label>
+                              <label for="issue_date">{{__('messages.travel_policies_report.from_date')}}</label>
                                 <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                     <input type="date" name="issue_date" id="issue_date" value="{{request('issue_date')}}">
                                 </div>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="expiry_date">To Date</label>
+                                <label for="expiry_date">{{__('messages.travel_policies_report.to_date')}}</label>
+
                                 <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                     <input type="date" name="expiry_date" id="expiry_date" value="{{request('expiry_date')}}">
                                 </div>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="destination">Destination</label>
+                                <label for="destination">{{__('messages.travel_policies_report.destination')}}</label>
+
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="destination" id="destination">
-                                    <option value="">Select Destination</option>
+                                       <option value="">{{__('messages.travel_policies_report.select_destination')}}</option>
                                     @foreach ($countries as $country)
                                     <option value="{{ $country->id }}" {{ request('destination')==$country->id ? 'selected' : ''}}>{{ $country->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="travel_period">Travel Period</label>
+                             <label for="travel_period">{{__('messages.travel_policies_report.travel_period')}}</label>
+
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="travel_period" id="travel_period">
-                                    <option value="">Select Travel Period</option>
+                                  <option value="">{{__('messages.travel_policies_report.select_travel_period')}}</option>
+
                                     @foreach ($periods as $period)
                                     <option value="{{ $period['id'] }}" {{ request('travel_period')==$period['id'] ? 'selected' : ''}}>{{ $period['name'] }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="plan_type">Plan Type</label>
+                               <label for="plan_type">{{__('messages.travel_policies_report.plan_type')}}</label>
+
                                 <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                     <input type="text" name="plan_type" id="plan_type" value="{{request('plan_type')}}">
                                 </div>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="agent_name">Agent Name</label>
+                               <label for="agent_name">{{__('messages.travel_policies_report.agent_name')}}</label>
+
                                 <select class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" name="agent_name" id="agent_name">
-                                    <option value="">Select Agent</option>
+                                        <option value="">{{__('messages.travel_policies_report.select_agent')}}</option>
+
                                     @foreach ($agents as $agent)
                                     <option value="{{ $agent->id }}" {{ request('agent_name')==$agent->id ? 'selected' : ''}}>{{ $agent->first_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <label for="client_age">Client Age</label>
+                                <label for="client_age">{{__('messages.travel_policies_report.client_age')}}</label>
+
                                 <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                     <input type="number" name="client_age" id="client_age" value="{{request('client_age')}}">
                                 </div>
                             </div>
                             <div class="col-12 col-lg-4 pt-4 d-flex flex-column">
-                                <button type="submit" class="btn rounded-1 text-white opacity-50 p-2" style="background-color: #EF7C00;">Generate Report</button>
+                                <button type="submit" class="btn rounded-1 text-white opacity-50 p-2" style="background-color: #EF7C00;">{{__('messages.travel_policies_report.generate_report')}}</button>
                             </div>
                         </div>
                     </div>
@@ -146,7 +154,7 @@
         </form>
         <div class="m-2 text-center">
             <img class="p-3" src="{{asset('img/DashboardSotariaLogo.png')}}" alt="">
-            <h4>Policies by
+            <!-- <h4>Policies by
                 @php
                 switch(request('grouptype'))
                 {
@@ -175,6 +183,33 @@
                 @endphp
             </h4>
             <p>From: {{ request('issue_date') ?? '--' }} To: {{ request('expiry_date') ?? '--' }}</p>
+             -->
+            <h4>{{__('messages.travel_policies_report.policies_by')}}
+    @php
+    switch(request('grouptype'))
+    {
+    case 'period_of_travel':
+    echo __('messages.travel_policies_report.heading_period_of_travel');
+    break;
+    case 'destination':
+    echo __('messages.travel_policies_report.heading_destination');
+    break;
+    case 'client_age':
+    echo __('messages.travel_policies_report.heading_client_age');
+    break;
+    case 'agent_name':
+    echo __('messages.travel_policies_report.heading_agent_name');
+    break;
+    case 'travel_plan':
+    echo __('messages.travel_policies_report.heading_travel_plan');
+    break;
+    default:
+    echo __('messages.travel_policies_report.heading_insurance_company');
+    break;
+    }
+    @endphp
+</h4>
+<p>{{__('messages.travel_policies_report.from')}} {{ request('issue_date') ?? __('messages.travel_policies_report.no_date') }} {{__('messages.travel_policies_report.to')}} {{ request('expiry_date') ?? __('messages.travel_policies_report.no_date') }}</p>
         </div>
         <div class="body bg-white py-4 px-4 d-flex flex-column gap-3 pb-5">
             @if ($policies)
@@ -210,7 +245,8 @@
                     @endforeach
                     <!-- Totals Row -->
                     <tr>
-                        <td colspan="6"><strong>TOTAL</strong></td>
+                            <td colspan="6"><strong>{{__('messages.travel_policies_report.total')}}</strong></td>
+
                         <td>{{ $data['totals']['total_net_premium'] }}</td>
                         <td>{{ $data['totals']['total_gross_premium'] }}</td>
                         <td></td>
@@ -218,8 +254,8 @@
                 </tbody>
             </table>
             @endforeach
-            @else
-            <h4 class="text-center">No Record Found</h4>
+           @else
+            <h4 class="text-center">{{__('messages.travel_policies_report.no_record')}}</h4>
             @endif
         </div>
     </div>

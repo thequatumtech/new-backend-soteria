@@ -14,10 +14,10 @@ class GeographicalAreaController extends Controller
     public function index()
     {
         $geographical_area = GeographicalArea::withTrashed()->get();
-        // $countries = Country::all();
+        $countries = Country::orderBy('name', 'asc')->get();
         return view('admin.geographical_area.geographical_area', [
             'geographical_area' => $geographical_area,
-            // 'countries'         => $countries,
+            'countries'         => $countries,
         ]);
     }
 
@@ -31,13 +31,13 @@ class GeographicalAreaController extends Controller
                     'string',
                     Rule::unique('geographical_areas')->whereNull('deleted_at'),
                 ],
-                // 'countries' => ['nullable', 'array'],
-                // 'countries.*' => ['integer', 'exists:countries,id'],
+                'countries' => ['nullable', 'array'],
+                'countries.*' => ['integer', 'exists:countries,id'],
             ]);
 
             GeographicalArea::create([
                 'name'      => $request->name,
-                // 'countries' => $request->countries ?? [],
+                'countries' => $request->countries ?? [],
             ]);
 
             return redirect()->route('geographical_area.list')
@@ -58,14 +58,14 @@ class GeographicalAreaController extends Controller
                     'string',
                     Rule::unique('geographical_areas')->ignore($request->cd_id)->whereNull('deleted_at'),
                 ],
-                // 'countries' => ['nullable', 'array'],
-                // 'countries.*' => ['integer', 'exists:countries,id'],
+                'countries' => ['nullable', 'array'],
+                'countries.*' => ['integer', 'exists:countries,id'],
             ]);
 
             $geographical_area = GeographicalArea::findOrFail($request->cd_id);
             $geographical_area->update([
                 'name'      => $request->name,
-                // 'countries' => $request->countries ?? [],
+                'countries' => $request->countries ?? [],
             ]);
 
             return redirect()->route('geographical_area.list')

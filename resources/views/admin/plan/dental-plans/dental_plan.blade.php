@@ -43,9 +43,12 @@
         <div class="container-fluid">
             <div class="header d-flex justify-content-between p-3 py-2 align-items-center">
                 <div class="text-white group-title fw-bold">{{$title}}</div>
+                            @if(canAccessRoute('insurance_plans_add'))
+
                 <a href="{{$add_route}}" class="btn pe-0">
                     <img src="{{asset('img/icon-add.png')}}" alt="">
                 </a>
+                @endif
             </div>
 
             <div class="body bg-white py-4 px-4 d-flex flex-column gap-3 pb-5">
@@ -61,26 +64,26 @@
                     </thead>
                     <tbody>
                     @foreach($plans as $key => $data)
-                        <tr>
-                            <td>{{ $key + 1 }}</td>
-                            <td>{{$data->plan_name}}</td>
-                            <td>{{$data->insurance_company->company_name ?? ''}}</td>
-                            <td>{{$data->net_premium}}</td>
-                            <td>
-                                <div class="d-flex gap-3 justify-content-evenly align-items-center px-2">
-                                    {{--                                <a href="" class="" style="color: #939EAA !important;">More</a>--}}
-{{--
-                                    <button type="button" class="btn p-0 m-0 btn-custom viewbtn"  value="{{$data->id}}">
-                                        <img src="{{asset('img/icon-eye.png')}}" alt="View" title="View">
-                                    </button>
---}}
-                                    <a href="{{route('dental_plan.edit',$data->id)}}" class="btn p-0 m-0" title="Edit">
-                                        <img src="{{asset('img/icon-edit.png')}}" alt="">
-                                    </a>
-                                    <button class="btn p-0 m-0 deletebtn1" value="{{$data->id}}" title="Delete"><img src="{{asset('img/icon-delete.png')}}" alt=""></button>
-                                </div>
-                            </td>
-                        </tr>
+                                            <tr>
+                                                <td>{{ $key + 1 }}</td>
+                                                <td>{{$data->plan_name}}</td>
+                                                <td>{{$data->insurance_company->company_name ?? ''}}</td>
+                                                <td>{{$data->net_premium}}</td>
+                                                <td>
+                                                    <div class="d-flex gap-3 justify-content-evenly align-items-center px-2">
+
+                        @if(canAccessRoute('insurance_plans_edit'))
+                            <a href="{{route('dental_plan.edit', encrypt($data->id))}}" class="btn p-0 m-0" title="Edit">
+                                <img src="{{asset('img/icon-edit.png')}}" alt="">
+                            </a>
+                          @endif
+                                                            @if(canAccessRoute('insurance_plans_delete'))
+
+                                                        <button class="btn p-0 m-0 deletebtn1" value="{{$data->id}}" title="Delete"><img src="{{asset('img/icon-delete.png')}}" alt=""></button>
+                                                        @endif
+                                                    </div>
+                                                </td>
+                                            </tr>
                     @endforeach
                     </tbody>
                 </table>

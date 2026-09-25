@@ -20,6 +20,7 @@ use App\Models\NoOfVisit;
 use App\Models\Occupations;
 use App\Models\OutPatientDeductible;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 
 class InOutPatientPlanController extends Controller
 {
@@ -37,9 +38,9 @@ class InOutPatientPlanController extends Controller
     {
         $insurance_companies = InsuranceCompany::where('line_of_business_id', 'like', '%"5"%')->get();
         $line_of_businesses = LineOfBusiness::where('id', self::line_of_business_id)->first()->name;
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
         $occupations = Occupations::all();
         $chronics = ChronicDisease::all();
@@ -53,11 +54,13 @@ class InOutPatientPlanController extends Controller
 
     public function edit_in_out_patient_plan(Request $request, $id)
     {
+        $decryptedId = Crypt::decrypt($id);
+
         $insurance_companies = InsuranceCompany::where('line_of_business_id', 'like', '%"5"%')->get();
         $line_of_businesses = LineOfBusiness::all();
-        $countries = Country::all();
-        $cities = Cities::all();
-        $districts = District::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
         $ages = Ages::all();
         $occupations = Occupations::all();
         $chronics = ChronicDisease::all();
@@ -71,18 +74,8 @@ class InOutPatientPlanController extends Controller
             'additional_benefits',
             'male_pricing_schedule',
             'female_pricing_schedule'
-        ])->find($id);
+        ])->find($decryptedId);
 
-        /*        if($plan->restricted_country_ids) {
-            $cities = Cities::whereIn('country_id', json_decode($plan->restricted_country_ids))->get();
-            if($plan->restricted_city_ids) {
-                $districts = District::whereIn('city_id', json_decode($plan->restricted_city_ids))->get();
-            } else {
-                $districts = [];
-            }
-        } else {
-            $cities = $districts = [];
-        }*/
         // Decode stored country and city IDs
         $selected_country_ids = $plan->restricted_country_ids ? json_decode($plan->restricted_country_ids, true) : [];
         $selected_city_ids = $plan->restricted_city_ids ? json_decode($plan->restricted_city_ids, true) : [];
