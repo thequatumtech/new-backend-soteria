@@ -113,7 +113,7 @@ class PurchasePolicy extends Model
         $policy->save();
         return $policy;
     }
-    
+
     public static function getAllPolicy($user_id)
     {
         $policyTypes = [
@@ -164,6 +164,8 @@ class PurchasePolicy extends Model
             'clients.father_name',
             'clients.grandfather_name',
             'clients.surname'
+
+
         )
             ->leftJoin(
                 'insurance_companies',
@@ -186,6 +188,17 @@ class PurchasePolicy extends Model
             ->where('purchase_policy.client_id', $user_id)
             ->where('purchase_policy.payment_status', 1)
             ->orderBy('purchase_policy.id', 'desc')
+
+            // Don't show policies that have already been renewed
+
+            ->whereNotExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('renewal_policies')
+                    ->whereColumn(
+                        'renewal_policies.old_policy_id',
+                        'purchase_policy.id'
+                    );
+            })
 
             ->get();
 
@@ -211,11 +224,121 @@ class PurchasePolicy extends Model
                 $p->pdf_url = self::buildPdfUrl($p->policy_pdf_url);
             }
 
+
+            $renewals = RenewalPolicy::where('new_policy_id', $p->id)
+                ->pluck('old_policy_id');
+
+            if ($renewals->isNotEmpty()) {
+
+                $oldPolicies = DB::table('purchase_policy')
+                    ->leftJoin(
+                        'insurance_companies',
+                        'purchase_policy.insurance_company_id',
+                        '=',
+                        'insurance_companies.id'
+                    )
+                    ->leftJoin(
+                        'clients',
+                        'purchase_policy.client_id',
+                        '=',
+                        'clients.id'
+                    )
+                    ->leftJoin(
+                        'final_policy_pdfs',
+                        'final_policy_pdfs.policy_id',
+                        '=',
+                        'purchase_policy.id'
+                    )
+                    ->whereIn('purchase_policy.id', $renewals)
+                    ->select(
+                        'purchase_policy.id',
+                        'purchase_policy.client_id',
+                        'purchase_policy.policy_id',
+                        'purchase_policy.plan_id',
+                        'purchase_policy.insurance_company_id',
+                        'purchase_policy.policy_no',
+                        'purchase_policy.policy_type',
+                        'purchase_policy.plan_name',
+                        'purchase_policy.policy_plan_limit',
+                        'purchase_policy.inception_date',
+                        'purchase_policy.expiry_date',
+                        'purchase_policy.payment_status',
+                        'purchase_policy.net_premium',
+                        'purchase_policy.fees',
+                        'purchase_policy.stamps',
+                        'purchase_policy.sales_tax',
+                        'purchase_policy.cbj',
+                        'purchase_policy.sales_tax_cbj',
+                        'purchase_policy.gross_premium',
+                        'purchase_policy.commission_percentage',
+                        'purchase_policy.commission_amount',
+                        'purchase_policy.policy_pdf_url',
+
+                        'final_policy_pdfs.final_pdf_url',
+
+                        'insurance_companies.company_name',
+
+                        'clients.first_name',
+                        'clients.father_name',
+                        'clients.grandfather_name',
+                        'clients.surname'
+                    )
+                    ->get();
+
+                $oldPolicies->transform(function ($oldPolicy) use ($policyTypes) {
+
+                    $policyTypeNo = $oldPolicy->policy_type ?? 0;
+
+                    $oldPolicy->policy_type_no = $policyTypeNo;
+
+                    $oldPolicy->policy_type = $policyTypes[$policyTypeNo]
+                        ?? 'Unknown Policy Type';
+
+                    // PDF URL
+                    if (!empty($oldPolicy->final_pdf_url)) {
+                        $oldPolicy->pdf_url = self::buildPdfUrl(
+                            $oldPolicy->final_pdf_url
+                        );
+                    } else {
+                        $oldPolicy->pdf_url = self::buildPdfUrl(
+                            $oldPolicy->policy_pdf_url
+                        );
+                    }
+
+                    // Full name
+                    $oldPolicy->full_name = trim(implode(' ', array_filter([
+                        $oldPolicy->first_name,
+                        $oldPolicy->father_name,
+                        $oldPolicy->grandfather_name,
+                        $oldPolicy->surname,
+                    ])));
+
+                    // Hide internal/raw fields
+                    unset(
+                        $oldPolicy->policy_pdf_url,
+                        $oldPolicy->final_pdf_url
+                    );
+
+                    return $oldPolicy;
+                });
+
+                $p->old_renewal_policies = $oldPolicies->values();
+            } else {
+
+                // No old renewal policy
+                $p->old_renewal_policies = [];
+            }
+
+
             // Hide internal/raw paths
             $p->makeHidden([
                 'policy_pdf_url',
                 'final_pdf_url'
             ]);
+
+
+
+
         }
 
         return $policy;
@@ -988,5 +1111,22 @@ class PurchasePolicy extends Model
         default => false,
     };
 }
+
+
+    public function renewalPolicy()
+    {
+        return $this->hasOne(
+            RenewalPolicy::class,
+            'old_policy_id'
+        );
+    }
+
+    public function oldRenewalPolicies()
+    {
+        return $this->hasMany(
+            RenewalPolicy::class,
+            'new_policy_id'
+        );
+    }
 
 }

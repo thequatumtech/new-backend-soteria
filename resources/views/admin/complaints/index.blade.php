@@ -102,66 +102,66 @@
 @endsection
 
 @section('content')
-<main class="flex-grow-1 pt-5">
-    <div class="container-fluid">
-        <div class="header d-flex justify-content-between p-3 py-2 align-items-center">
-            <div class="text-white group-title fw-bold">{{__('messages.complaints.complaints_list')}}</div>
+    <main class="flex-grow-1 pt-5">
+        <div class="container-fluid">
+            <div class="header d-flex justify-content-between p-3 py-2 align-items-center">
+                <div class="text-white group-title fw-bold">{{__('messages.complaints.complaints_list')}}</div>
+            </div>
+            <div class="body bg-white py-4 px-4 d-flex flex-column gap-3">
+                <table id="example" class="table table-striped " style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>{{__('messages.complaints.complaint_no')}}</th>
+                            <th>{{__('messages.complaints.date')}}</th>
+                            <th>{{__('messages.complaints.client_name')}}</th>
+                            <th>{{__('messages.complaints.insurance_type')}}</th>
+                            <th>{{__('messages.complaints.insurance_company')}}</th>
+                            <th>{{__('messages.complaints.mobile_no')}}</th>
+                            <th class="no-order no-search">{{__('messages.complaints.status')}}</th>
+                            <th class="no-order no-search">{{__('messages.complaints.action')}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($complaints as $single)
+                            <tr>
+                                <td>{{ $single->complaint_number }}</td>
+                                <td>{{\Carbon\Carbon::parse($single->complaint_date)->format('d/m/Y')}}</td>
+                                <td>{{$single->client->full_name}}</td>
+                                <td>{{$single->line_of_business->name ?? '-'}}</td>
+                                <td>{{ optional($single->insurance_company)->company_name ?? '' }}</td>
+                                <td>{{$single->client->mobile_no}}</td>
+                                <td>{{ $single->status->name }}</td>
+                                <td>
+                                    <div class="d-flex gap-3 justify-content-evenly align-items-center px-2">
+                                        @if(is_admin_authorized('complaints.view'))
+                                        <a href="{{route('complaints.view',encrypt($single->id))}}" type="button" class="btn p-0 m-0 btn-custom viewbtn">
+                                            <img src="{{asset('img/icon-eye.png')}}" alt="View" title="View">
+                                        </a>
+                                        @endif
+                                        @if(is_admin_authorized('complaints.edit'))
+                                            <a href="{{route('complaints.edit', encrypt($single->id))}}" class="btn p-0 m-0" title="Edit">
+                                                <img src="{{asset('img/icon-edit.png')}}" alt="">
+                                            </a>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div class="body bg-white py-4 px-4 d-flex flex-column gap-3">
-            <table id="example" class="table table-striped " style="width:100%">
-                <thead>
-                    <tr>
-                        <th>{{__('messages.complaints.complaint_no')}}</th>
-                        <th>{{__('messages.complaints.date')}}</th>
-                        <th>{{__('messages.complaints.client_name')}}</th>
-                        <th>{{__('messages.complaints.insurance_type')}}</th>
-                        <th>{{__('messages.complaints.insurance_company')}}</th>
-                        <th>{{__('messages.complaints.mobile_no')}}</th>
-                        <th class="no-order no-search">{{__('messages.complaints.status')}}</th>
-                        <th class="no-order no-search">{{__('messages.complaints.action')}}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($complaints as $single)
-                    <tr>
-                        <td>{{ $single->complaint_number }}</td>
-                        <td>{{\Carbon\Carbon::parse($single->complaint_date)->format('d/m/Y')}}</td>
-                        <td>{{$single->client->full_name}}</td>
-                        <td>{{$single->line_of_business->name ?? '-'}}</td>
-                        <td>{{ optional($single->insurance_company)->company_name ?? '' }}</td>
-                        <td>{{$single->client->mobile_no}}</td>
-                        <td>{{ $single->status->name }}</td>
-                        <td>
-                            <div class="d-flex gap-3 justify-content-evenly align-items-center px-2">
-                                @if(is_admin_authorized('complaints.view'))
-                                <a href="{{route('complaints.view',$single->id)}}" type="button" class="btn p-0 m-0 btn-custom viewbtn">
-                                    <img src="{{asset('img/icon-eye.png')}}" alt="View" title="View">
-                                </a>
-                                @endif
-                                @if(is_admin_authorized('complaints.edit'))
-                                <a href="{{route('complaints.edit',$single->id)}}" class="btn p-0 m-0" title="Edit">
-                                    <img src="{{asset('img/icon-edit.png')}}" alt="">
-                                </a>
-                                    @endif
-                            </div>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
-</main>
-<div class="toast-container position-fixed bottom-0 start-50 translate-middle-x w-100">
-    <div class="p-3 col-12 col-lg-8 mx-auto">
-        <div class="toast align-items-center border-0 col-12 col-lg-8 w-100" style="background-color: #104E9E; color: white" data-bs-delay="3000" role="alert" aria-live="assertive" aria-atomic="true" id="clientSelectToast">
-            <div class="d-flex">
-                <div class="toast-body px-5 fw-bold py-3" style="font-size: 1.375rem;">
+    </main>
+    <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x w-100">
+        <div class="p-3 col-12 col-lg-8 mx-auto">
+            <div class="toast align-items-center border-0 col-12 col-lg-8 w-100" style="background-color: #104E9E; color: white" data-bs-delay="3000" role="alert" aria-live="assertive" aria-atomic="true" id="clientSelectToast">
+                <div class="d-flex">
+                    <div class="toast-body px-5 fw-bold py-3" style="font-size: 1.375rem;">
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 @endsection
 

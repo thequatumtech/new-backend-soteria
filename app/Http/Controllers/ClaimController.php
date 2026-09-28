@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Models\Chat;
 use App\Services\FirebaseChatService;
 use App\Models\Message;
-
+use Illuminate\Support\Facades\Crypt;
 
 class ClaimController extends Controller
 {
@@ -191,7 +191,10 @@ private function updateChatSummaryAndNotify(
 
     public function view_claim(Request $request,$id)
     {
-        $claim = Claim::find($id);
+
+        $decryptedId = Crypt::decrypt($id);
+
+        $claim = Claim::find($decryptedId);
         $client_id = $claim->client_id;
         $no_of_claims = Claim::where('client_id',$client_id)->count();
         $attachments_str = $claim->attachments;
@@ -206,8 +209,7 @@ private function updateChatSummaryAndNotify(
 
         $purchasepolicy = PurchasePolicy::findOrFail($claim->policy_id);
 
-        // dd($client);
-
+ 
         return view('admin.claims.view_claim', compact('claim','client','purchasepolicy','no_of_claims','attachments','claim_statuses'));
     }
 

@@ -180,7 +180,7 @@
                             <div class="row pt-5">
                                 <div class="col-12 col-lg-3">
                                     <div class="pt-4 " style="border: none;">
-                                        <a href="{{ route('purchase-policy.show', $purchasepolicy->id) }}" class="btn rounded-1 w-100 text-white opacity-50 p-2 " style="background-color: #EF7C00;">{{__('messages.claims.view_policy')}} </a>
+                                        <a href="{{ route('purchase-policy.show', encrypt($purchasepolicy->id)) }}" class="btn rounded-1 w-100 text-white opacity-50 p-2 " style="background-color: #EF7C00;">{{__('messages.claims.view_policy')}} </a>
                                     </div>
                                 </div>
                                 <div class="col-12 col-lg-3">

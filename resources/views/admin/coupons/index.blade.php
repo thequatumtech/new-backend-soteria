@@ -102,122 +102,122 @@
 @endsection
 
 @section('content')
-<main class="flex-grow-1 pt-5">
-    <div class="container-fluid">
-        <div class="header d-flex justify-content-between p-3 py-2 align-items-center">
-            <div class="text-white group-title fw-bold">{{__('messages.discount_coupons.coupons_list')}}</div>
-           
-            @if(is_admin_authorized('coupons.add'))
-            <a href="{{route('coupons.add')}}" class="btn pe-0">
-                <img src="{{asset('img/icon-add.png')}}" alt="">
-            </a>
-            @endif
+    <main class="flex-grow-1 pt-5">
+        <div class="container-fluid">
+            <div class="header d-flex justify-content-between p-3 py-2 align-items-center">
+                <div class="text-white group-title fw-bold">{{__('messages.discount_coupons.coupons_list')}}</div>
+
+                @if(is_admin_authorized('coupons.add'))
+                <a href="{{route('coupons.add')}}" class="btn pe-0">
+                    <img src="{{asset('img/icon-add.png')}}" alt="">
+                </a>
+                @endif
+            </div>
+            <div class="body bg-white py-4 px-4 d-flex flex-column gap-3">
+                <table id="example" class="table table-striped " style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>{{__('messages.discount_coupons.coupon_no')}}</th>
+                            <th>{{__('messages.discount_coupons.date')}}</th>
+                            <th>{{__('messages.discount_coupons.coupon_code')}}</th>
+                            <th>{{__('messages.discount_coupons.insurance_type')}}</th>
+                            <th>{{__('messages.discount_coupons.insurance_company')}}</th>
+                            <th>{{__('messages.discount_coupons.percentage')}}</th>
+                            <th class="no-order no-search">{{__('messages.discount_coupons.active_inactive')}}</th>
+                            <th class="no-order \">{{__('messages.discount_coupons.action')}}</th>
+                            <th class="no-order search not-visible">Active/Inactive</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($coupons as $key=>$coupon)
+                            <tr>
+                                <td>{{ $key + 1 }}</td>
+                                <td>{{\Carbon\Carbon::parse($coupon->effective_date)->format('Y-m-d')}}</td>
+                                <td>{{$coupon->coupon_code}}</td>
+                                <td>{{$coupon->line_of_business->name}}</td>
+                                <td>{{$coupon->insurance_company->company_name ?? ''}}</td>
+                                <td>{{$coupon->percentage}}</td>
+                                <td>
+                                    <div class="switch">
+                                        <input type="checkbox" class="toggleSwitch" id="toggleSwitch_{{$coupon->id}}" 
+                                            data-id="{{$coupon->id}}" 
+                                            {{$coupon->status == 1 ? 'checked' : ''}} 
+                                            {{is_admin_authorized('coupons.change_status') ? '' : 'disabled'}}>
+                                        <label for="toggleSwitch_{{$coupon->id}}" class="slider"></label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-3 justify-content-evenly align-items-center px-2">
+                                        @if(is_admin_authorized('coupons.view'))
+                                            <a href="{{route('coupons.view',encrypt($coupon->id))}}" type="button" class="btn p-0 m-0 btn-custom viewbtn">
+                                                <img src="{{asset('img/icon-eye.png')}}" alt="View" title="View">
+                                            </a>
+                                        @endif
+                                        @if(is_admin_authorized('coupons.edit'))
+                                            <a href="{{route('coupons.edit', encrypt($coupon->id))}}" class="btn p-0 m-0" title="Edit">
+                                                <img src="{{asset('img/icon-edit.png')}}" alt="">
+                                            </a>
+                                        @endif
+                                        @if(is_admin_authorized('coupons.delete_coupon'))
+                                            <button class="btn p-0 m-0 deletebtn" value="{{$coupon->id}}" title="Delete">
+                                                <img src="{{asset('img/icon-delete.png')}}" alt="">
+                                            </button>
+                                        @endif
+                                    </div>
+
+                                </td>
+                                <td>{{$coupon->status == 1 ? 'Active' : 'Inactive'}}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div class="body bg-white py-4 px-4 d-flex flex-column gap-3">
-            <table id="example" class="table table-striped " style="width:100%">
-                <thead>
-                    <tr>
-                        <th>{{__('messages.discount_coupons.coupon_no')}}</th>
-                        <th>{{__('messages.discount_coupons.date')}}</th>
-                        <th>{{__('messages.discount_coupons.coupon_code')}}</th>
-                        <th>{{__('messages.discount_coupons.insurance_type')}}</th>
-                        <th>{{__('messages.discount_coupons.insurance_company')}}</th>
-                        <th>{{__('messages.discount_coupons.percentage')}}</th>
-                        <th class="no-order no-search">{{__('messages.discount_coupons.active_inactive')}}</th>
-                        <th class="no-order \">{{__('messages.discount_coupons.action')}}</th>
-                        <th class="no-order search not-visible">Active/Inactive</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($coupons as $key=>$coupon)
-                    <tr>
-                        <td>{{ $key + 1 }}</td>
-                        <td>{{\Carbon\Carbon::parse($coupon->effective_date)->format('Y-m-d')}}</td>
-                        <td>{{$coupon->coupon_code}}</td>
-                        <td>{{$coupon->line_of_business->name}}</td>
-                        <td>{{$coupon->insurance_company->company_name ?? ''}}</td>
-                        <td>{{$coupon->percentage}}</td>
-                        <td>
-                            <div class="switch">
-                                <input type="checkbox" class="toggleSwitch" id="toggleSwitch_{{$coupon->id}}" 
-                                    data-id="{{$coupon->id}}" 
-                                    {{$coupon->status == 1 ? 'checked' : ''}} 
-                                    {{is_admin_authorized('coupons.change_status') ? '' : 'disabled'}}>
-                                <label for="toggleSwitch_{{$coupon->id}}" class="slider"></label>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="d-flex gap-3 justify-content-evenly align-items-center px-2">
-                                @if(is_admin_authorized('coupons.view'))
-                                    <a href="{{route('coupons.view',$coupon->id)}}" type="button" class="btn p-0 m-0 btn-custom viewbtn">
-                                        <img src="{{asset('img/icon-eye.png')}}" alt="View" title="View">
-                                    </a>
-                                @endif
-                                @if(is_admin_authorized('coupons.edit'))
-                                    <a href="{{route('coupons.edit',$coupon->id)}}" class="btn p-0 m-0" title="Edit">
-                                        <img src="{{asset('img/icon-edit.png')}}" alt="">
-                                    </a>
-                                @endif
-                                @if(is_admin_authorized('coupons.delete_coupon'))
-                                    <button class="btn p-0 m-0 deletebtn" value="{{$coupon->id}}" title="Delete">
-                                        <img src="{{asset('img/icon-delete.png')}}" alt="">
-                                    </button>
-                                @endif
-                            </div>
-                            
-                        </td>
-                        <td>{{$coupon->status == 1 ? 'Active' : 'Inactive'}}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
-</main>
-<div class="toast-container position-fixed bottom-0 start-50 translate-middle-x w-100">
-    <div class="p-3 col-12 col-lg-8 mx-auto">
-        <div class="toast align-items-center border-0 col-12 col-lg-8 w-100" style="background-color: #104E9E; color: white" data-bs-delay="3000" role="alert" aria-live="assertive" aria-atomic="true" id="clientSelectToast">
-            <div class="d-flex">
-                <div class="toast-body px-5 fw-bold py-3" style="font-size: 1.375rem;">
+    </main>
+    <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x w-100">
+        <div class="p-3 col-12 col-lg-8 mx-auto">
+            <div class="toast align-items-center border-0 col-12 col-lg-8 w-100" style="background-color: #104E9E; color: white" data-bs-delay="3000" role="alert" aria-live="assertive" aria-atomic="true" id="clientSelectToast">
+                <div class="d-flex">
+                    <div class="toast-body px-5 fw-bold py-3" style="font-size: 1.375rem;">
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="modal fade " id="DeleteModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
-        <div class="modal-content">
-            <div class="modal-header text-white " style="background-color: #104E9E;">
-                <h1 class="modal-title fs-5"> {{__('messages.discount_coupons.delete_coupon')}}</h1>
-                <button data-bs-dismiss="modal" class="btn">
-                    <img src="{{asset('img/icon-close.svg')}}" alt="">
-                </button>
-            </div>
+    <div class="modal fade " id="DeleteModal" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header text-white " style="background-color: #104E9E;">
+                    <h1 class="modal-title fs-5"> {{__('messages.discount_coupons.delete_coupon')}}</h1>
+                    <button data-bs-dismiss="modal" class="btn">
+                        <img src="{{asset('img/icon-close.svg')}}" alt="">
+                    </button>
+                </div>
 
-            <form action="{{route('coupons.delete')}}" method="post">
-                @csrf
-                <div class="modal-body">
-                    <div class="row p-3" style="color: #92959A;">
-                        <div class="container">
-                            <div class="row pt-5">
-                                <div class="col-12 col-lg-9">
-                                    <h4>Confirm to Delete Coupon ?</h4>
-                                    <input type="hidden" id="deleting_id" name="coupon_id">
-                                </div>
-                                <div class="col-12 col-lg-3">
-                                    <div class="pt-4 " style="border: none;">
-                                        <button data-bs-target="#notif" data-bs-toggle="modal" type="submit" class="btn rounded-1 w-100 text-white opacity-50 p-2" style="background-color: #EF7C00;">YES DELETE </button>
+                <form action="{{route('coupons.delete')}}" method="post">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="row p-3" style="color: #92959A;">
+                            <div class="container">
+                                <div class="row pt-5">
+                                    <div class="col-12 col-lg-9">
+                                        <h4>Confirm to Delete Coupon ?</h4>
+                                        <input type="hidden" id="deleting_id" name="coupon_id">
+                                    </div>
+                                    <div class="col-12 col-lg-3">
+                                        <div class="pt-4 " style="border: none;">
+                                            <button data-bs-target="#notif" data-bs-toggle="modal" type="submit" class="btn rounded-1 w-100 text-white opacity-50 p-2" style="background-color: #EF7C00;">YES DELETE </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
 @endsection
 

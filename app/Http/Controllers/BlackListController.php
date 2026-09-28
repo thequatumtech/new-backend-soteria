@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Crypt;
 
 class BlackListController extends Controller
 {
@@ -75,7 +76,11 @@ class BlackListController extends Controller
 
     public function client($id)
     {
-        $client = Client::find($id);
+
+        $decryptedId = Crypt::decrypt($id);
+
+
+        $client = Client::find($decryptedId);
         $insurance_companies = $client->black_list_detail->dealt_insurance_companies_id;
         $insurance_companies_arr = explode(',', $insurance_companies);
         $insurance_companies_name_arr = [];
@@ -124,7 +129,10 @@ class BlackListController extends Controller
 
     public function client_edit(Request $request, $id)
     {
-        $client = Client::find($id);
+        $decryptedId = Crypt::decrypt($id);
+
+        $client = Client::find($decryptedId);
+        
         $insurance_companies = $client->black_list_detail->dealt_insurance_companies_id;
         $insurance_companies_arr = explode(',', $insurance_companies);
         $insurance_companies_name_arr = [];

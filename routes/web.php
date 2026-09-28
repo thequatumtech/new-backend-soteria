@@ -92,41 +92,6 @@ use App\Http\Controllers\Admin\AdminNotificationController;
 |
 */
 
-// Route::get('/update-purchase-policy-cbj-columns', function () {
-//     try {
-//         $records = DB::table('purchase_policy')
-//             ->orderByDesc('id')
-//             ->limit(5)
-//             ->get(['id', 'client_id']);
-
-//         return response()->json([
-//             'success' => true,
-//             'records' => $records,
-//         ]);
-//     } catch (\Exception $e) {
-//         return response()->json([
-//             'success' => false,
-//             'error' => $e->getMessage(),
-//         ], 500);
-//     }
-// });
-// Route::get('/update-purchase-policy-cbj-columns', function () {
-//     try {
-//         $record = DentalPlan::with('policy_covers', 'insurance_company')
-//             ->where('id', 6)
-//             ->first();
-
-//         return response()->json([
-//             'success' => true,
-//             'record' => $record,
-//         ]);
-//     } catch (\Exception $e) {
-//         return response()->json([
-//             'success' => false,
-//             'error' => $e->getMessage(),
-//         ], 500);
-//     }
-// });
 
 Route::get('/update-purchase-policy-cbj-columns', function () {
     try {
@@ -259,23 +224,6 @@ Route::post('/get-cities', [CitiesController::class, 'get_cities'])->name('get_c
 Route::post('/get-districts', [DistrictController::class, 'get_districts'])->name('get_districts');
 
 
-
-// Route::get('/check-policy', function () {
-//     $coupons = \App\Models\ClientDiscountCoupon::all();
-//         return response()->json($coupons);
-//     });
-
-//  Route::get('/coupon-test', function () {
-//     return \App\Models\ClientDiscountCoupon::where('coupon_code', '2602171261')
-//         ->get(['id', 'effective_date', 'expiry_date', 'percentage', 'created_at', 'updated_at']);
-// });
-
-// Route::get('/coupon-debug-before', function () {
-//     return \App\Models\ClientDiscountCoupon::max('id');
-// });
-// Route::get('/check-discount-coupon', function () {
-//     return \App\Models\DiscountCoupon::find(7);
-// });
 Route::get('/run-migration', function () {
     Artisan::call('migrate', [
         '--path' => 'database/migrations/2026_08_24_001445_add_currency_id_to_insurance_companies_table.php',
@@ -322,35 +270,6 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
     });
 
 
-    // Route::get('/update-client-travel-geographical-countries', function () {
-    //     try {
-    //         if (!Schema::hasColumn('client_travel_insurances', 'geographical_countries')) {
-    //             DB::statement("
-    //             ALTER TABLE client_travel_insurances
-    //             ADD COLUMN geographical_countries TEXT NULL
-    //         ");
-
-    //             return 'Column geographical_countries added successfully!';
-    //         }
-
-    //         return 'Column already exists!';
-    //     } catch (\Exception $e) {
-    //         return 'Error: ' . $e->getMessage();
-    //     }
-    // });
-    // Route::get('/update-purchase-policy-cbj-columns', function () {
-    //     try {
-    //         DB::statement("
-    //             ALTER TABLE purchase_policy
-    //             ADD COLUMN cbj DECIMAL(10,2) NULL AFTER sales_tax,
-    //             ADD COLUMN sales_tax_cbj DECIMAL(10,2) NULL AFTER cbj
-    //         ");
-
-    //         return 'Columns cbj and sales_tax_cbj added to purchase_policy table successfully!';
-    //     } catch (\Exception $e) {
-    //         return 'Error: ' . $e->getMessage();
-    //     }
-    // });
 
     Route::get('/update-pet-plans-add-pet-age-restriction', function () {
         try {
@@ -548,191 +467,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
         }
     });
 
-    // Route::get('/update-travel_plans-columns', function () {
-    //     try {
-    //         if (!Schema::hasColumn('travel_plans', 'restricted_dangerous_activities_ids')) {
-    //             DB::statement("
-    //                 ALTER TABLE travel_plans
-    //                 ADD COLUMN restricted_dangerous_activities_ids TEXT NULL
-    //             ");
-
-    //             return 'Column restricted_dangerous_activities_ids added successfully!';
-    //         }
-
-    //         return 'Column already exists!';
-    //     } catch (\Exception $e) {
-    //         return 'Error: ' . $e->getMessage();
-    //     }
-    // });
-
-    // Route::get('/update-travel-plans-countries-column', function () {
-    //     try {
-    //         DB::statement("
-    //         ALTER TABLE travel_plans
-    //         ADD COLUMN countries LONGTEXT NULL AFTER geographical_areas_ids
-    //     ");
-
-    //         return 'Column countries added to travel_plans table successfully!';
-    //     } catch (\Exception $e) {
-    //         return 'Error: ' . $e->getMessage();
-    //     }
-    // });
-
-    // Route::get('/update-comprehensive-cover-columns', function () {
-    //     try {
-    //         DB::statement("
-    //         ALTER TABLE motor_insurance_plan_comprehensive_cover_premiums
-    //         MODIFY vehicle_brand_id JSON NULL,
-    //         MODIFY vehicle_category_id JSON NULL
-    //     ");
-
-    //         return 'Columns vehicle_brand_id and vehicle_category_id updated to JSON NULL successfully!';
-    //     } catch (\Exception $e) {
-    //         return 'Error: ' . $e->getMessage();
-    //     }
-    // });
-
-    // Route::get('/run-queries', function () {
-
-    //     // First query
-    //     $result1 = DB::select("
-    //         select * from client_personal_accident_insurances
-    //         where id = 80 limit 1
-    //     ");
-
-    //     // Second query
-    //     $result2 = DB::select("
-    //         select
-    //         client_personal_accident_insurances.*,
-    //         personal_accident_plans.plan_name,
-    //         personal_accident_plans.fees,
-    //         personal_accident_plans.stamps,
-    //         personal_accident_plans.sales_tax,
-    //         personal_accident_plans.commission_percentage,
-    //         personal_accident_plans.insurance_policy_text,
-    //         insurance_companies.company_name,
-    //         insurance_company_documents.company_stamp,
-    //         insurance_company_documents.logo,
-    //         insurance_company_documents.authorized_signature,
-    //         insurance_companies.id as insurance_company_id,
-    //         purchase_policy.inception_date,
-    //         purchase_policy.expiry_date,
-    //         purchase_policy.net_premium,
-    //         purchase_policy.fees as plan_fees,
-    //         purchase_policy.stamps as plan_stamps,
-    //         purchase_policy.sales_tax as plan_sales_tax,
-    //         purchase_policy.gross_premium,
-    //         purchase_policy.plan_name as purchase_plan_name,
-    //         purchase_policy.policy_plan_limit,
-    //         purchase_policy.policy_pdf_url
-    //         from client_personal_accident_insurances
-    //         left join personal_accident_plans
-    //             on client_personal_accident_insurances.plan_id = personal_accident_plans.id
-    //         left join insurance_companies
-    //             on personal_accident_plans.insurance_company_id = insurance_companies.id
-    //         left join insurance_company_documents
-    //             on insurance_companies.id = insurance_company_documents.insurance_id
-    //         left join purchase_policy
-    //             on purchase_policy.policy_id = client_personal_accident_insurances.id
-    //         where client_personal_accident_insurances.id = 80
-    //         limit 1
-    //     ");
-
-    //     return [
-    //         'query_1_output' => $result1,
-    //         'query_2_output' => $result2
-    //     ];
-    // });
-    // Route::get('/run-queriess', function () {
-
-    //     // First query
-    //     $result1 = DB::select("
-    //         select * from client_personal_accident_insurances
-    //     ");
-
-    //     return [
-    //         'query_1_output' => $result1
-    //     ];
-    // });
-    // Route::get('/run-queriesss', function () {
-
-    //     // First query
-    //     $result1 = DB::select("
-    //         select * from purchase_policy
-    //     ");
-
-    //     return [
-    //         'query_1_output' => $result1
-    //     ];
-    // });
-    // Route::get('/debug-purchase-policy', function () {
-    //     $rows = DB::select("
-    //     SELECT *
-    //     FROM purchase_policy
-    //     WHERE policy_id = 80
-    //     ORDER BY inception_date
-    // ");
-
-    //     return $rows;
-    // });
-
-    // Route::get('/in-patient-plans-columns', function () {
-    //     try {
-    //         $columns = DB::select("DESCRIBE in_patient_plans");
-
-    //         // Extract only the column names
-    //         $columnNames = array_map(fn($col) => $col->Field, $columns);
-
-    //         return response()->json($columnNames);
-    //     } catch (\Exception $e) {
-    //         return 'Error: ' . $e->getMessage();
-    //     }
-    // });
-    // Route::get('/client-motor-insurances', function () {
-    //     $data = DB::table('client_motor_insurances')->get();
-    //     dd($data); // This will dump all records and stop execution
-    // });
-    // Route::get('/client-personal-accident-insurances', function () {
-    //     $data = DB::table('client_personal_accident_insurances')
-    //         ->where('police_no', '77951337')
-    //         ->get();   // or ->first() if you expect only one result
-    //     dd($data);
-    // });
-    // Route::get('/purchase-policy-details', function () {
-    //     $data = DB::table('purchase_policy')
-    //         ->where('id', '259')
-    //         ->get();   // or ->first() if you expect only one result
-
-    //     dd($data);
-    // });
-    // Route::get('/update-purchase-policy-columns', function () {
-
-    //     $table = 'purchase_policy';
-
-    //     $columns = [
-    //         'net_premium',
-    //         'fees',
-    //         'stamps',
-    //         // 'cbj',
-    //         'sales_tax',
-    //         // 'cbj_sales_tax',
-    //         'gross_premium',
-    //         'commission_percentage',
-    //         'commission_amount'
-    //     ];
-
-    //     foreach ($columns as $column) {
-    //         DB::statement("ALTER TABLE `$table` MODIFY `$column` DOUBLE(30,2) NULL");
-    //     }
-
-    //     return "Columns updated successfully!";
-    // });
-    // Route::get('/purchase-policy-detailss', function () {
-    //     $data = DB::table('purchase_policy')
-    //         ->where('policy_no', '42570297')
-    //         ->get();   // or ->first() if you expect only one result
-    //     dd($data);
-    // });
+   
     Route::get('/test-purchase-policy', function () {
         // Fetch all records from personal_accident_plans
         $plans = DB::table('banners')->get();
@@ -740,43 +475,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
         // Dump all data
         dd($plans->toJson(JSON_PRETTY_PRINT));
     });
-    // Route::get('/test-update-expire-date', function () {
-
-    //     DB::table('purchase_policy')
-    //         ->where('id', 258)
-    //         ->update([
-    //             'expiry_date' => '2026-01-12',
-    //         ]);
-    //     // 258 ='2026-01-12', 259 = '2026-01-10',257 = '2025-12-01',256 = '2025-12-17',260 = 'renewed=1'
-    //     return 'Record updated successfully!';
-    // });
-    // Route::get('/test-mails', function () {
-    //     Artisan::call('notify:renewals');
-    //     return 'NotifyRenewals command executed!';
-    // });
-    // Route::get('/test-personal-accident-plans', function () {
-    //     // Fetch all records from personal_accident_plans
-    //     $plans = DB::table('purchase_policy')->get();
-
-    //     // Dump all data
-    //     dd($plans);
-    // });
-    // Route::get('/update-policy-period', function () {
-    //     // Fetch all records first
-    //     $plans = DB::table('personal_accident_plans')->get();
-
-    //     foreach ($plans as $plan) {
-    //         // Generate a random number between 1 and 12
-    //         $randomPeriod = rand(1, 12);
-
-    //         // Update the policy_period column for this record
-    //         DB::table('personal_accident_plans')
-    //             ->where('id', $plan->id) // assuming 'id' is the primary key
-    //             ->update(['policy_period' => $randomPeriod]);
-    //     }
-
-    //     return "Policy periods updated successfully!";
-    // });
+ 
     Route::get('/add-policy-period-to-motor-insurance-plans', function () {
         try {
             DB::statement("
@@ -1608,12 +1307,3 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
 
 
 
-
-
-
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-
-// Route::group(['prefix' => 'admin'], function () {
-// });

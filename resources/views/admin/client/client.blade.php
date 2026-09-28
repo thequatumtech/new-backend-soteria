@@ -117,12 +117,12 @@
                                 <td>
                                     <div class="d-flex gap-3 justify-content-evenly align-items-center px-2">
                                           @if(is_admin_authorized('client.purchased_policy'))
-                                                <a href="{{ route('client.getAllPolicies', $data->id) }}"
-                                                   class="btn p-0 m-0"
-                                                   title="All Policies">
-                                                {{__('messages.clients.all_policies')}}
-                                                </a>
-                                            @endif
+                                            <a href="{{ route('client.getAllPolicies', encrypt($data->id)) }}"
+                                               class="btn p-0 m-0"
+                                               title="All Policies">
+                                            {{__('messages.clients.all_policies')}}
+                                            </a>
+                                        @endif
                                         <!-- {{-- <a href="" class="" style="color: #939EAA !important;">More</a>--}} -->
                                         @if(is_admin_authorized('client.view'))
                                         <a href="javascript:void(0);" class="btn p-0 m-0 btn-custom viewbtn {{is_admin_authorized('client.purchased_policy')?'purchased_policy':''}}" data-client_id="{{$data->id}}" title="View">

@@ -141,7 +141,7 @@
                                 <div class="col-12 col-lg-3">
                                         @if(canAccessRoute('complaints.edit'))
                                     <div class="pt-4 " style="border: none;">
-                                        <a href="{{route('complaints.edit', $complaint->id)}}" class="btn rounded-1 w-100 text-white opacity-50 p-2 submit-btn" style="background-color: #EF7C00;">{{__('messages.complaints.edit')}} </a>
+                                        <a href="{{route('complaints.edit', encrypt($complaint->id))}}" class="btn rounded-1 w-100 text-white opacity-50 p-2 submit-btn" style="background-color: #EF7C00;">{{__('messages.complaints.edit')}} </a>
                                     </div>
                                     @endif
                                 </div>

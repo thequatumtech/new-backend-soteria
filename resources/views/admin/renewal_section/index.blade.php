@@ -359,7 +359,7 @@
                                             <img src="{{asset('img/icon-edit.png')}}" alt="">
                                         </a>
 
-                                        <a href="{{ route('purchase-policy.show', $single->id) }}" class="btn btn-sm btn-primary text-white">
+                                        <a href="{{ route('purchase-policy.show',encrypt($single->id))}}" class="btn btn-sm btn-primary text-white">
                                            View
                                         </a>
 

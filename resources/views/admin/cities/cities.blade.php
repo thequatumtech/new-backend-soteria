@@ -32,7 +32,7 @@
                     @if(!$value->trashed())
                         <tr>
                             <td>{{ $key + 1 }}</td>
-                            <td>{{$value->country->name}}</td>
+                            <td>{{$value->country?->name ?? '-'}}</td>
                             <td>{{$value->name}}</td>
                             <td>
                                 <div class="d-flex gap-3 justify-content-evenly align-items-center px-2">

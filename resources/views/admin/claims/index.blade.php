@@ -149,19 +149,15 @@
                                                     <td>
                                                         <div class="d-flex gap-3 justify-content-evenly align-items-center px-2">
                                                               @if(is_admin_authorized('claims.view'))
-                                                            <a href="{{ route('purchase-policy.show', $single->policy_id) }}" type="button" class="btn p-0 m-0 btn-custom viewbtn">
-                                                                <img src="{{asset('img/icon-eye.png')}}" alt="View" title="View">
-                                                            </a>
+                                                                <a href="{{ route('purchase-policy.show',encrypt($single->policy_id)) }}" type="button" class="btn p-0 m-0 btn-custom viewbtn">
+                                                                    <img src="{{asset('img/icon-eye.png')}}" alt="View" title="View">
+                                                                </a>
                                                             @endif
 
-                            {{--  @if(is_admin_authorized('claims.view'))
-                                                            <a href="{{route('complaints.edit',$single->id)}}" class="btn p-0 m-0" title="Edit">
-                                                                <img src="{{asset('img/icon-edit.png')}}" alt="">
-                                                            </a>
-                            --}}
+                          
                                                         </div>
                                                     </td>
-                                                    <td><input class="form-check-input select-checkbox" type="checkbox" data-claim_id="{{$single->id}}"></td>
+                                                    <td><input class="form-check-input select-checkbox" type="checkbox" data-claim_id="{{encrypt($single->id)}}"></td>
                                                 </tr>
                         @endforeach
                     </tbody>

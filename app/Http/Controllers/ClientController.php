@@ -30,11 +30,14 @@ class ClientController extends Controller
 
     public function getAllPolicy(Request $request, $id)
     {
+
+       $decryptedId = Crypt::decrypt($id);
+
         $client = Client::with([
             'agent',
             'purchased_policies.finalPolicyPdf',
             'purchased_policies.insurance_company',
-        ])->findOrFail($id);
+        ])->findOrFail($decryptedId);
 
         $policyTypes = [
             1 => 'Home Insurance',
@@ -87,12 +90,15 @@ class ClientController extends Controller
 
     public function purchase_policy_show(Request $request, $id)
     {
+
+       $decryptedId = Crypt::decrypt($id);
+
         $policy = PurchasePolicy::with([
             'client',
             'agent',
             'insurance_company',
             'finalPolicyPdf',
-        ])->findOrFail($id);
+        ])->findOrFail($decryptedId);
 
         $policyTypes = [
             1 => 'Home Insurance',

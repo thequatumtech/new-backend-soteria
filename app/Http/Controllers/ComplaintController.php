@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Crypt;
+
 class ComplaintController extends Controller
 {
     public function index(Request $request)
@@ -22,7 +24,13 @@ class ComplaintController extends Controller
 
     public function view_complaint(Request $request, $id)
     {
-        $complaint = Complaint::find($id);
+
+        $decryptedId = Crypt::decrypt($id);
+
+
+        $complaint = Complaint::find($decryptedId);
+
+
         $attachments_str = $complaint->attachments;
         $attachments = [];
         if($attachments_str){
@@ -33,7 +41,12 @@ class ComplaintController extends Controller
 
     public function edit_complaint(Request $request, $id)
     {
-        $complaint = Complaint::find($id);
+        $decryptedId = Crypt::decrypt($id);
+
+
+        $complaint = Complaint::find($decryptedId);
+
+        
         $attachments_str = $complaint->attachments;
         $attachments = [];
         if($attachments_str){

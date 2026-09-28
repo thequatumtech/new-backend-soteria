@@ -170,7 +170,7 @@ Route::group(['middleware' => ['apitoken']], function () {
     // getPolicyDetails
     Route::get('/getPolicyDetails', [ClientController::class, 'getPolicyDetails']);
 
-    
+
 
     Route::post('/check-policy-renewal', [ClientController::class, 'check_policy_renewal']);
 
@@ -204,50 +204,52 @@ Route::group(['middleware' => ['apitoken']], function () {
     Route::post('/get-discount-amount', [DiscountCouponController::class, 'getDiscountAmount']);
 
     Route::post('/change-password', [ClientController::class, 'changePassword']);
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Basic / Public APIs
+    |--------------------------------------------------------------------------
+    */
 
-    // terms
-    // Route::get('/terms-and-conditions', [TermsController::class, 'getTerms']);
+    Route::get('/get-banner', [BannersController::class, 'getBanner']);
+    Route::get('/get-ages', [AdminbasicController::class, 'getAges']);
+
+    Route::get('/get-chronic-disease', [AdminbasicController::class, 'getChronicDisease']);
+    Route::get('/get-claim-status', [AdminbasicController::class, 'getClaimStatus']);
+
+    Route::get('/get-complaint-status', [AdminbasicController::class, 'getComplaintStatus']);
+    Route::get('/get-dangerous-activities', [AdminbasicController::class, 'getDangerousActivities']);
+    Route::get('/get-engine-capacity', [AdminbasicController::class, 'getEngineCapacity']);
+    Route::get('/get-engine-type', [AdminbasicController::class, 'getEngineType']);
+    Route::get('/get-insurance-period', [AdminbasicController::class, 'getInsurancePeriod']);
+    Route::get('/get-medical-network', [AdminbasicController::class, 'getMedicalNetwork']);
+    Route::get('/get-motor-plan', [AdminbasicController::class, 'getMotorPlan']);
+    Route::get('/get-protection-system', [AdminbasicController::class, 'getProtectionSystem']);
+    Route::get('/get-in-patient-deductible', [AdminbasicController::class, 'getInPatientDeductible']);
+    Route::get('/get-out-patient-deductible', [AdminbasicController::class, 'getOutPatientDeductible']);
+    Route::get('/get-number-of-visits', [AdminbasicController::class, 'getNumberOfVisits']);
+    Route::get('/get-claim-deductible', [AdminbasicController::class, 'getClaimDeductible']);
+
+    Route::get('/get-currency', [AdminbasicController::class, 'getCurrency']);
+    Route::get('/get-geographical-area', [AdminbasicController::class, 'getGeographicalArea']);
+    Route::get('/get-vehicle-brands', [AdminbasicController::class, 'getVehicleBrands']);
+    Route::get('/get-vehicle-category', [AdminbasicController::class, 'getVehicleCategory']);
+    Route::get('/get-vehicle-color', [AdminbasicController::class, 'getVehicleColor']);
+    Route::get('/get-vehicle-type', [AdminbasicController::class, 'getVehicleType']);
+    Route::get('/get-type-cover', [AdminbasicController::class, 'getTypeCover']);
+    Route::get('/get-item-category', [AdminbasicController::class, 'getItemCategory']);
+    Route::get('/get-item-subcategory', [AdminbasicController::class, 'getItemSubcategory']);
+    Route::post('/check-dangerous-activity', [AdminbasicController::class, 'checkDangerousActivity']);
+
+    Route::get('/pet-breeds', [PetBreedController::class, 'index']);
+    Route::get('/pet-breeds/{id}', [PetBreedController::class, 'show']);
+
 });
 
 
-/*
-|--------------------------------------------------------------------------
-| Admin Basic / Public APIs
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/get-banner', [BannersController::class, 'getBanner']);
-Route::get('/get-ages', [AdminbasicController::class, 'getAges']);
-Route::get('/get-occupations', [AdminbasicController::class, 'getOccupations']);
-Route::get('/get-chronic-disease', [AdminbasicController::class, 'getChronicDisease']);
-Route::get('/get-claim-status', [AdminbasicController::class, 'getClaimStatus']);
 Route::get('/get-country', [AdminbasicController::class, 'getCountry']);
 Route::get('/get-district', [AdminbasicController::class, 'getDistrict']);
 Route::get('/get-city', [AdminbasicController::class, 'getCities']);
-Route::get('/get-complaint-status', [AdminbasicController::class, 'getComplaintStatus']);
-Route::get('/get-dangerous-activities', [AdminbasicController::class, 'getDangerousActivities']);
-Route::get('/get-engine-capacity', [AdminbasicController::class, 'getEngineCapacity']);
-Route::get('/get-engine-type', [AdminbasicController::class, 'getEngineType']);
-Route::get('/get-insurance-period', [AdminbasicController::class, 'getInsurancePeriod']);
-Route::get('/get-medical-network', [AdminbasicController::class, 'getMedicalNetwork']);
-Route::get('/get-motor-plan', [AdminbasicController::class, 'getMotorPlan']);
-Route::get('/get-protection-system', [AdminbasicController::class, 'getProtectionSystem']);
-Route::get('/get-in-patient-deductible', [AdminbasicController::class, 'getInPatientDeductible']);
-Route::get('/get-out-patient-deductible', [AdminbasicController::class, 'getOutPatientDeductible']);
-Route::get('/get-number-of-visits', [AdminbasicController::class, 'getNumberOfVisits']);
-Route::get('/get-claim-deductible', [AdminbasicController::class, 'getClaimDeductible']);
 Route::get('/get-language', [AdminbasicController::class, 'getLanguage']);
 Route::get('/get-nationality', [AdminbasicController::class, 'getNationality']);
-Route::get('/get-currency', [AdminbasicController::class, 'getCurrency']);
-Route::get('/get-geographical-area', [AdminbasicController::class, 'getGeographicalArea']);
-Route::get('/get-vehicle-brands', [AdminbasicController::class, 'getVehicleBrands']);
-Route::get('/get-vehicle-category', [AdminbasicController::class, 'getVehicleCategory']);
-Route::get('/get-vehicle-color', [AdminbasicController::class, 'getVehicleColor']);
-Route::get('/get-vehicle-type', [AdminbasicController::class, 'getVehicleType']);
-Route::get('/get-type-cover', [AdminbasicController::class, 'getTypeCover']);
-Route::get('/get-item-category', [AdminbasicController::class, 'getItemCategory']);
-Route::get('/get-item-subcategory', [AdminbasicController::class, 'getItemSubcategory']);
-Route::post('/check-dangerous-activity', [AdminbasicController::class, 'checkDangerousActivity']);
-
-Route::get('/pet-breeds', [PetBreedController::class, 'index']);
-Route::get('/pet-breeds/{id}', [PetBreedController::class, 'show']);
+Route::get('/get-occupations', [AdminbasicController::class, 'getOccupations']);

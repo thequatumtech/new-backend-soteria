@@ -11,6 +11,7 @@ use App\Models\LineOfBusiness;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Crypt;
 
 class DiscountCouponController extends Controller
 {
@@ -46,9 +47,14 @@ class DiscountCouponController extends Controller
         return view('admin.coupons.add_coupon', compact('insurance_companies',/*'line_of_businesses',*/ 'coupon_code', 'clients'));
     }
 
-    public function edit_coupon(Request $request)
+    public function edit_coupon(Request $request,$id)
     {
-        $coupon = DiscountCoupon::find($request->id);
+
+        $decryptedId = Crypt::decrypt($id);
+
+        $coupon = DiscountCoupon::find($decryptedId);
+
+        
         $clients = Client::all();
         $insurance_companies = InsuranceCompany::all();
         //        $line_of_businesses = LineOfBusiness::all();
@@ -217,9 +223,14 @@ class DiscountCouponController extends Controller
         return redirect()->route('coupons')->with('success', $message);
     }
 
-    public function view_coupon(Request $request)
+    public function view_coupon(Request $request,$id)
     {
-        $coupon = DiscountCoupon::find($request->id);
+
+        $decryptedId = Crypt::decrypt($id);
+
+
+
+        $coupon = DiscountCoupon::find($decryptedId);
         $clients = Client::all();
         $insurance_company = InsuranceCompany::find($coupon->insurance_company_id);
         $line_of_business = LineOfBusiness::find($coupon->line_of_business_id);
