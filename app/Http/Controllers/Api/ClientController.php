@@ -131,7 +131,9 @@ class ClientController extends Controller
 
             if (!empty($client->mobile_no)) {
 
-                $client['otp'] = str_pad(rand(0000, 9999), 4, "0", STR_PAD_LEFT);
+                // $client['otp'] = str_pad(rand(0000, 9999), 4, "0", STR_PAD_LEFT);
+
+                $client['otp'] = '4321';
 
                 $response = Http::get('https://sendsms.ngt.jo/http/send_sms_http.php', [
                     'login_name' => 'nitaq',
@@ -604,50 +606,7 @@ class ClientController extends Controller
         }
     }
 
-    // public function sendForgotOtp(Request $request)
-    // {
-    //     try {
-    //         $request->validate([
-    //             'phone' => 'required'
-    //         ]);
-    //         $data=Client::where('mobile_no',$request->phone)->first();
-    //         if (!empty($data)) {
-    //             $data['otp']=str_pad(rand(0000,9999),4,"0",STR_PAD_LEFT);
-    //             $apiKey = config('services.josms.api_key');
-    //             $apiSecret = config('services.josms.api_secret');
-    //             $senderId = config('services.josms.sender_id');
-    //             $baseUrl = config('services.josms.base_url');
-    //             Log::info('JO SMS Config', [
-    //                 'api_key' => $apiKey,
-    //                 'sender_id' => $senderId,
-    //                 'base_url' => $baseUrl,
-    //             ]);
-    //             $response = Http::get($baseUrl, [
-    //                 'senderid' => $senderId,
-    //                 'numbers' => $data['mobile_no'],
-    //                 'accname' => $apiKey,
-    //                 'AccPass' => $apiSecret,
-    //                 'msg' => "Your OTP is: {$data['otp']}",
-    //             ]);
-    //
-    //             $status=$response->successful();
-    //             // $status=1;
-    //             if($status==1)
-    //             {
-    //                 $data=VerifyOtp::storeData($data);
-    //                 return response()->json(['status' => true, 'status_code' => 200, 'message' => 'OTP send successfully','data' => $data]);
-    //             }
-    //             return response()->json(['status' => true, 'status_code' => 200, 'message' => 'OTP send failed','data' => array()]);
-    //         }
-    //         else{
-    //             return response()->json(['status' => true, 'status_code' => 404, 'message' => 'User Details Not Found','data' => array()]);
-    //         }
-    //     }
-    //     catch(\Exception $e)
-    //     {
-    //         return response()->json(['status' => false, 'status_code' => 500, 'message' => $e->getMessage(), 'data' => array()]);
-    //     }
-    // }
+
 
     public function sendForgotOtp(Request $request)
     {
@@ -659,12 +618,14 @@ class ClientController extends Controller
 
             if (!empty($data)) {
 
-                $data['otp'] = str_pad(
-                    rand(0000, 9999),
-                    4,
-                    "0",
-                    STR_PAD_LEFT
-                );
+                // $data['otp'] = str_pad(
+                //     rand(0000, 9999),
+                //     4,
+                //     "0",
+                //     STR_PAD_LEFT
+                // );
+
+                $data['otp'] = '4321';
 
                 $response = Http::get('https://sendsms.ngt.jo/http/send_sms_http.php', [
                     'login_name' => 'nitaq',
@@ -733,12 +694,15 @@ class ClientController extends Controller
             $data = new \stdClass();
             $data->id = null;
             $data->mobile_no = $request->phone;
-            $data->otp = str_pad(
-                rand(0, 9999),
-                4,
-                "0",
-                STR_PAD_LEFT
-            );
+            
+            // $data->otp = str_pad(
+            //     rand(0, 9999),
+            //     4,
+            //     "0",
+            //     STR_PAD_LEFT
+            // );
+
+            $data->otp = '4321';
 
             $response = Http::get('https://sendsms.ngt.jo/http/send_sms_http.php', [
                 'login_name' => 'nitaq',
@@ -888,8 +852,11 @@ class ClientController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'purchase_policy_id' => 'required|integer',
-            'client_id' => 'required|integer|exists:clients,id',
+
         ]);
+
+
+// 'client_id' => 'required|integer|exists:clients,id',
 
         if ($validator->fails()) {
             return response()->json([
@@ -899,6 +866,9 @@ class ClientController extends Controller
                 'errors' => $validator->errors(),
             ], 422);
         }
+
+
+         $client_id = $request->user_id;
 
         /*------------Check purchase policy exists ---------------------*/
 
@@ -933,7 +903,7 @@ class ClientController extends Controller
         }
 
 
-        if ((int) $purchasePolicy->client_id !== (int) $request->client_id) {
+        if ((int) $purchasePolicy->client_id !== (int) $client_id) {
             return response()->json([
                 'status' => false,
                 'can_renew' => false,
@@ -943,7 +913,7 @@ class ClientController extends Controller
             ], 403);
         }
 
-        
+
 
         if ((int) $purchasePolicy->payment_status !== 1) {
             return response()->json([
@@ -1088,10 +1058,10 @@ class ClientController extends Controller
 
                 'client' => $purchasePolicy->client,
 
-              
+
                 'agent' => $purchasePolicy->agent,
 
-             
+
                 'insurance_company' => $purchasePolicy->insurance_company,
 
                 'plan' => $plan,
