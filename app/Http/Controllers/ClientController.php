@@ -540,6 +540,8 @@ class ClientController extends Controller
 
         $client = Client::find($decryptedId);
 
+        // dd($client);
+
         if ($client) {
             $nationalities = Nationality::all();
             $countries = Country::orderBy('name', 'asc')->get();

@@ -198,7 +198,7 @@ if (env('APP_ENV') == 'local') {
 
         print_r('Cache cleared successfully');
     });
-    
+
     Route::get('/run-queue-once', function () {
         Artisan::call('queue:work', ['--once' => true]);
         return "One job processed!";
@@ -224,15 +224,34 @@ Route::post('/get-cities', [CitiesController::class, 'get_cities'])->name('get_c
 Route::post('/get-districts', [DistrictController::class, 'get_districts'])->name('get_districts');
 
 
+// Route::get('/run-migration', function () {
+//     Artisan::call('migrate', [
+//         '--path' => 'database/migrations/2026_08_24_001445_add_currency_id_to_insurance_companies_table.php',
+//         '--force' => true,
+//     ]);
+
+//     return response()->json([
+//         'message' => 'Migration executed successfully',
+//         'output' => Artisan::output(),
+//     ]);
+// });
+
+
+
 Route::get('/run-migration', function () {
     Artisan::call('migrate', [
-        '--path' => 'database/migrations/2026_08_24_001445_add_currency_id_to_insurance_companies_table.php',
         '--force' => true,
     ]);
 
+    $migrationOutput = Artisan::output();
+
+    Artisan::call('optimize:clear');
+    $clearOutput = Artisan::output();
+
     return response()->json([
-        'message' => 'Migration executed successfully',
-        'output' => Artisan::output(),
+        'message' => 'Migrations and cache clearing completed',
+        'migration_output' => $migrationOutput,
+        'cache_clear_output' => $clearOutput,
     ]);
 });
 
@@ -467,7 +486,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
         }
     });
 
-   
+
     Route::get('/test-purchase-policy', function () {
         // Fetch all records from personal_accident_plans
         $plans = DB::table('banners')->get();
@@ -475,7 +494,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
         // Dump all data
         dd($plans->toJson(JSON_PRETTY_PRINT));
     });
- 
+
     Route::get('/add-policy-period-to-motor-insurance-plans', function () {
         try {
             DB::statement("
@@ -527,7 +546,7 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
         Route::post('/chat/{chatId}/mark-read', [AdminChatController::class, 'markAsRead']);
         Route::get('/chat/inbox', [AdminChatController::class, 'chatList']);          // existing chats, paginated
         Route::get('/get-clients-for-chat', [AdminChatController::class, 'getClientsForChat']); // search all clients, paginated
-        
+
         /**
          * admin notification
          */
