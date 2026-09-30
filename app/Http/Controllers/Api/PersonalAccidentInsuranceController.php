@@ -203,22 +203,7 @@ class PersonalAccidentInsuranceController extends Controller
                 return $this->restrictionError('occupation');
             }
 
-            // $effective_date = $data['inception_date'];
 
-            // $months = $plan->policy_period ?? 0;
-            // if ($plan->insurance_period) {
-            //     $periodName = strtolower($plan->insurance_period->name);
-            //     $number = (int) preg_replace('/[^0-9]/', '', $periodName);
-            //     if (str_contains($periodName, 'year')) {
-            //         $months = $number * 12;
-            //     } elseif (str_contains($periodName, 'month')) {
-            //         $months = $number;
-            //     }
-            // }
-
-            // $expiry_date = date('Y-m-d', strtotime("+$months months", strtotime($effective_date)));
-
-            // $data['expiry_date'] = $expiry_date;
 
             $effective_date = $data['inception_date'];
 
@@ -485,9 +470,6 @@ class PersonalAccidentInsuranceController extends Controller
             $purchasePolicy = PurchasePolicy::where('policy_id', $policy_id)->first();
             $responseData = ClientPersonalAccidentInsurance::getClientPersonalAccidentInsuranceDetails($policy_id);
 
-            // $client = Client::with('country.currency')->find($request->user_id);
-            // $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
-
             $client = Client::with('country.currency')->find($request->user_id);
 
             // Get insurance company currency first
@@ -501,8 +483,6 @@ class PersonalAccidentInsuranceController extends Controller
                 $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
             }
             if ($purchasePolicy) {
-
-
                 $responseData->net_premium = number_format($purchaseData['net_premium'], 2) . ' ' . $abbr;
                 $responseData->fees = number_format($purchaseData['fees'], 2) . ' ' . $abbr;
                 $responseData->stamps = number_format($purchaseData['stamps'], 2) . ' ' . $abbr;
@@ -515,7 +495,9 @@ class PersonalAccidentInsuranceController extends Controller
             }
 
 
-            $responseData->purchase_id = $purchasePolicy->id ?? null;
+            // $responseData->purchase_id = $purchasePolicy->id ?? null;
+
+            $responseData->purchase_id = $responseData->purchase_policy_id ?? $purchasePolicy->id ?? null;
 
             $directory = public_path('insurance_pdfs/personal_accident_policy');
             if (!file_exists($directory)) {
