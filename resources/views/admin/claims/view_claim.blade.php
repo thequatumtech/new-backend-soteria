@@ -348,121 +348,191 @@
 @endsection
 
 @section('script')
-            <script>
+                <script>
 
 
-                var deleteIconUrl = "{{ asset('img/icon-delete.png') }}";
-                var csrf_token = "{{ csrf_token() }}";
-                var claim_id = "{{$claim->id}}";
+                    var deleteIconUrl = "{{ asset('img/icon-delete.png') }}";
+                    var csrf_token = "{{ csrf_token() }}";
+                    var claim_id = "{{$claim->id}}";
+
+                    var sendMessageUrl = "{{ route('claims.send_message') }}";
+
+                    $(document).ready(function () {
+                        const chatInput = document.getElementById('chat-input');
+                        const sendButton = document.getElementById('send-button');
+                        const chatMessages = document.getElementById('chat-messages');
+
+                        if (sendButton && chatInput && chatMessages) {
+                            sendButton.addEventListener('click', function () {
+                                const message = chatInput.value.trim();
+
+                                if (message === '') {
+                                    return;
+                                }
+
+                                sendButton.disabled = true;
+
+                                $.ajax({
+                                    type: "POST",
+                                    url: sendMessageUrl,
+                                    dataType: "json",
+                                    data: {
+                                        claim_id: claim_id,
+                                        message: message,
+                                        _token: csrf_token
+                                    },
+                                    success: function (data) {
+                                        const messageData = data.message;
+                                        const date = new Date(messageData.time);
+
+                                        const formatter = new Intl.DateTimeFormat('en-GB', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        });
+
+                                        const messageElement = document.createElement('div');
+                                        messageElement.classList.add('chat-message');
+
+                                        const timeElement = document.createElement('span');
+                                        timeElement.classList.add('time');
+                                        timeElement.textContent = formatter.format(date);
+
+                                        const messageText = document.createElement('span');
+                                        const sender = document.createElement('b');
+                                        sender.textContent = 'You';
+
+                                        messageText.appendChild(sender);
+                                        messageText.appendChild(
+                                            document.createTextNode(': ' + messageData.message)
+                                        );
+
+                                        messageElement.appendChild(timeElement);
+                                        messageElement.appendChild(messageText);
+
+                                        chatMessages.appendChild(messageElement);
+                                        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                                        chatInput.value = '';
+                                    },
+                                    error: function (xhr) {
+                                        console.error('Failed to send message:', xhr.responseText);
+                                        alert(xhr.responseJSON?.message || 'Unable to send message.');
+                                    },
+                                    complete: function () {
+                                        sendButton.disabled = false;
+                                    }
+                                });
+                            });
+                        }
+
+                    });
+
+
+                    $('#notify-company-btn').on('click', function () {
+                        notificationType = 'insurance_company';
+
+                        $('#preview-email-to').text(
+                            '{{ $claim->insurance_company?->email ?? '' }}'
+                        );
+
+                        $('#preview-email-subject').text(
+                            'Claim Notification - {{ $claim->claim_no }}'
+                        );
+
+                        const modal = new bootstrap.Modal(
+                            document.getElementById('emailPreviewModal')
+                        );
+
+                        modal.show();
+                    });
+
+                    $('#notify-client-btn').on('click', function () {
+                        notificationType = 'client';
+
+                        $('#preview-email-to').text(
+                            '{{ $client->email_id ?? '' }}'
+                        );
+
+                        $('#preview-email-subject').text(
+                            'Claim Update - {{ $claim->claim_no }}'
+                        );
+
+                        const modal = new bootstrap.Modal(
+                            document.getElementById('emailPreviewModal')
+                        );
+
+                        modal.show();
+                    });
+
+
+                        let notificationType = null;
+
+                        $('#send-preview-email-btn').on('click', function () {
+                            const button = $(this);
+
+                            // Prevent multiple clicks
+                            if (button.prop('disabled')) {
+                                return;
+                            }
+
+                            // Show loader
+                            button.prop('disabled', true);
+                            button.html(`
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            Sending...
+                        `);
+
+                    $.ajax({
+                        type: 'POST',
+                        url: window.location.origin + '/admin/claim-send-notification',
+                        dataType: 'json',
+                        data: {
+                            claim_id: claim_id,
+                            type: notificationType,
+                            _token: csrf_token
+                        },
+                        success: function (data) {
+                            const modalElement = document.getElementById('emailPreviewModal');
+                            const modal = bootstrap.Modal.getInstance(modalElement);
+
+                            if (modal) {
+                                modal.hide();
+                            }
+
+                            $('.toast-body').html(data.message);
+
+                            const toast = new bootstrap.Toast(
+                                document.getElementById('clientSelectToast')
+                            );
+
+                            toast.show();
+                        },
+                        error: function (xhr) {
+                            const message = xhr.responseJSON?.message || 'Unable to send email.';
+
+                            $('.toast-body').html(message);
+
+                            const toast = new bootstrap.Toast(
+                                document.getElementById('clientSelectToast')
+                            );
+
+                            toast.show();
+                        },
+                        complete: function () {
+                            // Restore button
+                            button.prop('disabled', false);
+                            button.html('Send Email');
+                        }
+                    });
+                    });
+                </script>
 
 
 
-                $('#notify-company-btn').on('click', function () {
-            notificationType = 'insurance_company';
 
-            $('#preview-email-to').text(
-                '{{ $claim->insurance_company?->email ?? '' }}'
-            );
-
-            $('#preview-email-subject').text(
-                'Claim Notification - {{ $claim->claim_no }}'
-            );
-
-            const modal = new bootstrap.Modal(
-                document.getElementById('emailPreviewModal')
-            );
-
-            modal.show();
-        });
-
-        $('#notify-client-btn').on('click', function () {
-            notificationType = 'client';
-
-            $('#preview-email-to').text(
-                '{{ $client->email_id ?? '' }}'
-            );
-
-            $('#preview-email-subject').text(
-                'Claim Update - {{ $claim->claim_no }}'
-            );
-
-            const modal = new bootstrap.Modal(
-                document.getElementById('emailPreviewModal')
-            );
-
-            modal.show();
-        });
-
-
-        let notificationType = null;
-
-        $('#send-preview-email-btn').on('click', function () {
-            const button = $(this);
-
-            // Prevent multiple clicks
-            if (button.prop('disabled')) {
-                return;
-            }
-
-            // Show loader
-            button.prop('disabled', true);
-            button.html(`
-            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-            Sending...
-        `);
-
-            $.ajax({
-                type: 'POST',
-                url: window.location.origin + '/admin/claim-send-notification',
-                dataType: 'json',
-                data: {
-                    claim_id: claim_id,
-                    type: notificationType,
-                    _token: csrf_token
-                },
-                success: function (data) {
-                    const modalElement = document.getElementById('emailPreviewModal');
-                    const modal = bootstrap.Modal.getInstance(modalElement);
-
-                    if (modal) {
-                        modal.hide();
-                    }
-
-                    $('.toast-body').html(data.message);
-
-                    const toast = new bootstrap.Toast(
-                        document.getElementById('clientSelectToast')
-                    );
-
-                    toast.show();
-                },
-                error: function (xhr) {
-                    const message = xhr.responseJSON?.message || 'Unable to send email.';
-
-                    $('.toast-body').html(message);
-
-                    const toast = new bootstrap.Toast(
-                        document.getElementById('clientSelectToast')
-                    );
-
-                    toast.show();
-                },
-                complete: function () {
-                    // Restore button
-                    button.prop('disabled', false);
-                    button.html('Send Email');
-                }
-            });
-        });
-            </script>
-
-    <script>
-
-
-        var sendMessageUrl = "{{ route('claims.send_message') }}";
-      
-    </script>
-
-            <script src="{{asset('js/claims.js?v=1')}}"></script>
+                <script src="{{asset('js/claims.js?v=1')}}"></script>
 @endsection
 

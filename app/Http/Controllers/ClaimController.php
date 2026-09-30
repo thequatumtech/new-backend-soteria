@@ -14,6 +14,7 @@ use App\Models\Chat;
 use App\Services\FirebaseChatService;
 use App\Models\Message;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 
 class ClaimController extends Controller
 {
@@ -209,7 +210,7 @@ private function updateChatSummaryAndNotify(
 
         $purchasepolicy = PurchasePolicy::findOrFail($claim->policy_id);
 
- 
+
         return view('admin.claims.view_claim', compact('claim','client','purchasepolicy','no_of_claims','attachments','claim_statuses'));
     }
 
@@ -237,7 +238,7 @@ private function updateChatSummaryAndNotify(
         status: $new_status
         ));
         //end notification
-        
+
         return response()->json(['success'=>'Status changed successfully.']);
     }
 
@@ -255,8 +256,16 @@ private function updateChatSummaryAndNotify(
     }
     public function send_message(Request $request)
     {
+        Log::info('Send claim message started', [
+        'claim_id' => $request->claim_id,
+        'admin_id' => auth('admin')->id(),
+    ]);
+     try {
         $claim = Claim::findOrFail($request->claim_id);
-
+   Log::info('Claim found', [
+            'claim_id' => $claim->id,
+            'client_id' => $claim->client_id,
+        ]);
         $claim_message = new ClaimMessage();
         $claim_message->claim_id = $claim->id;
         $claim_message->client_id = $claim->client_id;
@@ -264,6 +273,11 @@ private function updateChatSummaryAndNotify(
         $claim_message->is_message = '1';
         $claim_message->sent_by = '0';
         $claim_message->save();
+
+          Log::info('Claim message saved', [
+            'message_id' => $claim_message->id,
+            'claim_id' => $claim->id,
+        ]);
 
         // Get the existing chat between admin and client
         $chat = Chat::where(function ($query) use ($claim) {
@@ -280,6 +294,11 @@ private function updateChatSummaryAndNotify(
 
         // Send to Firebase if chat exists
         if ($chat) {
+
+          Log::info('Existing chat found', [
+                'chat_id' => $chat->id,
+            ]);
+
             $this->firebase->pushMessage($chat->id, [
                 'id' => $claim_message->id,
                 'sender_id' => auth('admin')->id(),
@@ -292,6 +311,12 @@ private function updateChatSummaryAndNotify(
                 'created_at' => $claim_message->created_at->toJSON(),
             ]);
 
+               Log::info('Firebase message pushed', [
+                'chat_id' => $chat->id,
+                'message_id' => $claim_message->id,
+            ]);
+
+
             $this->updateChatSummaryAndNotify(
                 $chat->id,
                 'admin',
@@ -299,6 +324,9 @@ private function updateChatSummaryAndNotify(
                 null,
                 null
             );
+            Log::info('Chat summary and notification updated', [
+                'chat_id' => $chat->id,
+            ]);
 
             event(new \App\Events\ChatMessageSent(
                 recipientUserId: $claim->client_id,
@@ -306,7 +334,26 @@ private function updateChatSummaryAndNotify(
                 claimId: $claim->id,
                 messagePreview: $claim_message->message
             ));
+
+              Log::info('ChatMessageSent event dispatched', [
+                'chat_id' => $chat->id,
+                'claim_id' => $claim->id,
+                'client_id' => $claim->client_id,
+            ]);
+
+        } else {
+            Log::warning('No existing chat found', [
+                'claim_id' => $claim->id,
+                'client_id' => $claim->client_id,
+                'admin_id' => auth('admin')->id(),
+            ]);
         }
+
+
+           Log::info('Send claim message completed', [
+            'claim_id' => $claim->id,
+            'message_id' => $claim_message->id,
+        ]);
 
         return response()->json([
             'success' => 'Message Sent Successfully',
@@ -318,5 +365,17 @@ private function updateChatSummaryAndNotify(
                 'is_message' => '1'
             ]
         ]);
+
+        } catch (\Throwable $e) {
+            Log::error('Send claim message failed', [
+                'claim_id' => $request->claim_id,
+                'admin_id' => auth('admin')->id(),
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            throw $e;
+        }
     }
 }
