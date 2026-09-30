@@ -22,16 +22,18 @@ class PersonalAccidentInsuranceController extends Controller
 {
     private function cleanNumber($value)
     {
-        if ($value === null) return 0;
+        if ($value === null)
+            return 0;
 
         $clean = preg_replace('/[^\d.]/', '', $value);
 
-        return is_numeric($clean) ? (float)$clean : 0;
+        return is_numeric($clean) ? (float) $clean : 0;
     }
 
     private function normalizeRestricted($value)
     {
-        if (!$value) return [];
+        if (!$value)
+            return [];
 
         if (is_string($value) && str_starts_with($value, '[')) {
             return array_map('trim', json_decode($value, true));
@@ -42,7 +44,7 @@ class PersonalAccidentInsuranceController extends Controller
         }
 
         if (is_numeric($value)) {
-            return [(int)$value];
+            return [(int) $value];
         }
 
         return [];
@@ -79,7 +81,8 @@ class PersonalAccidentInsuranceController extends Controller
 
     private function normalizeDate($date)
     {
-        if (!$date) return null;
+        if (!$date)
+            return null;
 
         if (preg_match('/^\d{2}-\d{2}-\d{4}$/', $date)) {
             return Carbon::createFromFormat('m-d-Y', $date)->format('Y-m-d');
@@ -122,7 +125,7 @@ class PersonalAccidentInsuranceController extends Controller
                 'payment_status' => 'nullable',
                 'dangerous_field' => 'nullable',
 
-                 'old_policy_id_for_renew' => 'nullable|integer',
+                'old_policy_id_for_renew' => 'nullable|integer',
                 'renew' => 'nullable|boolean',
 
             ]);
@@ -200,25 +203,51 @@ class PersonalAccidentInsuranceController extends Controller
                 return $this->restrictionError('occupation');
             }
 
+            // $effective_date = $data['inception_date'];
+
+            // $months = $plan->policy_period ?? 0;
+            // if ($plan->insurance_period) {
+            //     $periodName = strtolower($plan->insurance_period->name);
+            //     $number = (int) preg_replace('/[^0-9]/', '', $periodName);
+            //     if (str_contains($periodName, 'year')) {
+            //         $months = $number * 12;
+            //     } elseif (str_contains($periodName, 'month')) {
+            //         $months = $number;
+            //     }
+            // }
+
+            // $expiry_date = date('Y-m-d', strtotime("+$months months", strtotime($effective_date)));
+
+            // $data['expiry_date'] = $expiry_date;
+
             $effective_date = $data['inception_date'];
 
-            $months = $plan->policy_period ?? 0;
-            if ($plan->insurance_period) {
-                $periodName = strtolower($plan->insurance_period->name);
-                $number = (int) preg_replace('/[^0-9]/', '', $periodName);
-                if (str_contains($periodName, 'year')) {
-                    $months = $number * 12;
-                } elseif (str_contains($periodName, 'month')) {
-                    $months = $number;
-                }
-            }
+            // Use the same months as the pricing calculation
+            $months = (int) ($data['inception_period'] ?? 0);
 
-            $expiry_date = date('Y-m-d', strtotime("+$months months", strtotime($effective_date)));
+            // Calculate expiry date using the selected period
+            $expiry_date = Carbon::parse($effective_date)
+                ->addMonths($months)
+                ->format('Y-m-d');
 
             $data['expiry_date'] = $expiry_date;
 
+            Log::info('PA Expiry Date Debug', [
+                'inception_date' => $effective_date,
+                'inception_period' => $data['inception_period'] ?? null,
+                'calculated_months' => $months,
+                'expiry_date' => $expiry_date,
+            ]);
 
-                $oldPolicyForRenewal = null;
+
+            Log::info('PA Expiry Date Debug', [
+    'inception_date' => $effective_date,
+    'policy_period' => $plan->policy_period,
+    'insurance_period_name' => $plan->insurance_period?->name,
+    'calculated_months' => $months,
+]);
+
+            $oldPolicyForRenewal = null;
 
             if ($request->boolean('renew')) {
 
@@ -260,8 +289,8 @@ class PersonalAccidentInsuranceController extends Controller
 
                 $purchase = PurchasePolicy::savePurchasePolicy($data);
 
-                
-   if ($request->boolean('renew')) {
+
+                if ($request->boolean('renew')) {
 
                     RenewalPolicy::create([
                         'old_policy_id' => $oldPolicyForRenewal->id,
@@ -931,9 +960,9 @@ class PersonalAccidentInsuranceController extends Controller
 
                     $item->insurance_policy_pdf = url(
                         'uploads/insurance_plans/' .
-                            $item->id .
-                            '/' .
-                            $item->insurance_policy_pdf
+                        $item->id .
+                        '/' .
+                        $item->insurance_policy_pdf
                     );
                 }
 
@@ -949,9 +978,9 @@ class PersonalAccidentInsuranceController extends Controller
 
                     $item->insurance_company->privacy_policy = url(
                         'insurance/' .
-                            $item->insurance_company->id .
-                            '/' .
-                            $item->insurance_company->privacy_policy
+                        $item->insurance_company->id .
+                        '/' .
+                        $item->insurance_company->privacy_policy
                     );
                 }
             }
