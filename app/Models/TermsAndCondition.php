@@ -13,5 +13,5 @@ class TermsAndCondition extends Model
 
     protected $table = 'terms_and_conditions';
     protected $dates = ['deleted_at'];
-    protected $fillable = ['mobile', 'message','file'];
+    protected $fillable = ['mobile', 'message','file','arabic_file'];
 }

@@ -39,70 +39,136 @@ class TermsAndConditionController extends Controller
         abort(404);
     }
 
+    // public function create(Request $request)
+    // {
+    //     try {
+    //         // Validate input
+    //         $request->validate([
+    //             'message' => 'required_without:terms_file',
+    //             'terms_file' => 'required_without:message|file|mimes:jpg,jpeg,png,gif,bmp,pdf'
+    //         ], [
+    //             'message.required_without' => 'Either Message or File is required.',
+    //             'terms_file.required_without' => 'Either File or Message is required.',
+    //             'terms_file.file' => 'The file must be a valid file.',
+    //             'terms_file.mimes' => 'The file must be a JPG, JPEG, PNG, GIF, BMP, or PDF.',
+    //         ]);
+
+    //         if (isset($request->id)) {
+    //             // Update existing Terms and Condition
+    //             $terms = TermsAndCondition::findOrFail($request->id);
+    //             $terms->message = $request->message;
+
+    //             if ($request->hasFile('terms_file')) {
+    //                 // Delete old file if exists
+    //                 if ($terms->file && file_exists(public_path('uploads/terms_and_conditions/' . $terms->file))) {
+    //                     unlink(public_path('uploads/terms_and_conditions/' . $terms->file));
+    //                 }
+
+    //                 // Save new file
+    //                 $uploadedFile = $request->file('terms_file');
+    //                 $newFilename = time() . '_' . $uploadedFile->getClientOriginalName(); // Use unique filename
+    //                 $uploadedFile->move(public_path('uploads/terms_and_conditions'), $newFilename);
+    //                 $terms->file = $newFilename;
+    //             }
+
+    //             $terms->save();
+    //             return back()->with('success', __('messages.terms_and_conditions.edit_success'));
+    //         } else {
+    //             $terms = new TermsAndCondition();
+
+    //             if (!empty($request->message)) {
+    //                 $terms->message = $request->message;
+    //             }
+
+    //             if ($request->hasFile('terms_file')) {
+    //                 $uploadedFile = $request->file('upload_file');
+    //                 $newFilename = $uploadedFile->getClientOriginalName();
+    //                 $uploadedFile->move(public_path('uploads/terms_and_conditions'), $newFilename);
+    //                 $terms->file = $newFilename;
+    //             }
+
+    //             if (empty($terms->message) && empty($terms->file)) {
+    //                 return back()->with('error', __('messages.terms_and_conditions.error'));
+    //             }
+
+    //             $terms->save();
+    //             return back()->with('success', __('messages.terms_and_conditions.add_success'));
+    //         }
+    //     } catch (ValidationException $e) {
+    //         $errors = $e->validator->errors()->first();
+    //         return redirect()->route('pages.terms-and-conditions')->with('error', $errors);
+    //     } catch (\Exception $e) {
+    //         return back()->with('error', __('messages.general_error'));
+    //     }
+    // }
+
+
+
+
     public function create(Request $request)
     {
         try {
-            // Validate input
             $request->validate([
-                'message' => 'required_without:terms_file',
-                'terms_file' => 'required_without:message|file|mimes:jpg,jpeg,png,gif,bmp,pdf'
+                'message' => 'required_without_all:terms_file,terms_file_arabic|nullable|string',
+                'terms_file' => 'required_without_all:message,terms_file_arabic|nullable|file|mimes:jpg,jpeg,png,gif,bmp,pdf',
+                'terms_file_arabic' => 'required_without_all:message,terms_file|nullable|file|mimes:pdf',
             ], [
-                'message.required_without' => 'Either Message or File is required.',
-                'terms_file.required_without' => 'Either File or Message is required.',
-                'terms_file.file' => 'The file must be a valid file.',
-                'terms_file.mimes' => 'The file must be a JPG, JPEG, PNG, GIF, BMP, or PDF.',
+                'message.required_without_all' => 'Please enter a message or upload a file.',
+                'terms_file.required_without_all' => 'Please upload at least one file or enter a message.',
+                'terms_file.mimes' => 'The English file must be JPG, JPEG, PNG, GIF, BMP, or PDF.',
+                'terms_file_arabic.mimes' => 'The Arabic file must be a PDF.',
             ]);
 
-            if (isset($request->id)) {
-                // Update existing Terms and Condition
-                $terms = TermsAndCondition::findOrFail($request->id);
-                $terms->message = $request->message;
+            $terms = new TermsAndCondition();
+            $terms->message = $request->message;
 
-                if ($request->hasFile('terms_file')) {
-                    // Delete old file if exists
-                    if ($terms->file && file_exists(public_path('uploads/terms_and_conditions/' . $terms->file))) {
-                        unlink(public_path('uploads/terms_and_conditions/' . $terms->file));
-                    }
+            $uploadPath = public_path('uploads/terms_and_conditions');
 
-                    // Save new file
-                    $uploadedFile = $request->file('terms_file');
-                    $newFilename = time() . '_' . $uploadedFile->getClientOriginalName(); // Use unique filename
-                    $uploadedFile->move(public_path('uploads/terms_and_conditions'), $newFilename);
-                    $terms->file = $newFilename;
-                }
-
-                $terms->save();
-                return back()->with('success', __('messages.terms_and_conditions.edit_success'));
-            } else {
-                $terms = new TermsAndCondition();
-
-                if (!empty($request->message)) {
-                    $terms->message = $request->message;
-                }
-
-                if ($request->hasFile('terms_file')) {
-                    $uploadedFile = $request->file('upload_file');
-                    $newFilename = $uploadedFile->getClientOriginalName();
-                    $uploadedFile->move(public_path('uploads/terms_and_conditions'), $newFilename);
-                    $terms->file = $newFilename;
-                }
-
-                if (empty($terms->message) && empty($terms->file)) {
-                    return back()->with('error', __('messages.terms_and_conditions.error'));
-                }
-
-                $terms->save();
-                return back()->with('success', __('messages.terms_and_conditions.add_success'));
+            if (!file_exists($uploadPath)) {
+                mkdir($uploadPath, 0755, true);
             }
+
+            // English file upload
+            if ($request->hasFile('terms_file')) {
+                $file = $request->file('terms_file');
+
+                $filename = uniqid('english_') . '_' .
+                    preg_replace('/[^A-Za-z0-9._-]/', '_', $file->getClientOriginalName());
+
+                $file->move($uploadPath, $filename);
+                $terms->file = $filename;
+            }
+
+            // Arabic PDF upload
+            if ($request->hasFile('terms_file_arabic')) {
+                $file = $request->file('terms_file_arabic');
+
+                $filename = uniqid('arabic_') . '_' .
+                    preg_replace('/[^A-Za-z0-9._-]/', '_', $file->getClientOriginalName());
+
+                $file->move($uploadPath, $filename);
+                $terms->arabic_file = $filename;
+            }
+
+            $terms->save();
+
+            return back()->with(
+                'success',
+                __('messages.terms_and_conditions.add_success')
+            );
+
         } catch (ValidationException $e) {
-            $errors = $e->validator->errors()->first();
-            return redirect()->route('pages.terms-and-conditions')->with('error', $errors);
+            return redirect()
+                ->route('pages.terms-and-conditions')
+                ->with('error', $e->validator->errors()->first())
+                ->withInput();
+
         } catch (\Exception $e) {
+            \Log::error('Terms and Conditions creation failed: ' . $e->getMessage());
+
             return back()->with('error', __('messages.general_error'));
         }
     }
-
-
     public function destroy(Request $request)
     {
         try {
@@ -121,80 +187,111 @@ class TermsAndConditionController extends Controller
             // Handle errors here
         }
     }
-    // public function update(Request $request)
-    // {
-    //     $request->validate([
-    //         'id' => 'required|exists:terms_and_conditions,id',
-    //         'message' => 'required_without:terms_file',
-    //         'terms_file' => 'file|mimes:jpg,jpeg,png,gif,bmp,pdf'
-    //     ]);
 
-    //     $terms = TermsAndCondition::find($request->id);
-    //     $terms->message = $request->message;
+// public function update(Request $request)
+// {
+//     $request->validate([
+//         'id' => 'required|exists:terms_and_conditions,id',
+//         'message' => 'required_without:terms_file',
+//         'terms_file' => 'file|mimes:jpg,jpeg,png,gif,bmp,pdf'
+//     ]);
 
-    //     if ($request->hasFile('terms_file')) {
-    //         if ($terms->file && file_exists(public_path('uploads/terms_and_conditions/' . $terms->file))) {
-    //             unlink(public_path('uploads/terms_and_conditions/' . $terms->file));
-    //         }
+//     $terms = TermsAndCondition::find($request->id);
 
-    //         $file = $request->file('terms_file');
-    //         $filename = time() . '_' . $file->getClientOriginalName();
-    //         $file->move(public_path('uploads/terms_and_conditions'), $filename);
+//     $terms->message = $request->message;
 
-    //         $terms->file = $filename;
-    //     }
+//     if ($request->hasFile('terms_file')) {
 
-    //     $terms->save();
+//         // Delete old file if it exists
+//         if (
+//             $terms->file &&
+//             file_exists(
+//                 public_path('uploads/terms_and_conditions/' . $terms->file)
+//             )
+//         ) {
+//             unlink(
+//                 public_path('uploads/terms_and_conditions/' . $terms->file)
+//             );
+//         }
 
-    //     return back()->with('success', 'Terms updated successfully.');
-    // }
-     
+//         // Get uploaded file
+//         $file = $request->file('terms_file');
+
+//         // Get original filename
+//         $originalName = $file->getClientOriginalName();
+
+//         // Replace all spaces/whitespace with underscore
+//         $originalName = preg_replace('/\s+/', '_', $originalName);
+
+//         // Create unique filename
+//         $filename = time() . '_' . $originalName;
+
+//         // Move file to upload directory
+//         $file->move(
+//             public_path('uploads/terms_and_conditions'),
+//             $filename
+//         );
+
+//         // Save filename in database
+//         $terms->file = $filename;
+//     }
+
+//     $terms->save();
+
+//     return back()->with('success', 'Terms updated successfully.');
+// }
+
+
 public function update(Request $request)
 {
     $request->validate([
         'id' => 'required|exists:terms_and_conditions,id',
-        'message' => 'required_without:terms_file',
-        'terms_file' => 'file|mimes:jpg,jpeg,png,gif,bmp,pdf'
+        'message' => 'nullable|string',
+        'terms_file' => 'nullable|file|mimes:jpg,jpeg,png,gif,bmp,pdf',
+        'terms_file_arabic' => 'nullable|file|mimes:pdf',
     ]);
 
-    $terms = TermsAndCondition::find($request->id);
+    $terms = TermsAndCondition::findOrFail($request->id);
 
-    $terms->message = $request->message;
+    if ($request->has('message')) {
+        $terms->message = $request->message;
+    }
 
+    $uploadPath = public_path('uploads/terms_and_conditions');
+
+    if (!file_exists($uploadPath)) {
+        mkdir($uploadPath, 0755, true);
+    }
+
+    // Update English file
     if ($request->hasFile('terms_file')) {
-
-        // Delete old file if it exists
-        if (
-            $terms->file &&
-            file_exists(
-                public_path('uploads/terms_and_conditions/' . $terms->file)
-            )
-        ) {
-            unlink(
-                public_path('uploads/terms_and_conditions/' . $terms->file)
-            );
+        if ($terms->file && file_exists($uploadPath . '/' . $terms->file)) {
+            unlink($uploadPath . '/' . $terms->file);
         }
 
-        // Get uploaded file
         $file = $request->file('terms_file');
+        $filename = uniqid('english_') . '_' .
+            preg_replace('/[^A-Za-z0-9._-]/', '_', $file->getClientOriginalName());
 
-        // Get original filename
-        $originalName = $file->getClientOriginalName();
-
-        // Replace all spaces/whitespace with underscore
-        $originalName = preg_replace('/\s+/', '_', $originalName);
-
-        // Create unique filename
-        $filename = time() . '_' . $originalName;
-
-        // Move file to upload directory
-        $file->move(
-            public_path('uploads/terms_and_conditions'),
-            $filename
-        );
-
-        // Save filename in database
+        $file->move($uploadPath, $filename);
         $terms->file = $filename;
+    }
+
+    // Update Arabic PDF
+    if ($request->hasFile('terms_file_arabic')) {
+        if (
+            $terms->arabic_file &&
+            file_exists($uploadPath . '/' . $terms->arabic_file)
+        ) {
+            unlink($uploadPath . '/' . $terms->arabic_file);
+        }
+
+        $file = $request->file('terms_file_arabic');
+        $filename = uniqid('arabic_') . '_' .
+            preg_replace('/[^A-Za-z0-9._-]/', '_', $file->getClientOriginalName());
+
+        $file->move($uploadPath, $filename);
+        $terms->arabic_file = $filename;
     }
 
     $terms->save();

@@ -198,11 +198,15 @@ private function updateChatSummaryAndNotify(
         $claim = Claim::find($decryptedId);
         $client_id = $claim->client_id;
         $no_of_claims = Claim::where('client_id',$client_id)->count();
-        $attachments_str = $claim->attachments;
-        $attachments = [];
-        if($attachments){
-            $attachments = explode(",",$attachments_str);
-        }
+
+   // Decode JSON and generate full attachment URLs
+    $attachments = Claim::buildAttachmentUrls($claim->attachments);
+
+        // $attachments_str = $claim->attachments;
+        // $attachments = [];
+        // if($attachments){
+        //     $attachments = explode(",",$attachments_str);
+        // }
         $claim_statuses = ClaimStatus::all();
 
         $client = Client::findOrFail($claim->client_id);
@@ -210,6 +214,7 @@ private function updateChatSummaryAndNotify(
 
         $purchasepolicy = PurchasePolicy::findOrFail($claim->policy_id);
 
+        // dd($attachments);
 
         return view('admin.claims.view_claim', compact('claim','client','purchasepolicy','no_of_claims','attachments','claim_statuses'));
     }

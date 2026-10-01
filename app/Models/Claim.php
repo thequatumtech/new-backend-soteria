@@ -129,4 +129,35 @@ class Claim extends Model
         return $this->belongsTo(InsuranceCompany::class, 'insurance_company_id');
     }
 
+
+    public static function buildAttachmentUrls($attachments)
+{
+    if (empty($attachments)) {
+        return [];
+    }
+
+    // Decode JSON if attachments are stored as a JSON string
+    if (is_string($attachments)) {
+        $attachments = json_decode($attachments, true);
+    }
+
+    if (!is_array($attachments)) {
+        return [];
+    }
+
+    return array_map(function ($path) {
+        if (!$path) {
+            return null;
+        }
+
+        // Already a full URL
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
+
+        // Convert relative path to full URL
+        return url(ltrim($path, '/'));
+    }, $attachments);
+}
+
 }

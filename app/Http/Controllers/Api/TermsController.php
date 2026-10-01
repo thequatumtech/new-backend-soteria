@@ -26,17 +26,41 @@ class TermsController extends Controller
             ], 404);
         }
 
-        if (!empty($terms->file)) {
-            $terms->file = url('uploads/terms_and_conditions/' . $terms->file);
+
+        // Detect language from headers
+        $lang = strtolower(
+            $request->header('lang')
+            ?? $request->header('Accept-Language')
+            ?? 'en'
+        );
+
+        $lang = substr(trim(explode(',', $lang)[0]), 0, 2);
+
+        // Select PDF based on language
+        if ($lang === 'ar' && !empty($terms->arabic_file)) {
+            $file = $terms->arabic_file;
+        } else {
+            $file = $terms->file;
         }
+
+        // Fallback if the selected file is unavailable
+        if (empty($file)) {
+            $file = $terms->arabic_file ?? null;
+        }
+
+        // Convert filename to full URL
+        $fileUrl = !empty($file)
+            ? url('uploads/terms_and_conditions/' . $file)
+            : null;
 
         return response()->json([
             'success' => true,
-            'data'    => [
-                'id'      => $terms->id,
+            'data' => [
+                'id' => $terms->id,
                 'message' => $terms->message,
-                'file'    => $terms->file,
+                'file' => $fileUrl,
             ]
         ]);
+
     }
 }

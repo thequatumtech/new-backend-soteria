@@ -156,7 +156,8 @@ class PersonalAccidentInsuranceController extends Controller
             $clientCity = $client->city_id;
             $clientDistrict = $client->district_id;
             $clientOccupation = $client->occupation_id;
-            $clientAge = Carbon::parse($client->birth_date)->age;
+            // $clientAge = Carbon::parse($client->birth_date)->age;
+            $clientAge = Carbon::parse($data['birth_date'])->age;
 
             $restrictedCountries = $this->normalizeRestricted($plan->restricted_country_ids);
             $restrictedCities = $this->normalizeRestricted($plan->restricted_city_ids);
@@ -204,33 +205,88 @@ class PersonalAccidentInsuranceController extends Controller
             }
 
 
-
             $effective_date = $data['inception_date'];
 
-            // Use the same months as the pricing calculation
-            $months = (int) ($data['inception_period'] ?? 0);
+            // inception_period is the InsurancePeriod ID
+            $insurancePeriod = InsurancePeriod::find($data['inception_period'] ?? null);
 
-            // Calculate expiry date using the selected period
-            $expiry_date = Carbon::parse($effective_date)
-                ->addMonths($months)
-                ->format('Y-m-d');
+            if (!$insurancePeriod) {
+                return response()->json([
+                    'status' => false,
+                    'status_code' => 422,
+                    'message' => 'Invalid insurance period.',
+                    'data' => [],
+                ], 422);
+            }
+
+            // Example: 1 week, 12 months, 1 years
+            if (
+                !preg_match(
+                    '/^(\d+)\s+(day|days|week|weeks|month|months|year|years)$/i',
+                    trim($insurancePeriod->name),
+                    $matches
+                )
+            ) {
+                throw new \Exception('Invalid insurance period format.');
+            }
+
+            $duration = (int) $matches[1];
+            $periodType = strtolower($matches[2]);
+
+            $expiryDate = Carbon::parse($effective_date);
+
+            switch ($periodType) {
+                case 'day':
+                case 'days':
+                    $expiryDate->addDays($duration);
+                    break;
+
+                case 'week':
+                case 'weeks':
+                    $expiryDate->addWeeks($duration);
+                    break;
+
+                case 'month':
+                case 'months':
+                    $expiryDate->addMonths($duration);
+                    break;
+
+                case 'year':
+                case 'years':
+                    $expiryDate->addYears($duration);
+                    break;
+            }
+
+            $expiry_date = $expiryDate->format('Y-m-d');
 
             $data['expiry_date'] = $expiry_date;
+
+
+            $months = match ($periodType) {
+    'month', 'months' => $duration,
+    'year', 'years' => $duration * 12,
+    'day', 'days' => $duration,
+    'week', 'weeks' => $duration * 7,
+    default => 0,
+};
+
+            Log::info('PA Expiry Date Debug', [
+                'inception_date' => $effective_date,
+                'inception_period_id' => $insurancePeriod->id,
+                'insurance_period_name' => $insurancePeriod->name,
+                'duration' => $duration,
+                'period_type' => $periodType,
+                'expiry_date' => $expiry_date,
+                'pricing_months' => $months,
+            ]);
 
             Log::info('PA Expiry Date Debug', [
                 'inception_date' => $effective_date,
                 'inception_period' => $data['inception_period'] ?? null,
-                'calculated_months' => $months,
+
                 'expiry_date' => $expiry_date,
             ]);
 
-
-            Log::info('PA Expiry Date Debug', [
-    'inception_date' => $effective_date,
-    'policy_period' => $plan->policy_period,
-    'insurance_period_name' => $plan->insurance_period?->name,
-    'calculated_months' => $months,
-]);
 
             $oldPolicyForRenewal = null;
 
@@ -287,7 +343,7 @@ class PersonalAccidentInsuranceController extends Controller
             }
             $clientAge = Carbon::parse($client->birth_date)->age;
 
-            $months = (int) ($data['inception_period'] ?? 0);
+            // $months = (int) ($data['inception_period'] ?? 0);
 
             Log::info('PA Store - Premium Calculation Started', [
                 'plan_id' => $plan->id,
@@ -371,16 +427,6 @@ class PersonalAccidentInsuranceController extends Controller
                 'pricing_rate' => $pricingRate,
             ]);
 
-            /*
-|--------------------------------------------------------------------------
-| Determine Premium Rate
-|--------------------------------------------------------------------------
-|
-| If age/month pricing exists, use it.
-| Otherwise use plan net_premium.
-|
-*/
-
             $netPremiumRate = $pricingRate > 0
                 ? $pricingRate
                 : (float) $plan->net_premium;
@@ -391,12 +437,6 @@ class PersonalAccidentInsuranceController extends Controller
                 'plan_net_premium' => $plan->net_premium,
                 'selected_rate' => $netPremiumRate,
             ]);
-
-            /*
-|--------------------------------------------------------------------------
-| Calculate Net Premium
-|--------------------------------------------------------------------------
-*/
 
             $policyLimit = $this->cleanNumber($plan->limit);
 
@@ -410,11 +450,6 @@ class PersonalAccidentInsuranceController extends Controller
                 'net_premium' => $netPremium,
             ]);
 
-            /*
-|--------------------------------------------------------------------------
-| Calculate Fees / Stamps / Tax / CBJ / Gross
-|--------------------------------------------------------------------------
-*/
 
             Log::info('PA Store - Calling calculatePremium()', [
                 'plan_id' => $plan->id,
@@ -586,20 +621,7 @@ class PersonalAccidentInsuranceController extends Controller
                 'client_age' => $clientAge,
             ]);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Build Query
-            |--------------------------------------------------------------------------
-            */
-            // $query = PersonalAccidentPlan::with(
-            //     'policy_covers',
-            //     'insurance_company',
-            //     'pricing_schedule'
-            // )
-            //     ->whereHas('insurance_company', function ($q) {
-            //         $q->whereNull('deleted_at');
-            //     })->where('limit', $request->limit );
-            // ->where('limit', 'LIKE', '%' . $request->limit . '%');
+          
             $query = PersonalAccidentPlan::with(
                 'policy_covers',
                 'insurance_company',
@@ -697,7 +719,44 @@ class PersonalAccidentInsuranceController extends Controller
                 is_numeric($periodInput)
             ) {
 
-                $month = (int) $periodInput;
+                // $month = (int) $periodInput;
+
+                $periodInput = $request->input('insurance_period_id')
+                    ?? $request->input('insurance_period');
+
+                $insurancePeriod = InsurancePeriod::find($periodInput);
+
+                if (!$insurancePeriod) {
+                    return response()->json([
+                        'status' => false,
+                        'status_code' => 422,
+                        'message' => 'Invalid insurance period.',
+                        'data' => [],
+                    ], 422);
+                }
+
+                if (
+                    !preg_match(
+                        '/^(\d+)\s+(day|days|week|weeks|month|months|year|years)$/i',
+                        trim($insurancePeriod->name),
+                        $matches
+                    )
+                ) {
+                    throw new \Exception('Invalid insurance period format.');
+                }
+
+                $duration = (int) $matches[1];
+                $periodType = strtolower($matches[2]);
+
+                $month = match ($periodType) {
+                    'month', 'months' => $duration,
+                    'year', 'years' => $duration * 12,
+                    'day', 'days' => $duration,
+                    'week', 'weeks' => $duration * 7,
+                    default => 0,
+                };
+
+                $monthKey = 'm_' . $month;
 
 
                 Log::info('PA Plan API - Month Selected', [
@@ -710,7 +769,7 @@ class PersonalAccidentInsuranceController extends Controller
                 | Prevent invalid month
                 |--------------------------------------------------------------------------
                 */
-                if ($month >= 1 && $month <= 12) {
+                if ($month > 0) {
 
                     $monthKey = 'm_' . $month;
 

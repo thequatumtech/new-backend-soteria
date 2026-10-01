@@ -159,7 +159,7 @@
                                     <div class="col-lg-10 col-12">
                                         @forelse($attachments as $single)
                                             <div class="span_{{$single}}">
-                                                <a href="{{asset('uploads/claims') . '/' . $claim->id . '/' . $single}}" target="_blank">{{$single}}</a>
+                                                <a href="{{$single}}" target="_blank">{{$single}}</a>
                                             </div>
                                         @empty -
                                         @endforelse
