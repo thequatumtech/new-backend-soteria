@@ -34,6 +34,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 | Therefore all API routes automatically use the selected language.
 |
 */
+Route::middleware(['api.decrypt', 'api.encrypt'])->group(function () {
 
 // login
 Route::post('/login', [ClientController::class, 'Login']);
@@ -44,7 +45,7 @@ Route::post('forgot-otp-send', [ClientController::class, 'sendForgotOtp']);
 Route::post('forgot-password', [ClientController::class, 'forgotPassword']);
 
 Route::post('register-otp-send', [ClientController::class, 'sendRegisterOtp']);
-
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -52,7 +53,7 @@ Route::post('register-otp-send', [ClientController::class, 'sendRegisterOtp']);
 |--------------------------------------------------------------------------
 */
 
-Route::group(['middleware' => ['apitoken']], function () {
+Route::group(['middleware' => ['apitoken', 'api.decrypt','api.encrypt']], function () {
 
     Route::post('/change-language', [ClientController::class, 'changeLanguage']);
     Route::post('/save-signature', [ClientController::class, 'saveSignature']);
@@ -204,7 +205,7 @@ Route::group(['middleware' => ['apitoken']], function () {
     Route::post('/get-discount-amount', [DiscountCouponController::class, 'getDiscountAmount']);
 
     Route::post('/change-password', [ClientController::class, 'changePassword']);
-    
+
     /*
     |--------------------------------------------------------------------------
     | Admin Basic / Public APIs
@@ -246,10 +247,11 @@ Route::group(['middleware' => ['apitoken']], function () {
 
 });
 
-
+Route::middleware(['api.decrypt', 'api.encrypt'])->group(function () {
 Route::get('/get-country', [AdminbasicController::class, 'getCountry']);
 Route::get('/get-district', [AdminbasicController::class, 'getDistrict']);
 Route::get('/get-city', [AdminbasicController::class, 'getCities']);
 Route::get('/get-language', [AdminbasicController::class, 'getLanguage']);
 Route::get('/get-nationality', [AdminbasicController::class, 'getNationality']);
 Route::get('/get-occupations', [AdminbasicController::class, 'getOccupations']);
+});

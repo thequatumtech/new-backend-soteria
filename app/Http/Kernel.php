@@ -71,5 +71,8 @@ class Kernel extends HttpKernel
         'checkAdminAuthorization' => \App\Http\Middleware\CheckAdminAuthorization::class,
         'checkAdminAuthorizationForAdminBasics' => \App\Http\Middleware\CheckAdminAuthorizationForAdminBasics::class,
         'checkAdminAuthorizationForInsurancePlans' => \App\Http\Middleware\CheckAdminAuthorizationForInsurancePlans::class,
+
+        'api.decrypt' => \App\Http\Middleware\DecryptApiRequest::class,
+        'api.encrypt' => \App\Http\Middleware\EncryptApiResponse::class,
     ];
 }
