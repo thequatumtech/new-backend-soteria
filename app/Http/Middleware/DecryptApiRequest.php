@@ -77,6 +77,10 @@ class DecryptApiRequest
             $data = app(ApiEncryptionService::class)
                 ->decrypt($payload);
 
+            // Global TrimStrings / ConvertEmptyStringsToNull ran before
+            // decryption, so apply the same normalisation to decrypted data.
+            $data = $this->normalizeInput($data);
+
             if ($request->isJson()) {
                 $request->json()->replace($data);
             }
@@ -95,5 +99,21 @@ class DecryptApiRequest
         return $next($request);
     }
 
+    private function normalizeInput(array $data): array
+    {
+        $exceptTrim = ['current_password', 'password', 'password_confirmation'];
 
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $data[$key] = $this->normalizeInput($value);
+            } elseif (is_string($value)) {
+                if (!in_array($key, $exceptTrim, true)) {
+                    $value = trim($value);
+                }
+                $data[$key] = $value === '' ? null : $value;
+            }
+        }
+
+        return $data;
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models\InsurancePlanModels;
 
+use App\Helpers\InsurancePlanHelper;
 use App\Models\InsuranceCompany;
 use App\Models\LineOfBusiness;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -50,17 +51,28 @@ class InPatientPlan extends Model
     {
         return $this->hasMany(InPatientPlanPricingSchedule::class, 'in_patient_plan_id', 'id')->where('gender', 2);
     }
-    public static function getInPatientPlanLimit()
+    public static function getInPatientPlanLimit($userId = null)
     {
-        $plan = InPatientPlan::select('limit')->groupBy('limit')->get();
+        $query = InPatientPlan::select('limit');
+
+        // Only offer limits available in the client's country (currency)
+        if ($userId) {
+            InsurancePlanHelper::filterByClientCurrency($query, $userId);
+        }
+
+        $plan = $query->groupBy('limit')->get();
         return $plan;
     }
-    public static function getInPatientInsurancePlanByLimit($limit)
+    public static function getInPatientInsurancePlanByLimit($limit, $userId = null)
     {
-        $plan = InPatientPlan::select('plan_name', 'policy_period')
-            ->where('limit', $limit)
-            ->groupBy('plan_name', 'policy_period')
-            ->get();
+        $query = InPatientPlan::select('plan_name', 'policy_period')
+            ->where('limit', $limit);
+
+        if ($userId) {
+            InsurancePlanHelper::filterByClientCurrency($query, $userId);
+        }
+
+        $plan = $query->groupBy('plan_name', 'policy_period')->get();
         return $plan;
     }
        public function pricing_schedule()

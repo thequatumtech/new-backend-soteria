@@ -181,20 +181,18 @@ class InPatientController extends Controller
                 // Only show "no plans for your country" when the result is empty
                 // due to the country/currency filter — not because of a limit mismatch.
                 // Check if any plans exist for this client's country (ignoring limit).
-                if ($request->filled('limit')) {
-                    $countryQuery = InPatientPlan::whereHas('insurance_company', function ($q) {
-                        $q->whereNull('deleted_at');
-                    });
-                    InsurancePlanHelper::filterByClientCurrency($countryQuery, $request->user_id);
-                    $plansExistForCountry = $countryQuery->exists();
-                    if ($plansExistForCountry) {
-                        return response()->json([
-                            'status'      => false,
-                            'status_code' => 404,
-                            'message'     => __('messages.api.no_inpatient_insurance_plans_for_country'),
-                            'data'        => []
-                        ], 404);
-                    }
+                $countryQuery = InPatientPlan::whereHas('insurance_company', function ($q) {
+                    $q->whereNull('deleted_at');
+                });
+                InsurancePlanHelper::filterByClientCurrency($countryQuery, $request->user_id);
+                $plansExistForCountry = $countryQuery->exists();
+                if (!$plansExistForCountry) {
+                    return response()->json([
+                        'status'      => false,
+                        'status_code' => 404,
+                        'message'     => __('messages.api.no_inpatient_insurance_plans_for_country'),
+                        'data'        => []
+                    ], 404);
                 }
             }
 
