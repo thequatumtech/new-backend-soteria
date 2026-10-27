@@ -306,6 +306,112 @@
             <h1>Life Insurance Policy</h1>
         </header>
 
+{{-- POLICYHOLDER DETAILS --}}
+<div class="policy-summary">
+    <h4>Policyholder Details</h4>
+    <table class="policy-details">
+        <tbody>
+            <tr><td>First Name</td><td>{{ $data->first_name ?? '' }}</td></tr>
+            <tr><td>Last Name</td><td>{{ $data->last_name ?? '' }}</td></tr>
+            <tr><td>Third Name</td><td>{{ $data->third_name ?? '' }}</td></tr>
+            <tr><td>Family Name</td><td>{{ $data->family_name ?? '' }}</td></tr>
+            <tr><td>Nationality</td><td>{{ $data->nationality ?? '' }}</td></tr>
+            <tr><td>Nationality Number</td><td>{{ $data->nationality_no ?? '' }}</td></tr>
+            <tr><td>Residence ID Number</td><td>{{ $data->id_residence_no ?? '' }}</td></tr>
+            <tr><td>Birth Date</td><td>{{ !empty($data->birth_date) ? date('m-d-Y', strtotime($data->birth_date)) : '' }}</td></tr>
+            <tr><td>Gender</td><td>{{ $data->gender ?? '' }}</td></tr>
+            <tr><td>Marital Status</td><td>{{ getMaritalStatusName($data->marital_status ?? null) }}</td></tr>
+            <tr><td>Place of Residence</td><td>{{ $data->place_residence ?? '' }}</td></tr>
+            <tr><td>Occupation / Work</td><td>{{ $data->occupancy_work ?? '' }}</td></tr>
+            <tr><td>American Nationality Status</td><td>{{ $data->american_notionality_status ?? '' }}</td></tr>
+            <tr><td>Beneficiary First Name</td><td>{{ $data->beneficiary_first_name ?? '' }}</td></tr>
+            <tr><td>Beneficiary Last Name</td><td>{{ $data->beneficiary_last_name ?? '' }}</td></tr>
+            <tr><td>Beneficiary Third Name</td><td>{{ $data->beneficiary_third_name ?? '' }}</td></tr>
+        </tbody>
+    </table>
+</div>
+
+{{-- RESIDENTIAL ADDRESS --}}
+<div class="policy-summary">
+    <h4>Residential Address</h4>
+    <table class="policy-details">
+        <tbody>
+            <tr><td>Country</td><td>{{ getCountryName($data->country_id ?? null) }}</td></tr>
+            <tr><td>City</td><td>{{ getCityName($data->city_id ?? null) }}</td></tr>
+            <tr><td>District</td><td>{{ getDistrictName($data->district_id ?? null) }}</td></tr>
+            <tr><td>Street Name</td><td>{{ $data->street_name ?? '' }}</td></tr>
+            <tr><td>Building Number</td><td>{{ $data->building_no ?? '' }}</td></tr>
+        </tbody>
+    </table>
+</div>
+
+{{-- EMPLOYMENT DETAILS --}}
+<div class="policy-summary">
+    <h4>Employment Details</h4>
+    <table class="policy-details">
+        <tbody>
+            <tr><td>Employee Status</td><td>{{ $data->employee_status ?? '' }}</td></tr>
+            <tr><td>Company Name</td><td>{{ $data->company_name ?? '' }}</td></tr>
+            <tr><td>Position</td><td>{{ $data->position ?? '' }}</td></tr>
+            <tr><td>Nature of Work</td><td>{{ $data->work_nature ?? '' }}</td></tr>
+            <tr><td>Company City</td><td>{{ getCityName($data->employee_city_id ?? null) }}</td></tr>
+            <tr><td>Company District</td><td>{{ getDistrictName($data->employee_district_id ?? null) }}</td></tr>
+            <tr><td>Company Street</td><td>{{ $data->employee_street_name ?? '' }}</td></tr>
+            <tr><td>Company Building Number</td><td>{{ $data->employee_building_no ?? '' }}</td></tr>
+            <tr><td>Company Contact</td><td>{{ $data->company_contact ?? '' }}</td></tr>
+        </tbody>
+    </table>
+</div>
+
+{{-- MEDICAL HISTORY --}}
+<div class="policy-summary">
+    <h4>Medical History and Declarations</h4>
+    <table class="policy-details">
+        <tbody>
+            <tr><td>Height</td><td>{{ $data->height ?? '' }}</td></tr>
+            <tr><td>Weight</td><td>{{ $data->wight ?? '' }}</td></tr>
+            <tr><td>Chronic Diseases</td><td>{{ $data->chronic_diseases_id ?? '' }}</td></tr>
+            <tr><td>Previous Operation</td><td>{{ $data->previous_operation ?? '' }}</td></tr>
+            <tr><td>Operation Details</td><td>{{ $data->operation_details ?? '' }}</td></tr>
+            <tr><td>Company Declined Policy</td><td>{{ $data->company_declined_policy ?? '' }}</td></tr>
+            <tr><td>Declined Policy Details</td><td>{{ $data->declined_policy_details ?? '' }}</td></tr>
+            <tr><td>Existing Life Insurance</td><td>{{ $data->exiting_life_insur ?? '' }}</td></tr>
+            <tr><td>Existing Life Insurance Details</td><td>{{ $data->exiting_life_insur_details ?? '' }}</td></tr>
+        </tbody>
+    </table>
+</div>
+
+{{-- BENEFICIARY DETAILS --}}
+<div class="policy-summary">
+    <h4>Beneficiary Details</h4>
+    <table class="policy-details">
+        <tbody>
+            <tr><td>First Name</td><td>{{ $data->beneficiary_first_name ?? '' }}</td></tr>
+            <tr><td>Last Name</td><td>{{ $data->beneficiary_last_name ?? '' }}</td></tr>
+            <tr><td>Third Name</td><td>{{ $data->beneficiary_third_name ?? '' }}</td></tr>
+        </tbody>
+    </table>
+</div>
+
+{{-- LIFE INSURANCE COVERAGE --}}
+<div class="policy-summary">
+    <h4>Life Insurance Coverage Details</h4>
+    <table class="policy-details">
+        <tbody>
+            <tr><td>Insurance Amount</td><td>{{ $data->insurance_amount ?? '' }}</td></tr>
+            <tr><td>Effective Date</td><td>{{ !empty($data->effective_date) ? date('m-d-Y', strtotime($data->effective_date)) : '' }}</td></tr>
+            <tr><td>Insurance Period (Years)</td><td>{{ $data->insurance_period ?? '' }}</td></tr>
+            <tr><td>Inception Date</td><td>{{ !empty($data->inception_date) ? date('m-d-Y', strtotime($data->inception_date)) : '' }}</td></tr>
+            <tr><td>Expiry Date</td><td>{{ !empty($data->expiry_date) ? date('m-d-Y', strtotime($data->expiry_date)) : '' }}</td></tr>
+            <tr><td>Renewal</td><td>{{ !empty($data->renew) ? 'Yes' : 'No' }}</td></tr>
+            <tr><td>Previous Policy ID</td><td>{{ $data->old_policy_id_for_renew ?? '' }}</td></tr>
+        </tbody>
+    </table>
+</div>
+
+
+
+
         <!-- POLICY DETAILS -->
         <table class="policy-details">
             <tr>

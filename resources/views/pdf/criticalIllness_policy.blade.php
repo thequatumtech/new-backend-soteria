@@ -303,12 +303,12 @@
 
         {{-- ===================================================== LETTERHEAD Show only if letterhead exists
 ====================================================== --}} @php $letterHeadPath = null;
-        if (!empty($data->letterhead)) {
-        $possibleLetterHeadPath = public_path('insurance/' . $data->insurance_company_id . '/' . $data->letterhead);
-        if (file_exists($possibleLetterHeadPath)) {
+if (!empty($data->letterhead)) {
+    $possibleLetterHeadPath = public_path('insurance/' . $data->insurance_company_id . '/' . $data->letterhead);
+    if (file_exists($possibleLetterHeadPath)) {
         $letterHeadPath = $possibleLetterHeadPath;
-        }
-        } @endphp
+    }
+} @endphp
 
         @if($letterHeadPath)
         <div class="letterhead"> <img src="{{ $letterHeadPath }}"
@@ -318,6 +318,186 @@
             <img src="{{public_path('insurance/' . $data->insurance_company_id . '/' . $data->logo)}}" alt="{{ $data->company_name }}" class="logo">
             <h1>Critical Illness insurance Policy</h1>
         </header>
+
+        {{-- ================= APPLICATION DETAILS ================= --}}
+        <div class="policy-summary">
+            <h4>Application Details</h4>
+
+            <div class="table-responsive">
+                <table class="policy-details">
+                    <tr>
+                        <td colspan="2" style="background-color: #d0d0d0;">
+                            <strong>Applicant Information</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Full Name</td>
+                        <td>
+                            {{ $data->first_name ?? '' }}
+                            {{ $data->last_name ?? '' }}
+                            {{ $data->third_name ?? '' }}
+                            {{ $data->family_name ?? '' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Nationality</td>
+                        <td>{{ $data->nationality ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Nationality Number</td>
+                        <td>{{ $data->nationality_no ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Residence ID Number</td>
+                        <td>{{ $data->id_residence_no ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Date of Birth</td>
+                        <td>
+                            {{ !empty($data->birth_date) ? date('m-d-Y', strtotime($data->birth_date)) : '' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Gender</td>
+                        <td>{{ $data->gender ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Marital Status</td>
+                        <td>{{ $data->marital_status ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Place of Residence</td>
+                        <td>{{ $data->place_residence ?? '' }}</td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2" style="background-color: #d0d0d0;">
+                            <strong>Beneficiary Information</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Beneficiary Name</td>
+                        <td>
+                            {{ $data->beneficiary_first_name ?? '' }}
+                            {{ $data->beneficiary_last_name ?? '' }}
+                            {{ $data->beneficiary_third_name ?? '' }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2" style="background-color: #d0d0d0;">
+                            <strong>Employment Information</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Occupation / Work</td>
+                        <td>{{ $data->occupancy_work ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Company Name</td>
+                        <td>{{ $data->company_name ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Position</td>
+                        <td>{{ $data->position ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Nature of Work</td>
+                        <td>{{ $data->work_nature ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Company Contact</td>
+                        <td>{{ $data->company_contact ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Company Address</td>
+                        <td>
+                            {{ $data->company_street_name ?? '' }}
+                            {{ !empty($data->company_building_no) ? ', Building ' . $data->company_building_no : '' }}
+                            {{ !empty($data->company_city_name) ? ', ' . $data->company_city_name : (!empty($data->company_city_id) ? ', City ID: ' . $data->company_city_id : '') }}
+                            {{ !empty($data->company_district_name) ? ', ' . $data->company_district_name : (!empty($data->company_district_id) ? ', District ID: ' . $data->company_district_id : '') }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2" style="background-color: #d0d0d0;">
+                            <strong>Medical Information</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Height</td>
+                        <td>{{ $data->height ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Weight</td>
+                        <td>{{ $data->wight ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Chronic Diseases</td>
+                        <td>{{ $data->chronic_diseases_name ?? $data->chronic_diseases_id ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Previous Operation</td>
+                        <td>{{ $data->previous_operation ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Operation Details</td>
+                        <td>{{ $data->operation_details ?? '' }}</td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2" style="background-color: #d0d0d0;">
+                            <strong>Insurance Information</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Previous Insurance Policy</td>
+                        <td>{{ $data->previous_insurance_policy ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Previous Policy Details</td>
+                        <td>{{ $data->previous_insurance_policy_details ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Insurance Amount</td>
+                        <td>
+                            {{ isset($data->insurance_amount) ? number_format((float) $data->insurance_amount, 2) . ' ' . ($abbr ?? 'JOD') : '' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Insurance Plan</td>
+                        <td>{{ $data->plan_name ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Inception Date</td>
+                        <td>
+                            {{ !empty($data->inception_date) ? date('m-d-Y', strtotime($data->inception_date)) : '' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Expiry Date</td>
+                        <td>
+                            {{ !empty($data->expiry_date) ? date('m-d-Y', strtotime($data->expiry_date)) : '' }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2" style="background-color: #d0d0d0;">
+                            <strong>Supporting Documents</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Passport / ID Documents</td>
+                        <td>{{ $data->passport_id_documents ?? 'Not provided' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Insured Documents</td>
+                        <td>{{ $data->insured_documents ?? 'Not provided' }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        {{-- ================= END APPLICATION DETAILS ================= --}}
 
         <div class="table-responsive">
             <table class="policy-details stack-on-mobile">
@@ -357,43 +537,43 @@
         </div>
 
         @php
-        $columns = [];
-        $abbr = $abbr ?? 'JOD';
+$columns = [];
+$abbr = $abbr ?? 'JOD';
 
-        $feesRate = $plan->fees ?? 0;
-        $stampsRate = $plan->stamps ?? 0;
-        $salesTaxRate = $plan->sales_tax ?? 0;
-        $cbjRate = $plan->cbj ?? 0;
-        $cbjTaxRate = $plan->sales_tax_cbj ?? 0;
+$feesRate = $plan->fees ?? 0;
+$stampsRate = $plan->stamps ?? 0;
+$salesTaxRate = $plan->sales_tax ?? 0;
+$cbjRate = $plan->cbj ?? 0;
+$cbjTaxRate = $plan->sales_tax_cbj ?? 0;
 
-        if (!empty($purchase->policy_plan_limit))
-        $columns['Limit'] = number_format($purchase->policy_plan_limit, 2) . ' ' . $abbr;
+if (!empty($purchase->policy_plan_limit))
+    $columns['Limit'] = number_format($purchase->policy_plan_limit, 2) . ' ' . $abbr;
 
-        if (!empty($purchase->net_premium))
-        $columns['Net Premium'] = number_format($purchase->net_premium, 2) . ' ' . $abbr;
+if (!empty($purchase->net_premium))
+    $columns['Net Premium'] = number_format($purchase->net_premium, 2) . ' ' . $abbr;
 
-        $fees_label = 'Issuance Fees' . ($feesRate > 0 ? ' (' . $feesRate . '%)' : '');
-        if (!empty($purchase->fees))
-        $columns[$fees_label] = number_format($purchase->fees, 2) . ' ' . $abbr;
+$fees_label = 'Issuance Fees' . ($feesRate > 0 ? ' (' . $feesRate . '%)' : '');
+if (!empty($purchase->fees))
+    $columns[$fees_label] = number_format($purchase->fees, 2) . ' ' . $abbr;
 
-        $stamps_label = 'Stamps' . ($stampsRate > 0 ? ' (' . $stampsRate . '%)' : '');
-        if (!empty($purchase->stamps))
-        $columns[$stamps_label] = number_format($purchase->stamps, 2) . ' ' . $abbr;
+$stamps_label = 'Stamps' . ($stampsRate > 0 ? ' (' . $stampsRate . '%)' : '');
+if (!empty($purchase->stamps))
+    $columns[$stamps_label] = number_format($purchase->stamps, 2) . ' ' . $abbr;
 
-        $sales_tax_label = 'Sales Tax' . ($salesTaxRate > 0 ? ' (' . $salesTaxRate . '%)' : '');
-        if (!empty($purchase->sales_tax))
-        $columns[$sales_tax_label] = number_format($purchase->sales_tax, 2) . ' ' . $abbr;
+$sales_tax_label = 'Sales Tax' . ($salesTaxRate > 0 ? ' (' . $salesTaxRate . '%)' : '');
+if (!empty($purchase->sales_tax))
+    $columns[$sales_tax_label] = number_format($purchase->sales_tax, 2) . ' ' . $abbr;
 
-        $cbj_label = 'Contribution to the Guarantee Fund (CBJ)' . ($cbjRate > 0 ? ' (' . $cbjRate . '%)' : '');
-        if (!empty($purchase->cbj))
-        $columns[$cbj_label] = number_format($purchase->cbj, 2) . ' ' . $abbr;
+$cbj_label = 'Contribution to the Guarantee Fund (CBJ)' . ($cbjRate > 0 ? ' (' . $cbjRate . '%)' : '');
+if (!empty($purchase->cbj))
+    $columns[$cbj_label] = number_format($purchase->cbj, 2) . ' ' . $abbr;
 
-        $cbj_tax_label = 'Sales Tax on CBJ Contribution Fund' . ($cbjTaxRate > 0 ? ' (' . $cbjTaxRate . '%)' : '');
-        if (!empty($purchase->sales_tax_cbj))
-        $columns[$cbj_tax_label] = number_format($purchase->sales_tax_cbj, 2) . ' ' . $abbr;
+$cbj_tax_label = 'Sales Tax on CBJ Contribution Fund' . ($cbjTaxRate > 0 ? ' (' . $cbjTaxRate . '%)' : '');
+if (!empty($purchase->sales_tax_cbj))
+    $columns[$cbj_tax_label] = number_format($purchase->sales_tax_cbj, 2) . ' ' . $abbr;
 
-        if (!empty($purchase->gross_premium))
-        $columns['Gross Premium'] = number_format($purchase->gross_premium, 2) . ' ' . $abbr;
+if (!empty($purchase->gross_premium))
+    $columns['Gross Premium'] = number_format($purchase->gross_premium, 2) . ' ' . $abbr;
         @endphp
 
         @if(count($columns) > 0)
@@ -441,60 +621,60 @@
         </div>
 
         @php
-        /*
-        Check User Signature
-        --------------------------------------------------------------------------
-        */
-        $userSignaturePath = null;
+/*
+Check User Signature
+--------------------------------------------------------------------------
+*/
+$userSignaturePath = null;
 
-        if (!empty($data->user_signature)) {
-        $path = public_path($data->user_signature);
+if (!empty($data->user_signature)) {
+    $path = public_path($data->user_signature);
 
-        if (file_exists($path)) {
+    if (file_exists($path)) {
         $userSignaturePath = $path;
-        }
+    }
 
-        }
+}
 
-        /*
-        Company Stamp
-        --------------------------------------------------------------------------
-        */
-        $companyStampPath = null;
+/*
+Company Stamp
+--------------------------------------------------------------------------
+*/
+$companyStampPath = null;
 
-        if (!empty($data->company_stamp)) {
-        $path = public_path(
+if (!empty($data->company_stamp)) {
+    $path = public_path(
         'insurance/' .
         $data->insurance_company_id .
         '/' .
         $data->company_stamp
-        );
+    );
 
-        if (file_exists($path)) {
+    if (file_exists($path)) {
         $companyStampPath = $path;
-        }
+    }
 
-        }
+}
 
-        /*
-        Authorized Signature
-        --------------------------------------------------------------------------
-        */
-        $authorizedSignaturePath = null;
+/*
+Authorized Signature
+--------------------------------------------------------------------------
+*/
+$authorizedSignaturePath = null;
 
-        if (!empty($data->authorized_signature)) {
-        $path = public_path(
+if (!empty($data->authorized_signature)) {
+    $path = public_path(
         'insurance/' .
         $data->insurance_company_id .
         '/' .
         $data->authorized_signature
-        );
+    );
 
-        if (file_exists($path)) {
+    if (file_exists($path)) {
         $authorizedSignaturePath = $path;
-        }
+    }
 
-        }
+}
         @endphp
 
         @if($userSignaturePath)

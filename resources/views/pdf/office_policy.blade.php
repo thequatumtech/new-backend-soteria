@@ -305,6 +305,227 @@
             <h1>Office Insurance Policy</h1>
         </header>
 
+
+{{-- APPLICATION DETAILS --}}
+<table class="policy-details">
+    <tr>
+        <td colspan="2" style="background-color: #d0d0d0;">
+            Applicant Details
+        </td>
+    </tr>
+    <tr>
+        <td>Full Name</td>
+        <td>{{ trim(($data->first_name ?? '') . ' ' . ($data->last_name ?? '') . ' ' . ($data->third_name ?? '') . ' ' . ($data->family_name ?? '')) }}</td>
+    </tr>
+    <tr>
+        <td>Nationality</td>
+        <td>{{ $data->nationality ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Nationality Number</td>
+        <td>{{ $data->nationality_no ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Residence ID</td>
+        <td>{{ $data->id_residence_no ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Date of Birth</td>
+        <td>{{ !empty($data->birth_date) ? date('m-d-Y', strtotime($data->birth_date)) : '' }}</td>
+    </tr>
+    <tr>
+        <td>Gender</td>
+        <td>{{ $data->gender ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Place of Residence</td>
+        <td>{{ $data->place_residence ?? '' }}</td>
+    </tr>
+
+    <tr>
+        <td colspan="2" style="background-color: #d0d0d0;">
+            Office / Company Details
+        </td>
+    </tr>
+    <tr>
+        <td>Company Name</td>
+        <td>{{ $data->company_name ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Company Registration National ID</td>
+        <td>{{ $data->company_register_national_id ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Company Registration ID</td>
+        <td>{{ $data->company_register_id ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Office Type</td>
+        <td>{{ $data->office_type ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Office Category</td>
+        <td>{{ $data->office_category ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Number of Floors</td>
+        <td>{{ $data->no_of_floor ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Number of Rooms</td>
+        <td>{{ $data->no_of_room ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Apartment Size</td>
+        <td>{{ $data->size_of_apartment ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Age of Apartment</td>
+        <td>{{ $data->age_of_apartment ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Number of Residences</td>
+        <td>{{ $data->no_of_residence ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Number of Employees</td>
+        <td>{{ $data->no_of_employee ?? '' }}</td>
+    </tr>
+
+    <tr>
+        <td colspan="2" style="background-color: #d0d0d0;">
+            Office Address
+        </td>
+    </tr>
+    <tr>
+        <td>Country</td>
+        <td>{{ $data->country_name ?? $data->country_id ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>City</td>
+        <td>{{ $data->city_name ?? $data->city_id ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>District</td>
+        <td>{{ $data->district_name ?? $data->district_id ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Street Name</td>
+        <td>{{ $data->street_name ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Building Number</td>
+        <td>{{ $data->building_no ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Office Number</td>
+        <td>{{ $data->office_no ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Block Number</td>
+        <td>{{ $data->block_no ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Plate Number</td>
+        <td>{{ $data->plate_no ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Plot Number</td>
+        <td>{{ $data->plot_no ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Company Telephone</td>
+        <td>{{ $data->company_telephone ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Company Owner</td>
+        <td>{{ $data->company_owner_name ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Owner Telephone</td>
+        <td>{{ $data->company_owner_telephone ?? '' }}</td>
+    </tr>
+
+    <tr>
+        <td colspan="2" style="background-color: #d0d0d0;">
+            Insurance Details
+        </td>
+    </tr>
+    <tr>
+        <td>Effective Date</td>
+        <td>{{ !empty($data->effective_date) ? date('m-d-Y', strtotime($data->effective_date)) : '' }}</td>
+    </tr>
+    <tr>
+        <td>Expiry Date</td>
+        <td>{{ !empty($data->expiry_date) ? date('m-d-Y', strtotime($data->expiry_date)) : '' }}</td>
+    </tr>
+    <tr>
+        <td>Insurance Limit</td>
+        <td>{{ $data->insurance_limit ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Protection System</td>
+        <td>{{ $data->protection_system ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Inception Date</td>
+        <td>{{ !empty($data->inception_date) ? date('m-d-Y', strtotime($data->inception_date)) : '' }}</td>
+    </tr>
+    <tr>
+        <td>Insurance Expiry Date</td>
+        <td>{{ !empty($data->insurance_expiry_date) ? date('m-d-Y', strtotime($data->insurance_expiry_date)) : '' }}</td>
+    </tr>
+
+    <tr>
+        <td colspan="2" style="background-color: #d0d0d0;">
+            Declarations
+        </td>
+    </tr>
+    <tr>
+        <td>Partner Company Status</td>
+        <td>{{ $data->partner_company_status ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Authorized Insurance Policy Status</td>
+        <td>{{ $data->authorized_insurance_police_status ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Company Registration Status</td>
+        <td>{{ $data->auth_company_register_status ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Previous Insurance Policy</td>
+        <td>{{ $data->provious_insurance_policy ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Insurance Declined</td>
+        <td>{{ $data->insurance_declined_issue_status ?? '' }}</td>
+    </tr>
+    <tr>
+        <td>Claims in the Last 5 Years</td>
+        <td>{{ $data->claims_5_year_status ?? '' }}</td>
+    </tr>
+
+    @if(!empty($data->renew))
+        <tr>
+            <td>Renewal</td>
+            <td>Yes</td>
+        </tr>
+        <tr>
+            <td>Previous Policy ID</td>
+            <td>{{ $data->old_policy_id_for_renew ?? '' }}</td>
+        </tr>
+    @else
+        <tr>
+            <td>Renewal</td>
+            <td>No</td>
+        </tr>
+    @endif
+
+   
+</table>
+
+
         <!-- POLICY DETAILS -->
         <table class="policy-details">
             <tr>

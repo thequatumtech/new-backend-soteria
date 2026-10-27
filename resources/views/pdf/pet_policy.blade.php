@@ -341,6 +341,149 @@ if (!empty($data->letterhead)) {
             <h1>Pets Insurance Policy</h1>
         </header>
 
+
+        {{-- ================= APPLICATION DETAILS ================= --}}
+        <div class="policy-summary">
+            <h4>Application Details</h4>
+
+            <div class="table-scroll">
+                <table class="policy-details">
+                    <tr>
+                        <td colspan="2" style="background-color: #d0d0d0;">
+                            <strong>Pet Owner Information</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Full Name</td>
+                        <td>
+                            {{ $data->first_name ?? '' }}
+                            {{ $data->last_name ?? '' }}
+                            {{ $data->third_name ?? '' }}
+                            {{ $data->family_name ?? '' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Nationality Number</td>
+                        <td>{{ $data->nationality_no ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Residence ID Number</td>
+                        <td>{{ $data->id_residence_no ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Owner Date of Birth</td>
+                        <td>
+                            {{ !empty($data->birth_date) ? date('m-d-Y', strtotime($data->birth_date)) : '' }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2" style="background-color: #d0d0d0;">
+                            <strong>Pet Information</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Pet Name</td>
+                        <td>{{ $data->pets_name ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Pet Type</td>
+                        <td>
+                            @php
+                                $petType = $data->pets_type ?? $data->type_of_pets ?? null;
+                            @endphp
+                            {{ $petType == 1 ? 'Dog' : ($petType == 2 ? 'Cat' : ($petType ?? '')) }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Pet Date of Birth</td>
+                        <td>
+                            {{ !empty($data->pets_dob) ? date('m-d-Y', strtotime($data->pets_dob)) : '' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Gender</td>
+                        <td>{{ $data->gender ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Breed</td>
+                        <td>{{ $data->breed ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Existing Medical Condition</td>
+                        <td>
+                            {{ !empty($data->pets_existing_condition_status)
+    ? 'Yes'
+    : 'No' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Medical Condition Details</td>
+                        <td>{{ $data->pets_existing_condition ?? '' }}</td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2" style="background-color: #d0d0d0;">
+                            <strong>Insurance Information</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Insurance Plan</td>
+                        <td>{{ $data->plan_name ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Insurance Limit</td>
+                        <td>
+                            {{ isset($data->insurance_limit)
+    ? number_format((float) $data->insurance_limit, 2) . ' ' . ($abbr ?? 'JOD')
+    : (isset($purchase->policy_plan_limit)
+        ? number_format((float) $purchase->policy_plan_limit, 2) . ' ' . ($abbr ?? 'JOD')
+        : '') }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Inception Date</td>
+                        <td>
+                            {{ !empty($data->inception_date) ? date('m-d-Y', strtotime($data->inception_date)) : '' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Expiry Date</td>
+                        <td>
+                            {{ !empty($data->expiry_date) ? date('m-d-Y', strtotime($data->expiry_date)) : '' }}
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="2" style="background-color: #d0d0d0;">
+                            <strong>Supporting Documents</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Vaccine Document</td>
+                        <td>{{ $data->vaccine_document ?? 'Not provided' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Pet Picture</td>
+                        <td>{{ $data->pets_picture ?? 'Not provided' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Pet Passport</td>
+                        <td>{{ $data->pets_passport ?? 'Not provided' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Owner Picture</td>
+                        <td>{{ $data->personal_picture_documents ?? 'Not provided' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Pet Permit</td>
+                        <td>{{ $data->pets_permit ?? 'Not provided' }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        {{-- ================= END APPLICATION DETAILS ================= --}}
+
         <!-- POLICY DETAILS — 4-column layout, stacks to 2-col pairs on mobile -->
         <table class="policy-details four-col">
             <tr>

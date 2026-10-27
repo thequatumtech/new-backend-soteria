@@ -284,13 +284,13 @@
              LETTERHEAD — show only if letterhead image exists
         ====================================================== --}}
         @php
-        $letterHeadPath = null;
-        if (!empty($data->letterhead)) {
-        $possibleLetterHeadPath = public_path('insurance/' . $data->insurance_company_id . '/' . $data->letterhead);
-        if (file_exists($possibleLetterHeadPath)) {
+$letterHeadPath = null;
+if (!empty($data->letterhead)) {
+    $possibleLetterHeadPath = public_path('insurance/' . $data->insurance_company_id . '/' . $data->letterhead);
+    if (file_exists($possibleLetterHeadPath)) {
         $letterHeadPath = $possibleLetterHeadPath;
-        }
-        }
+    }
+}
         @endphp
 
         @if($letterHeadPath)
@@ -304,6 +304,227 @@
                 alt="{{ $data->company_name }}" class="logo">
             <h1>Marine Insurance Policy</h1>
         </header>
+
+
+        {{-- APPLICATION DETAILS --}}
+        <table class="policy-details">
+            <tr>
+                <td colspan="2" style="background-color: #d0d0d0; font-weight: bold;">
+                    Applicant Details
+                </td>
+            </tr>
+
+            <tr>
+                <td>Applicant Type</td>
+                <td>
+                    {{ ($data->company_status ?? null) == 1 ? 'Individual' : (($data->company_status ?? null) == 2 ? 'Company' : '') }}
+                </td>
+            </tr>
+
+            @if(($data->company_status ?? null) == 1)
+                <tr>
+                    <td>Full Name</td>
+                    <td>{{ trim(($data->first_name ?? '') . ' ' . ($data->last_name ?? '') . ' ' . ($data->third_name ?? '') . ' ' . ($data->family_name ?? '')) }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Nationality</td>
+                    <td>{{ $data->nationality ?? '' }}</td>
+                </tr>
+                <tr>
+                    <td>Nationality Number</td>
+                    <td>{{ $data->nationality_no ?? '' }}</td>
+                </tr>
+                <tr>
+                    <td>Residence ID</td>
+                    <td>{{ $data->id_residence_no ?? '' }}</td>
+                </tr>
+                <tr>
+                    <td>Date of Birth</td>
+                    <td>{{ !empty($data->birth_date) ? date('m-d-Y', strtotime($data->birth_date)) : '' }}</td>
+                </tr>
+                <tr>
+                    <td>Gender</td>
+                    <td>{{ $data->gender ?? '' }}</td>
+                </tr>
+            @elseif(($data->company_status ?? null) == 2)
+                <tr>
+                    <td>Company Name</td>
+                    <td>{{ $data->company_name ?? '' }}</td>
+                </tr>
+                <tr>
+                    <td>Company Registration National ID</td>
+                    <td>{{ $data->company_reg_notional_id ?? '' }}</td>
+                </tr>
+                <tr>
+                    <td>Company Registration Number</td>
+                    <td>{{ $data->company_reg_no ?? '' }}</td>
+                </tr>
+                <tr>
+                    <td>Company Country</td>
+                    <td>{{ $data->company_country_name ?? $data->company_country_id ?? '' }}</td>
+                </tr>
+                <tr>
+                    <td>Company City</td>
+                    <td>{{ $data->company_city_name ?? $data->company_city_id ?? '' }}</td>
+                </tr>
+                <tr>
+                    <td>Company District</td>
+                    <td>{{ $data->company_district_name ?? $data->company_district_id ?? '' }}</td>
+                </tr>
+                <tr>
+                    <td>Street Name</td>
+                    <td>{{ $data->company_street_name ?? '' }}</td>
+                </tr>
+                <tr>
+                    <td>Building Number</td>
+                    <td>{{ $data->company_building_no ?? '' }}</td>
+                </tr>
+                <tr>
+                    <td>Office Number</td>
+                    <td>{{ $data->company_office_no ?? '' }}</td>
+                </tr>
+                <tr>
+                    <td>Company Contact</td>
+                    <td>{{ $data->company_contact ?? '' }}</td>
+                </tr>
+                <tr>
+                    <td>Owner Name</td>
+                    <td>{{ trim(($data->owner_first_name ?? '') . ' ' . ($data->owner_last_name ?? '') . ' ' . ($data->owner_third_name ?? '') . ' ' . ($data->owner_family_name ?? '')) }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Owner Contact</td>
+                    <td>{{ $data->company_owner_contact ?? '' }}</td>
+                </tr>
+            @endif
+
+            <tr>
+                <td colspan="2" style="background-color: #d0d0d0; font-weight: bold;">
+                    Shipment Details
+                </td>
+            </tr>
+            <tr>
+                <td>Voyage From</td>
+                <td>{{ $data->vayage_from_name ?? $data->vayage_from_id ?? '' }}</td>
+            </tr>
+            <tr>
+                <td>Through Country</td>
+                <td>{{ $data->through_country_name ?? $data->through_country_id ?? '' }}</td>
+            </tr>
+            <tr>
+                <td>Destination Country</td>
+                <td>{{ $data->destination_country_name ?? $data->destination_country_id ?? '' }}</td>
+            </tr>
+            <tr>
+                <td>Type of Transportation</td>
+                <td>{{ $data->type_of_transportation ?? '' }}</td>
+            </tr>
+            <tr>
+                <td>Type of Cover</td>
+                <td>{{ $data->type_of_cover ?? '' }}</td>
+            </tr>
+            <tr>
+                <td>Item Category</td>
+                <td>{{ $data->item_category_name ?? $data->item_category_id ?? '' }}</td>
+            </tr>
+            <tr>
+                <td>Item Subcategory</td>
+                <td>{{ $data->item_subcategory_name ?? $data->item_subcategory_id ?? '' }}</td>
+            </tr>
+            <tr>
+                <td>Bill Number</td>
+                <td>{{ $data->bill_no ?? '' }}</td>
+            </tr>
+            <tr>
+                <td>Insured Items</td>
+                <td>{{ $data->insured_items ?? '' }}</td>
+            </tr>
+            <tr>
+                <td>Transshipped Through Third Country</td>
+                <td>{{ $data->trans_shipped_third_country ?? '' }}</td>
+            </tr>
+
+            <tr>
+                <td colspan="2" style="background-color: #d0d0d0; font-weight: bold;">
+                    Declarations
+                </td>
+            </tr>
+            <tr>
+                <td>Dangerous Activities</td>
+                <td>{{ $data->dangerous_activities ?? '' }}</td>
+            </tr>
+            <tr>
+                <td>Existing Policy</td>
+                <td>{{ ($data->existing_policy_status ?? null) == 1 ? 'Yes' : (($data->existing_policy_status ?? null) == 0 ? 'No' : '') }}
+                </td>
+            </tr>
+            @if(!empty($data->existing_policy_desc))
+                <tr>
+                    <td>Existing Policy Description</td>
+                    <td>{{ $data->existing_policy_desc }}</td>
+                </tr>
+            @endif
+            <tr>
+                <td>Previously Declined Insurance</td>
+                <td>{{ ($data->declined_insurance_status ?? null) == 1 ? 'Yes' : (($data->declined_insurance_status ?? null) == 0 ? 'No' : '') }}
+                </td>
+            </tr>
+            @if(!empty($data->declined_insurance_desc))
+                <tr>
+                    <td>Declined Insurance Description</td>
+                    <td>{{ $data->declined_insurance_desc }}</td>
+                </tr>
+            @endif
+            <tr>
+                <td>Previous Claims or Accidents</td>
+                <td>{{ ($data->claims_accident_status ?? null) == 1 ? 'Yes' : (($data->claims_accident_status ?? null) == 0 ? 'No' : '') }}
+                </td>
+            </tr>
+            @if(!empty($data->claims_accident_desc))
+                <tr>
+                    <td>Claims/Accidents Description</td>
+                    <td>{{ $data->claims_accident_desc }}</td>
+                </tr>
+            @endif
+
+            <tr>
+                <td colspan="2" style="background-color: #d0d0d0; font-weight: bold;">
+                    Supporting Documents
+                </td>
+            </tr>
+            @foreach([
+                    'register_document' => 'Registration Document',
+                    'billing_of_landing_doc' => 'Bill of Lading',
+                    'copy_of_invoice_doc' => 'Invoice Copy',
+                    'insured_id_doc' => 'Insured ID Document',
+                    'policy_issuer_doc' => 'Policy Issuer Document',
+                    'company_reg_owner_doc' => 'Company Registration/Owner Document',
+                    'career_municipality_license_doc' => 'Carrier/Municipality License',
+                    'company_tax_certificate_doc' => 'Company Tax Certificate',
+                    'practice_certificate_doc' => 'Practice Certificate',
+                ] as $field => $label)
+                @if(!empty($data->$field))
+                    <tr>
+                        <td>{{ $label }}</td>
+                        <td>{{ is_array($data->$field) ? implode(', ', $data->$field) : $data->$field }}</td>
+                    </tr>
+                @endif
+            @endforeach
+
+            <tr>
+                <td>Renewal</td>
+                <td>{{ ($data->renew ?? null) == 1 ? 'Yes' : 'No' }}</td>
+            </tr>
+            @if(!empty($data->old_policy_id_for_renew))
+                <tr>
+                    <td>Previous Policy ID</td>
+                    <td>{{ $data->old_policy_id_for_renew }}</td>
+                </tr>
+            @endif
+        </table>
+
+
 
         <!-- POLICY DETAILS -->
         <table class="policy-details">
@@ -335,38 +556,38 @@
 
         {{-- ========================= PREMIUM SUMMARY (vertical label|value — matches Personal Accident) ========================= --}}
         @php
-        $abbr = $abbr ?? 'JOD';
+$abbr = $abbr ?? 'JOD';
 
-        $columns = [];
+$columns = [];
 
-        if (!empty($purchase->policy_plan_limit))
-        $columns['Limit'] = number_format($purchase->policy_plan_limit, 2) . ' ' . $abbr;
+if (!empty($purchase->policy_plan_limit))
+    $columns['Limit'] = number_format($purchase->policy_plan_limit, 2) . ' ' . $abbr;
 
-        if (!empty($purchase->net_premium))
-        $columns['Net Premium'] = number_format($purchase->net_premium, 2) . ' ' . $abbr;
+if (!empty($purchase->net_premium))
+    $columns['Net Premium'] = number_format($purchase->net_premium, 2) . ' ' . $abbr;
 
-        $fees_label = 'Issuance Fees' . ($data->fees > 0 ? ' (' . $data->fees . '%)' : '');
-        if (!empty($purchase->fees))
-        $columns[$fees_label] = number_format($purchase->fees, 2) . ' ' . $abbr;
+$fees_label = 'Issuance Fees' . ($data->fees > 0 ? ' (' . $data->fees . '%)' : '');
+if (!empty($purchase->fees))
+    $columns[$fees_label] = number_format($purchase->fees, 2) . ' ' . $abbr;
 
-        $stamps_label = 'Stamps' . ($data->stamps > 0 ? ' (' . $data->stamps . '%)' : '');
-        if (!empty($purchase->stamps))
-        $columns[$stamps_label] = number_format($purchase->stamps, 2) . ' ' . $abbr;
+$stamps_label = 'Stamps' . ($data->stamps > 0 ? ' (' . $data->stamps . '%)' : '');
+if (!empty($purchase->stamps))
+    $columns[$stamps_label] = number_format($purchase->stamps, 2) . ' ' . $abbr;
 
-        $sales_tax_label = 'Sales Tax' . ($data->sales_tax > 0 ? ' (' . $data->sales_tax . '%)' : '');
-        if (!empty($purchase->sales_tax))
-        $columns[$sales_tax_label] = number_format($purchase->sales_tax, 2) . ' ' . $abbr;
+$sales_tax_label = 'Sales Tax' . ($data->sales_tax > 0 ? ' (' . $data->sales_tax . '%)' : '');
+if (!empty($purchase->sales_tax))
+    $columns[$sales_tax_label] = number_format($purchase->sales_tax, 2) . ' ' . $abbr;
 
-        $cbj_label = 'Contribution to the Guarantee Fund (CBJ)' . ($data->cbj > 0 ? ' (' . $data->cbj . '%)' : '');
-        if (!empty($purchase->cbj))
-        $columns[$cbj_label] = number_format($purchase->cbj, 2) . ' ' . $abbr;
+$cbj_label = 'Contribution to the Guarantee Fund (CBJ)' . ($data->cbj > 0 ? ' (' . $data->cbj . '%)' : '');
+if (!empty($purchase->cbj))
+    $columns[$cbj_label] = number_format($purchase->cbj, 2) . ' ' . $abbr;
 
-        $cbj_tax_label = 'Sales Tax on CBJ Contribution Fund' . ($data->sales_tax_cbj > 0 ? ' (' . $data->sales_tax_cbj . '%)' : '');
-        if (!empty($purchase->sales_tax_cbj))
-        $columns[$cbj_tax_label] = number_format($purchase->sales_tax_cbj, 2) . ' ' . $abbr;
+$cbj_tax_label = 'Sales Tax on CBJ Contribution Fund' . ($data->sales_tax_cbj > 0 ? ' (' . $data->sales_tax_cbj . '%)' : '');
+if (!empty($purchase->sales_tax_cbj))
+    $columns[$cbj_tax_label] = number_format($purchase->sales_tax_cbj, 2) . ' ' . $abbr;
 
-        if (!empty($purchase->gross_premium))
-        $columns['Gross Premium'] = number_format($purchase->gross_premium, 2) . ' ' . $abbr;
+if (!empty($purchase->gross_premium))
+    $columns['Gross Premium'] = number_format($purchase->gross_premium, 2) . ' ' . $abbr;
         @endphp
 
         <!-- PREMIUM SUMMARY -->
@@ -417,23 +638,29 @@
         </div>
 
         @php
-        $userSignaturePath = null;
-        if (!empty($data->user_signature)) {
-        $path = public_path($data->user_signature);
-        if (file_exists($path)) { $userSignaturePath = $path; }
-        }
+$userSignaturePath = null;
+if (!empty($data->user_signature)) {
+    $path = public_path($data->user_signature);
+    if (file_exists($path)) {
+        $userSignaturePath = $path;
+    }
+}
 
-        $companyStampPath = null;
-        if (!empty($data->company_stamp)) {
-        $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp);
-        if (file_exists($path)) { $companyStampPath = $path; }
-        }
+$companyStampPath = null;
+if (!empty($data->company_stamp)) {
+    $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp);
+    if (file_exists($path)) {
+        $companyStampPath = $path;
+    }
+}
 
-        $authorizedSignaturePath = null;
-        if (!empty($data->authorized_signature)) {
-        $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature);
-        if (file_exists($path)) { $authorizedSignaturePath = $path; }
-        }
+$authorizedSignaturePath = null;
+if (!empty($data->authorized_signature)) {
+    $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature);
+    if (file_exists($path)) {
+        $authorizedSignaturePath = $path;
+    }
+}
         @endphp
 
         @if($userSignaturePath)
