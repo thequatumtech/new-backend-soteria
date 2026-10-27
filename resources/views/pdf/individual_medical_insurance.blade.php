@@ -291,22 +291,22 @@
         }
     }
 
-    
+
 </style>
 
 <body>
 
-    
+
     <div class="policy-container">
 
         @php
-        $letterHeadPath = null;
-        if (!empty($data->letterhead)) {
-        $possibleLetterHeadPath = public_path('insurance/' . $data->insurance_company_id . '/' . $data->letterhead);
-        if (file_exists($possibleLetterHeadPath)) {
+$letterHeadPath = null;
+if (!empty($data->letterhead)) {
+    $possibleLetterHeadPath = public_path('insurance/' . $data->insurance_company_id . '/' . $data->letterhead);
+    if (file_exists($possibleLetterHeadPath)) {
         $letterHeadPath = $possibleLetterHeadPath;
-        }
-        }
+    }
+}
         @endphp
 
         @if($letterHeadPath)
@@ -319,6 +319,271 @@
             <img src="{{public_path('insurance/' . $data->insurance_company_id . '/' . $data->logo)}}" alt="{{ $data->company_name }}" class="logo">
             <h1>Individual Medical insurance Policy</h1>
         </header>
+
+
+        {{-- INDIVIDUAL MEDICAL INSURANCE DETAILS --}}
+        <div class="policy-summary">
+            <h4>Policyholder Details</h4>
+            <table class="policy-details">
+                <tbody>
+                    <tr>
+                        <td>First Name</td>
+                        <td>{{ $data->first_name ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Last Name</td>
+                        <td>{{ $data->last_name ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Third Name</td>
+                        <td>{{ $data->third_name ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Family Name</td>
+                        <td>{{ $data->family_name ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Nationality</td>
+                        <td>{{ $data->nationality ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Nationality Number</td>
+                        <td>{{ $data->nationality_no ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Residence ID Number</td>
+                        <td>{{ $data->id_residence_no ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Birth Date</td>
+                        <td>{{ !empty($data->birth_date) ? date('m-d-Y', strtotime($data->birth_date)) : '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Gender</td>
+                        <td>{{ $data->gender ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Marital Status</td>
+                        <td>{{ getMaritalStatusName($data->marital_status ?? null) }}</td>
+                    </tr>
+                    <tr>
+                        <td>Occupation / Work</td>
+                        <td>{{ $data->occupancy_work ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Height</td>
+                        <td>{{ $data->height ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Weight</td>
+                        <td>{{ $data->wight ?? '' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="policy-summary">
+            <h4>Residential Address</h4>
+            <table class="policy-details">
+                <tbody>
+                    <tr>
+                        <td>City</td>
+                        <td>{{ getCityName($data->city_id ?? null) ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td>District</td>
+                        <td>{{ getDistrictName($data->district_id ?? null) ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Street Name</td>
+                        <td>{{ $data->street_name ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Building Number</td>
+                        <td>{{ $data->building_no ?? '' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="policy-summary">
+            <h4>Employment Details</h4>
+            <table class="policy-details">
+                <tbody>
+                    <tr>
+                        <td>Company Name</td>
+                        <td>{{ $data->company_name ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Position</td>
+                        <td>{{ $data->position ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Nature of Work</td>
+                        <td>{{ $data->work_nature ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Company City</td>
+                        <td>{{ getCityName($data->company_city_id ?? null) ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Company District</td>
+                        <td>{{ getDistrictName($data->company_district_id ?? null) ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Company Street</td>
+                        <td>{{ $data->company_street_name ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Company Building Number</td>
+                        <td>{{ $data->company_building_no ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Company Contact</td>
+                        <td>{{ $data->company_company_contact ?? '' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="policy-summary">
+            <h4>Existing Insurance Details</h4>
+            <table class="policy-details">
+                <tbody>
+                    <tr>
+                        <td>Existing Policy Status</td>
+                        <td>{{ $data->existing_policy_status ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Previous Insurance Company</td>
+                        <td>{{ $data->existing_policy_company_name ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Existing Policy Expiry</td>
+                        <td>{{ !empty($data->existing_policy_expiry_date) ? date('m-d-Y', strtotime($data->existing_policy_expiry_date)) : '' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Existing Insurance Card</td>
+                        <td>{{ $data->existing_policy_card ?? '' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="policy-summary">
+            <h4>Medical History and Declarations</h4>
+            <table class="policy-details">
+                <tbody>
+                    <tr>
+                        <td>Chronic Diseases</td>
+                        <td>{{ $data->chronic_diseases_id ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Previous Operation</td>
+                        <td>{{ $data->previous_operation ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Operation Details</td>
+                        <td>{{ $data->operation_details ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Pregnancy Status</td>
+                        <td>{{ $data->pregnant_status ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Pregnancy Month</td>
+                        <td>{{ $data->pregnant_month ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Dangerous Activity Status</td>
+                        <td>{{ $data->dangerous_status ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Dangerous Activity</td>
+                        <td>{{ $data->dangerous_id ?? '' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="policy-summary">
+            <h4>Medical Documents</h4>
+            <table class="policy-details">
+                <tbody>
+                    <tr>
+                        <td>Passport Front</td>
+                        <td>{{ $data->passport_front_id ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Passport Back</td>
+                        <td>{{ $data->passport_back_id ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Family Book</td>
+                        <td>{{ $data->family_book_documents ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Personal Picture</td>
+                        <td>{{ $data->personal_picture_documents ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Other Documents</td>
+                        <td>{{ $data->other_documents ?? '' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="policy-summary">
+            <h4>Medical Coverage Details</h4>
+            <table class="policy-details">
+                <tbody>
+                    <tr>
+                        <td>Insurance Type</td>
+                        <td>{{ $data->insurance_type ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Insurance Class</td>
+                        <td>{{ $data->insurance_class ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Insurance Limit</td>
+                        <td>{{ $data->insurance_limit ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Inpatient Deductible</td>
+                        <td>{{ $data->inpatient_deductible_id ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Outpatient Deductible</td>
+                        <td>{{ $data->outpatient_deductible_id ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Number of Visits</td>
+                        <td>{{ $data->no_of_visits_id ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Inception Date</td>
+                        <td>{{ !empty($data->inception_date) ? date('m-d-Y', strtotime($data->inception_date)) : '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Expiry Date</td>
+                        <td>{{ !empty($data->expiry_date) ? date('m-d-Y', strtotime($data->expiry_date)) : '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Renewal</td>
+                        <td>{{ $data->renew ?? '' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Previous Policy ID</td>
+                        <td>{{ $data->old_policy_id_for_renew ?? '' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+
 
         <div class="table-responsive">
             <table class="policy-details stack-on-mobile">
@@ -359,32 +624,32 @@
 
         {{-- ========================= POLICY SUMMARY (vertical label|value — matches Personal Accident) ========================= --}}
         @php
-        $abbr = $abbr ?? 'JOD';
-        $summaryColumns = [];
+$abbr = $abbr ?? 'JOD';
+$summaryColumns = [];
 
-        if (isset($plan->limit))
-        $summaryColumns['Limit'] = number_format((float) $plan->limit, 2) . ' ' . $abbr;
+if (isset($plan->limit))
+    $summaryColumns['Limit'] = number_format((float) $plan->limit, 2) . ' ' . $abbr;
 
-        if (isset($plan->net_premium_amount))
-        $summaryColumns['Net Premium'] = number_format((float) $plan->net_premium_amount, 2) . ' ' . $abbr;
+if (isset($plan->net_premium_amount))
+    $summaryColumns['Net Premium'] = number_format((float) $plan->net_premium_amount, 2) . ' ' . $abbr;
 
-        if (isset($plan->fees) && isset($plan->fees_amount))
-        $summaryColumns['Fees (' . ($plan->fees->fees ?? $plan->fees) . '%)'] = number_format((float) $plan->fees_amount, 2) . ' ' . $abbr;
+if (isset($plan->fees) && isset($plan->fees_amount))
+    $summaryColumns['Fees (' . ($plan->fees->fees ?? $plan->fees) . '%)'] = number_format((float) $plan->fees_amount, 2) . ' ' . $abbr;
 
-        if (isset($plan->stamps) && isset($plan->stamps_amount))
-        $summaryColumns['Stamps (' . ($plan->fees->stamps ?? $plan->stamps) . '%)'] = number_format((float) $plan->stamps_amount, 2) . ' ' . $abbr;
+if (isset($plan->stamps) && isset($plan->stamps_amount))
+    $summaryColumns['Stamps (' . ($plan->fees->stamps ?? $plan->stamps) . '%)'] = number_format((float) $plan->stamps_amount, 2) . ' ' . $abbr;
 
-        if (isset($plan->sales_tax) && isset($plan->sales_tax_amount))
-        $summaryColumns['Sales Tax (' . ($plan->fees->sales_tax ?? $plan->sales_tax) . '%)'] = number_format((float) $plan->sales_tax_amount, 2) . ' ' . $abbr;
+if (isset($plan->sales_tax) && isset($plan->sales_tax_amount))
+    $summaryColumns['Sales Tax (' . ($plan->fees->sales_tax ?? $plan->sales_tax) . '%)'] = number_format((float) $plan->sales_tax_amount, 2) . ' ' . $abbr;
 
-        if (isset($plan->cbj_amount) && $plan->cbj_amount > 0)
-        $summaryColumns['Contribution to Guarantee Fund (CBJ) (' . $plan->cbj . '%)'] = number_format((float) $plan->cbj_amount, 2) . ' ' . $abbr;
+if (isset($plan->cbj_amount) && $plan->cbj_amount > 0)
+    $summaryColumns['Contribution to Guarantee Fund (CBJ) (' . $plan->cbj . '%)'] = number_format((float) $plan->cbj_amount, 2) . ' ' . $abbr;
 
-        if (isset($plan->sales_tax_cbj_amount) && $plan->sales_tax_cbj_amount > 0)
-        $summaryColumns['Sales Tax on CBJ Contribution Fund (' . $plan->sales_tax_cbj . '%)'] = number_format((float) $plan->sales_tax_cbj_amount, 2) . ' ' . $abbr;
+if (isset($plan->sales_tax_cbj_amount) && $plan->sales_tax_cbj_amount > 0)
+    $summaryColumns['Sales Tax on CBJ Contribution Fund (' . $plan->sales_tax_cbj . '%)'] = number_format((float) $plan->sales_tax_cbj_amount, 2) . ' ' . $abbr;
 
-        if (isset($plan->gross_premium_amount))
-        $summaryColumns['Gross Premium'] = number_format((float) $plan->gross_premium_amount, 2) . ' ' . $abbr;
+if (isset($plan->gross_premium_amount))
+    $summaryColumns['Gross Premium'] = number_format((float) $plan->gross_premium_amount, 2) . ' ' . $abbr;
         @endphp
 
         @if(count($summaryColumns) > 0)
@@ -444,23 +709,29 @@
         </div>
 
         @php
-        $userSignaturePath = null;
-        if (!empty($data->user_signature)) {
-        $path = public_path($data->user_signature);
-        if (file_exists($path)) { $userSignaturePath = $path; }
-        }
+$userSignaturePath = null;
+if (!empty($data->user_signature)) {
+    $path = public_path($data->user_signature);
+    if (file_exists($path)) {
+        $userSignaturePath = $path;
+    }
+}
 
-        $companyStampPath = null;
-        if (!empty($data->company_stamp)) {
-        $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp);
-        if (file_exists($path)) { $companyStampPath = $path; }
-        }
+$companyStampPath = null;
+if (!empty($data->company_stamp)) {
+    $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp);
+    if (file_exists($path)) {
+        $companyStampPath = $path;
+    }
+}
 
-        $authorizedSignaturePath = null;
-        if (!empty($data->authorized_signature)) {
-        $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature);
-        if (file_exists($path)) { $authorizedSignaturePath = $path; }
-        }
+$authorizedSignaturePath = null;
+if (!empty($data->authorized_signature)) {
+    $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature);
+    if (file_exists($path)) {
+        $authorizedSignaturePath = $path;
+    }
+}
         @endphp
 
         @if($userSignaturePath)
@@ -517,7 +788,7 @@
         </footer>
 
     </div>
-    
+
 
 </body>
 

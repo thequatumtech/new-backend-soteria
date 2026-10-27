@@ -65,6 +65,7 @@ class ClientHomeInsurance extends Model
             'client_home_insurances.*',
             'home_plans.plan_name',
             'home_plans.insurance_policy_text',
+            'home_plans.insurance_policy_pdf',
             'home_plans.net_premium',
             'home_plans.limit',
             'home_plans.fees',

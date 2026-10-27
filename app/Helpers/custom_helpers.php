@@ -112,6 +112,20 @@ if (!function_exists('getCountryName')) {
     }
 }
 
+if (!function_exists('getMaritalStatusName')) {
+    function getMaritalStatusName($id)
+    {
+        $statuses = [
+            1 => 'Single',
+            2 => 'Married',
+            3 => 'Divorced',
+            4 => 'Widowed',
+        ];
+
+        return $statuses[$id] ?? '-';
+    }
+}
+
 
 if (!function_exists('getInsuredItemCategoryName')) {
     function getInsuredItemCategoryName($id)

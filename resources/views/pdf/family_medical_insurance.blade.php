@@ -6,8 +6,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Family Medical Insurance Policy</title>
-    {{-- <link rel="stylesheet" href="styles.css"> --}}
+
 </head>
+
 <style>
     * {
         box-sizing: border-box;
@@ -173,6 +174,15 @@
 
     /* ========================= MOBILE BREAKPOINT ========================== */
     @media (max-width: 600px) {
+
+        .family-details-grid .policy-details {
+            font-size: 12px;
+        }
+
+        .family-details-grid .policy-details td {
+            padding: 8px;
+        }
+
         .policy-container {
             margin: 0;
             padding: 12px;
@@ -296,6 +306,59 @@
             max-width: 120px;
         }
     }
+
+    /* Full-width family medical insurance sections */
+    .family-details-grid {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .family-layout-table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+    }
+
+    .family-layout-table>tbody>tr>td {
+        width: 100%;
+        padding: 5px;
+        vertical-align: top;
+    }
+
+    .family-layout-table>tbody>tr {
+        page-break-inside: avoid;
+    }
+
+    .family-details-grid .policy-summary {
+        width: 100%;
+        margin-bottom: 10px;
+        page-break-inside: avoid;
+    }
+
+    .family-details-grid h4 {
+        margin: 0 0 8px;
+        font-size: 13px;
+    }
+
+    .family-details-grid .policy-details {
+        width: 100%;
+        margin-bottom: 0;
+        table-layout: fixed;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    .family-details-grid .policy-details td {
+        padding: 5px;
+        white-space: normal;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        vertical-align: top;
+    }
+
+    .family-details-grid .policy-details td:first-child {
+        width: 48%;
+    }
 </style>
 
 <body>
@@ -303,25 +366,326 @@
 
 
         {{-- ===================================================== LETTERHEAD Show only if letterhead exists
-    ====================================================== --}} @php $letterHeadPath = null;
+        ====================================================== --}} @php $letterHeadPath = null;
 
 
-        if (!empty($data->letterhead)) {
-        $possibleLetterHeadPath = public_path('insurance/' . $data->insurance_company_id . '/' . $data->letterhead);
-        if (file_exists($possibleLetterHeadPath)) {
-        $letterHeadPath = $possibleLetterHeadPath;
-        }
+            if (!empty($data->letterhead)) {
+                $possibleLetterHeadPath = public_path('insurance/' . $data->insurance_company_id . '/' . $data->letterhead);
+                if (file_exists($possibleLetterHeadPath)) {
+                    $letterHeadPath = $possibleLetterHeadPath;
+                }
         } @endphp
 
 
         @if($letterHeadPath)
-        <div class="letterhead"> <img src="{{ $letterHeadPath }}"
-                alt="{{ $data->company_name ?? 'Insurance Company' }} Letterhead"> </div> @endif
+            <div class="letterhead"> <img src="{{ $letterHeadPath }}"
+        alt="{{ $data->company_name ?? 'Insurance Company' }} Letterhead"> </div> @endif
 
         <header class="policy-header">
-            <img src="{{public_path('insurance/' . $data->insurance_company_id . '/' . $data->logo)}}" alt="{{ $data->company_name }}" class="logo">
+            <img src="{{public_path('insurance/' . $data->insurance_company_id . '/' . $data->logo)}}"
+                alt="{{ $data->company_name }}" class="logo">
             <h1>Family Medical insurance Policy</h1>
         </header>
+
+
+
+        {{-- FAMILY MEDICAL INSURANCE DETAILS: EACH SECTION IN ITS OWN ROW --}}
+        <div class="family-details-grid">
+            <table class="family-layout-table">
+                <tbody>
+
+                    {{-- ROW 1: POLICYHOLDER DETAILS --}}
+                    <tr>
+                        <td>
+                            <div class="policy-summary">
+                                <h4>Policyholder Details</h4>
+                                <table class="policy-details">
+                                    <tbody>
+                                        <tr>
+                                            <td>First Name</td>
+                                            <td>{{ $data->first_name ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Last Name</td>
+                                            <td>{{ $data->last_name ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Third Name</td>
+                                            <td>{{ $data->third_name ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Family Name</td>
+                                            <td>{{ $data->family_name ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Nationality</td>
+                                            <td>{{ $data->nationality ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Nationality Number</td>
+                                            <td>{{ $data->nationality_no ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Residence ID Number</td>
+                                            <td>{{ $data->id_residence_no ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Birth Date</td>
+                                            <td>{{ !empty($data->birth_date) ? date('m-d-Y', strtotime($data->birth_date)) : '' }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Gender</td>
+                                            <td>{{ $data->gender ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Marital Status</td>
+                                            <td>{{ getMaritalStatusName($data->marital_status ?? null) }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Occupation / Work</td>
+                                            <td>{{ $data->occupancy_work ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Height</td>
+                                            <td>{{ $data->height ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Weight</td>
+                                            <td>{{ $data->wight ?? '' }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+
+                    {{-- ROW 2: RESIDENTIAL ADDRESS --}}
+                    <tr>
+                        <td>
+                            <div class="policy-summary">
+                                <h4>Residential Address</h4>
+                                <table class="policy-details">
+                                    <tbody>
+                                        <tr>
+                                            <td>City</td>
+                                            <td>{{ getCityName($data->city_id ?? null) ?? '-' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>District</td>
+                                            <td>{{ getDistrictName($data->district_id ?? null) ?? '-' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Street Name</td>
+                                            <td>{{ $data->street_name ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Building Number</td>
+                                            <td>{{ $data->building_no ?? '' }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+
+                    {{-- ROW 3: EMPLOYMENT DETAILS --}}
+                    <tr>
+                        <td>
+                            <div class="policy-summary">
+                                <h4>Employment Details</h4>
+                                <table class="policy-details">
+                                    <tbody>
+                                        <tr>
+                                            <td>Company Name</td>
+                                            <td>{{ $data->company_name ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Position</td>
+                                            <td>{{ $data->position ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Nature of Work</td>
+                                            <td>{{ $data->work_nature ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Company City</td>
+                                            <td> {{ getCityName($data->company_city_id ?? null) ?? '-' }} </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Company District</td>
+                                            <td> {{ getDistrictName($data->company_district_id ?? null) ?? '-' }} </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Company Street</td>
+                                            <td>{{ $data->company_street_name ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Company Building Number</td>
+                                            <td>{{ $data->company_building_no ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Company Contact</td>
+                                            <td>{{ $data->company_company_contact ?? '' }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+
+                    {{-- ROW 4: EXISTING INSURANCE --}}
+                    <tr>
+                        <td>
+                            <div class="policy-summary">
+                                <h4>Existing Insurance Details</h4>
+                                <table class="policy-details">
+                                    <tbody>
+                                        <tr>
+                                            <td>Existing Policy Status</td>
+                                            <td>{{ $data->existing_policy_status ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Previous Insurance Company</td>
+                                            <td>{{ $data->existing_policy_company_name ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Existing Policy Expiry</td>
+                                            <td>{{ !empty($data->existing_policy_expiry_date) ? date('m-d-Y', strtotime($data->existing_policy_expiry_date)) : '' }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Existing Insurance Card</td>
+                                            <td>{{ $data->existing_policy_card ?? '' }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+
+                    {{-- ROW 5: MEDICAL HISTORY --}}
+                    <tr>
+                        <td>
+                            <div class="policy-summary">
+                                <h4>Medical History and Declarations</h4>
+                                <table class="policy-details">
+                                    <tbody>
+                                        <tr>
+                                            <td>Chronic Diseases</td>
+                                            <td>{{ $data->chronic_diseases_id ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Previous Operation</td>
+                                            <td>{{ $data->previous_operation ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Operation Details</td>
+                                            <td>{{ $data->operation_details ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Pregnancy Status</td>
+                                            <td>{{ $data->pregnant_status ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Pregnancy Month</td>
+                                            <td>{{ $data->pregnant_month ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dangerous Activity Status</td>
+                                            <td>{{ $data->dangerous_status ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Dangerous Activity</td>
+                                            <td>{{ $data->dangerous_id ?? '' }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+
+                    {{-- ROW 6: POLICY AND COVERAGE --}}
+                    <tr>
+                        <td>
+                            <div class="policy-summary">
+                                <h4>Policy and Coverage Details</h4>
+                                <table class="policy-details">
+                                    <tbody>
+                                        <tr>
+                                            <td>Policy Number</td>
+                                            <td>{{ $data->police_no ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Plan Name</td>
+                                            <td>{{ $data->plan_name ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Insurance Type</td>
+                                            <td>{{ $data->insurance_type ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Insurance Class</td>
+                                            <td>{{ $data->insurance_class ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Insurance Limit</td>
+                                            <td>{{ $data->insurance_limit ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Inception Date</td>
+                                            <td>{{ !empty($data->inception_date) ? date('m-d-Y', strtotime($data->inception_date)) : '' }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Expiry Date</td>
+                                            <td>{{ !empty($data->expiry_date) ? date('m-d-Y', strtotime($data->expiry_date)) : '' }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+
+                    {{-- ROW 7: DOCUMENT DETAILS --}}
+                    <tr>
+                        <td>
+                            <div class="policy-summary">
+                                <h4>Document Details</h4>
+                                <table class="policy-details">
+                                    <tbody>
+                                        <tr>
+                                            <td>Passport Front</td>
+                                            <td>{{ $data->passport_front_id ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Passport Back</td>
+                                            <td>{{ $data->passport_back_id ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Family Book</td>
+                                            <td>{{ $data->family_book_documents ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Personal Picture</td>
+                                            <td>{{ $data->personal_picture_documents ?? '' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Other Documents</td>
+                                            <td>{{ $data->other_documents ?? '' }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+
 
         <div class="table-responsive">
             <table class="policy-details stack-on-mobile">
@@ -361,120 +725,130 @@
         </div>
 
         @php
-        $abbr = $abbr ?? 'JOD';
-        $summaryColumns = [];
+            $abbr = $abbr ?? 'JOD';
+            $summaryColumns = [];
 
-        if (isset($plan->limit))
-        $summaryColumns['Limit'] = number_format((float) $plan->limit, 2) . ' ' . $abbr;
+            if (isset($plan->limit))
+                $summaryColumns['Limit'] = number_format((float) $plan->limit, 2) . ' ' . $abbr;
 
-        if (isset($plan->net_premium_amount))
-        $summaryColumns['Net Premium'] = number_format((float) $plan->net_premium_amount, 2) . ' ' . $abbr;
+            if (isset($plan->net_premium_amount))
+                $summaryColumns['Net Premium'] = number_format((float) $plan->net_premium_amount, 2) . ' ' . $abbr;
 
-        if (isset($plan->fees) && isset($plan->fees_amount))
-        $summaryColumns['Fees (' . $plan->fees . '%)'] = number_format((float) $plan->fees_amount, 2) . ' ' . $abbr;
+            if (isset($plan->fees) && isset($plan->fees_amount))
+                $summaryColumns['Fees (' . $plan->fees . '%)'] = number_format((float) $plan->fees_amount, 2) . ' ' . $abbr;
 
-        if (isset($plan->stamps) && isset($plan->stamps_amount))
-        $summaryColumns['Stamps (' . $plan->stamps . '%)'] = number_format((float) $plan->stamps_amount, 2) . ' ' . $abbr;
+            if (isset($plan->stamps) && isset($plan->stamps_amount))
+                $summaryColumns['Stamps (' . $plan->stamps . '%)'] = number_format((float) $plan->stamps_amount, 2) . ' ' . $abbr;
 
-        if (isset($plan->sales_tax) && isset($plan->sales_tax_amount))
-        $summaryColumns['Sales Tax (' . $plan->sales_tax . '%)'] = number_format((float) $plan->sales_tax_amount, 2) . ' ' . $abbr;
+            if (isset($plan->sales_tax) && isset($plan->sales_tax_amount))
+                $summaryColumns['Sales Tax (' . $plan->sales_tax . '%)'] = number_format((float) $plan->sales_tax_amount, 2) . ' ' . $abbr;
 
-        if (isset($plan->cbj_amount) && $plan->cbj_amount > 0)
-        $summaryColumns['Contribution to Guarantee Fund (CBJ) (' . $plan->cbj . '%)'] = number_format((float) $plan->cbj_amount, 2) . ' ' . $abbr;
+            if (isset($plan->cbj_amount) && $plan->cbj_amount > 0)
+                $summaryColumns['Contribution to Guarantee Fund (CBJ) (' . $plan->cbj . '%)'] = number_format((float) $plan->cbj_amount, 2) . ' ' . $abbr;
 
-        if (isset($plan->sales_tax_cbj_amount) && $plan->sales_tax_cbj_amount > 0)
-        $summaryColumns['Sales Tax on CBJ Contribution Fund (' . $plan->sales_tax_cbj . '%)'] = number_format((float) $plan->sales_tax_cbj_amount, 2) . ' ' . $abbr;
+            if (isset($plan->sales_tax_cbj_amount) && $plan->sales_tax_cbj_amount > 0)
+                $summaryColumns['Sales Tax on CBJ Contribution Fund (' . $plan->sales_tax_cbj . '%)'] = number_format((float) $plan->sales_tax_cbj_amount, 2) . ' ' . $abbr;
 
-        if (isset($plan->gross_premium_amount))
-        $summaryColumns['Gross Premium'] = number_format((float) $plan->gross_premium_amount, 2) . ' ' . $abbr;
+            if (isset($plan->gross_premium_amount))
+                $summaryColumns['Gross Premium'] = number_format((float) $plan->gross_premium_amount, 2) . ' ' . $abbr;
         @endphp
 
         @if(count($summaryColumns) > 0)
-        <div class="policy-summary">
-            <h4>Policy Summary</h4>
+            <div class="policy-summary">
+                <h4>Policy Summary</h4>
 
-            <div class="table-responsive">
-                {{-- <table class="policy-details">
-                <tr>
-                    @isset($plan->limit)<td>Limit</td>@endisset
-                    @isset($plan->net_premium_amount)<td>Net Premium</td>@endisset
-                    @isset($plan->fees)<td>Fees ({{ $plan->fees }}%)</td>@endisset
-                @isset($plan->stamps)<td>Stamps ({{ $plan->stamps }}%)</td>@endisset
-                @isset($plan->sales_tax)<td>Sales Tax ({{ $plan->sales_tax }}%)</td>@endisset
-                @if(isset($plan->cbj_amount) && $plan->cbj_amount > 0)<td>Contribution to Guarantee Fund (CBJ) ({{ $plan->cbj }}%)</td>@endif
-                @if(isset($plan->sales_tax_cbj_amount) && $plan->sales_tax_cbj_amount > 0)<td>Sales Tax on CBJ Contribution Fund ({{ $plan->sales_tax_cbj }}%)</td>@endif
-                @isset($plan->gross_premium_amount)<td>Gross Premium</td>@endisset
-                </tr>
+                <div class="table-responsive">
+                    {{-- <table class="policy-details">
+                        <tr>
+                            @isset($plan->limit)<td>Limit</td>@endisset
+                            @isset($plan->net_premium_amount)<td>Net Premium</td>@endisset
+                            @isset($plan->fees)<td>Fees ({{ $plan->fees }}%)</td>@endisset
+                            @isset($plan->stamps)<td>Stamps ({{ $plan->stamps }}%)</td>@endisset
+                            @isset($plan->sales_tax)<td>Sales Tax ({{ $plan->sales_tax }}%)</td>@endisset
+                            @if(isset($plan->cbj_amount) && $plan->cbj_amount > 0)<td>Contribution to Guarantee Fund (CBJ)
+                                ({{ $plan->cbj }}%)</td>@endif
+                            @if(isset($plan->sales_tax_cbj_amount) && $plan->sales_tax_cbj_amount > 0)<td>Sales Tax on CBJ
+                                Contribution Fund ({{ $plan->sales_tax_cbj }}%)</td>@endif
+                            @isset($plan->gross_premium_amount)<td>Gross Premium</td>@endisset
+                        </tr>
 
-                <tr>
-                    @isset($plan->limit)<td>{{ number_format((float) $plan->limit, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
-                    @isset($plan->net_premium_amount)<td>{{ number_format((float) $plan->net_premium_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
-                    @isset($plan->fees_amount)<td>{{ number_format((float) $plan->fees_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
-                    @isset($plan->stamps_amount)<td>{{ number_format((float) $plan->stamps_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
-                    @isset($plan->sales_tax_amount)<td>{{ number_format((float) $plan->sales_tax_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
-                    @if(isset($plan->cbj_amount) && $plan->cbj_amount > 0)<td>{{ number_format((float) $plan->cbj_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endif
-                    @if(isset($plan->sales_tax_cbj_amount) && $plan->sales_tax_cbj_amount > 0)<td>{{ number_format((float) $plan->sales_tax_cbj_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endif
-                    @isset($plan->gross_premium_amount)<td>{{ number_format((float) $plan->gross_premium_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endisset
-                </tr>
-                </table> --}}
-                <table class="premium-summary-table">
-                    @foreach($summaryColumns as $label => $value)
-                    <tr>
-                        <td>{{ $label }}</td>
-                        <td>{{ $value }}</td>
-                    </tr>
-                    @endforeach
-                </table>
+                        <tr>
+                            @isset($plan->limit)<td>{{ number_format((float) $plan->limit, 2) }} {{ $abbr ?? 'JOD' }}</td>
+                            @endisset
+                            @isset($plan->net_premium_amount)<td>{{ number_format((float) $plan->net_premium_amount, 2) }}
+                                {{ $abbr ?? 'JOD' }}</td>@endisset
+                            @isset($plan->fees_amount)<td>{{ number_format((float) $plan->fees_amount, 2) }} {{ $abbr ??
+                                'JOD' }}</td>@endisset
+                            @isset($plan->stamps_amount)<td>{{ number_format((float) $plan->stamps_amount, 2) }} {{ $abbr ??
+                                'JOD' }}</td>@endisset
+                            @isset($plan->sales_tax_amount)<td>{{ number_format((float) $plan->sales_tax_amount, 2) }} {{
+                                $abbr ?? 'JOD' }}</td>@endisset
+                            @if(isset($plan->cbj_amount) && $plan->cbj_amount > 0)<td>{{ number_format((float)
+                                $plan->cbj_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endif
+                            @if(isset($plan->sales_tax_cbj_amount) && $plan->sales_tax_cbj_amount > 0)<td>{{
+                                number_format((float) $plan->sales_tax_cbj_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endif
+                            @isset($plan->gross_premium_amount)<td>{{ number_format((float) $plan->gross_premium_amount, 2)
+                                }} {{ $abbr ?? 'JOD' }}</td>@endisset
+                        </tr>
+                    </table> --}}
+                    <table class="premium-summary-table">
+                        @foreach($summaryColumns as $label => $value)
+                            <tr>
+                                <td>{{ $label }}</td>
+                                <td>{{ $value }}</td>
+                            </tr>
+                        @endforeach
+                    </table>
+                </div>
             </div>
-        </div>
         @endif
 
         @if(!empty($plan->policy_covers) && count($plan->policy_covers) > 0)
 
-        <h4>Policy Covers</h4>
+            <h4>Policy Covers</h4>
 
-        <div class="table-responsive">
-            <table class="policy-details">
-                <tr>
-                    <td><strong>Name of Cover</strong></td>
-                    <td><strong>Limit</strong></td>
-                </tr>
+            <div class="table-responsive">
+                <table class="policy-details">
+                    <tr>
+                        <td><strong>Name of Cover</strong></td>
+                        <td><strong>Limit</strong></td>
+                    </tr>
 
-                @foreach($plan->policy_covers as $cover)
-                <tr>
-                    <td>{{ $cover->cover_name }}</td>
-                    <td>
-                        {{ $cover->cover_limit }}
-                        <!-- @if($cover->cover_limit_type == '2') % @endif -->
-                    </td>
-                </tr>
-                @endforeach
-            </table>
-        </div>
+                    @foreach($plan->policy_covers as $cover)
+                        <tr>
+                            <td>{{ $cover->cover_name }}</td>
+                            <td>
+                                {{ $cover->cover_limit }}
+                                <!-- @if($cover->cover_limit_type == '2') % @endif -->
+                            </td>
+                        </tr>
+                    @endforeach
+                </table>
+            </div>
 
         @endif
         @if(!empty($plan->additional_benefits) && count($plan->additional_benefits) > 0)
 
-        <h4>Additional Benefits</h4>
+            <h4>Additional Benefits</h4>
 
-        <div class="table-responsive">
-            <table class="policy-details">
-                <tr>
-                    <td><strong>Name of Benefit</strong></td>
-                    <td><strong>Limit</strong></td>
-                </tr>
+            <div class="table-responsive">
+                <table class="policy-details">
+                    <tr>
+                        <td><strong>Name of Benefit</strong></td>
+                        <td><strong>Limit</strong></td>
+                    </tr>
 
-                @foreach($plan->additional_benefits as $benefit)
-                <tr>
-                    <td>{{ $benefit->benefit_name }}</td>
-                    <td>
-                        {{ $benefit->benefit_limit }}
-                        <!-- @if($benefit->benefit_limit_type == '2') % @endif -->
-                    </td>
-                </tr>
-                @endforeach
-            </table>
-        </div>
+                    @foreach($plan->additional_benefits as $benefit)
+                        <tr>
+                            <td>{{ $benefit->benefit_name }}</td>
+                            <td>
+                                {{ $benefit->benefit_limit }}
+                                <!-- @if($benefit->benefit_limit_type == '2') % @endif -->
+                            </td>
+                        </tr>
+                    @endforeach
+                </table>
+            </div>
 
         @endif
 
@@ -485,201 +859,186 @@
         @php
 
 
-        /* |
-        | -------------------------------------------------------------------------- |
-        | Check User Signature |
-        | -------------------------------------------------------------------------- |
-        | */
-        $userSignaturePath = null;
+            /* |
+            | -------------------------------------------------------------------------- |
+            | Check User Signature |
+            | -------------------------------------------------------------------------- |
+            | */
+            $userSignaturePath = null;
 
-        if (!empty($data->user_signature)) {
-        $path = public_path($data->user_signature);
-
-
-        if (file_exists($path)) {
-        $userSignaturePath = $path;
-        }
+            if (!empty($data->user_signature)) {
+                $path = public_path($data->user_signature);
 
 
-        }
-
-        /* |
-        | -------------------------------------------------------------------------- |
-        | Company Stamp |
-        | -------------------------------------------------------------------------- |
-        | */
-        $companyStampPath = null;
-
-        if (!empty($data->company_stamp)) {
-        $path = public_path(
-        'insurance/' .
-        $data->insurance_company_id .
-        '/' .
-        $data->company_stamp
-        );
+                if (file_exists($path)) {
+                    $userSignaturePath = $path;
+                }
 
 
-        if (file_exists($path)) {
-        $companyStampPath = $path;
-        }
+            }
+
+            /* |
+            | -------------------------------------------------------------------------- |
+            | Company Stamp |
+            | -------------------------------------------------------------------------- |
+            | */
+            $companyStampPath = null;
+
+            if (!empty($data->company_stamp)) {
+                $path = public_path(
+                    'insurance/' .
+                    $data->insurance_company_id .
+                    '/' .
+                    $data->company_stamp
+                );
 
 
-        }
-
-        /* |
-        | -------------------------------------------------------------------------- |
-        | Authorized Signature |
-        | -------------------------------------------------------------------------- |
-        */
-        $authorizedSignaturePath = null;
-
-        if (!empty($data->authorized_signature)) {
-        $path = public_path(
-        'insurance/' .
-        $data->insurance_company_id .
-        '/' .
-        $data->authorized_signature
-        );
+                if (file_exists($path)) {
+                    $companyStampPath = $path;
+                }
 
 
-        if (file_exists($path)) {
-        $authorizedSignaturePath = $path;
-        }
+            }
+
+            /* |
+            | -------------------------------------------------------------------------- |
+            | Authorized Signature |
+            | -------------------------------------------------------------------------- |
+            */
+            $authorizedSignaturePath = null;
+
+            if (!empty($data->authorized_signature)) {
+                $path = public_path(
+                    'insurance/' .
+                    $data->insurance_company_id .
+                    '/' .
+                    $data->authorized_signature
+                );
 
 
-        }
+                if (file_exists($path)) {
+                    $authorizedSignaturePath = $path;
+                }
+
+
+            }
         @endphp
 
         @if($userSignaturePath)
 
 
-        {{-- =========================================================
-     USER SIGNATURE AVAILABLE
-     3 COLUMNS
+            {{-- =========================================================
+            USER SIGNATURE AVAILABLE
+            3 COLUMNS
 
-     Insurer | Insured | Authorized Signature
-========================================================== --}}
+            Insurer | Insured | Authorized Signature
+            ========================================================== --}}
 
-        <table class="signatures three-columns">
+            <table class="signatures three-columns">
 
-            <tr>
+                <tr>
 
-                {{-- INSURER --}}
-                <td>
+                    {{-- INSURER --}}
+                    <td>
 
-                    <div class="signature-title">
-                        Insurer
-                    </div>
+                        <div class="signature-title">
+                            Insurer
+                        </div>
 
-                    <div>
-                        {{ $data->company_name }}
-                    </div>
+                        <div>
+                            {{ $data->company_name }}
+                        </div>
 
-                    @if($companyStampPath)
-                    <img
-                        src="{{ $companyStampPath }}"
-                        alt="Company Stamp"
-                        class="signature-image">
-                    @endif
+                        @if($companyStampPath)
+                            <img src="{{ $companyStampPath }}" alt="Company Stamp" class="signature-image">
+                        @endif
 
-                </td>
+                    </td>
 
 
-                {{-- INSURED --}}
-                <td>
+                    {{-- INSURED --}}
+                    <td>
 
-                    <div class="signature-title">
-                        Insured
-                    </div>
+                        <div class="signature-title">
+                            Insured
+                        </div>
 
-                    <div>
-                        {{ $data->first_name }}
-                        {{ $data->last_name }}
-                        {{ $data->third_name }}
-                        {{ $data->family_name }}
-                    </div>
+                        <div>
+                            {{ $data->first_name }}
+                            {{ $data->last_name }}
+                            {{ $data->third_name }}
+                            {{ $data->family_name }}
+                        </div>
 
-                    <img
-                        src="{{ $userSignaturePath }}"
-                        alt="User Signature"
-                        class="signature-image">
+                        <img src="{{ $userSignaturePath }}" alt="User Signature" class="signature-image">
 
-                </td>
+                    </td>
 
 
-                {{-- AUTHORIZED SIGNATURE --}}
-                <td>
+                    {{-- AUTHORIZED SIGNATURE --}}
+                    <td>
 
-                    <div class="signature-title">
-                        Authorized Signature
-                    </div>
+                        <div class="signature-title">
+                            Authorized Signature
+                        </div>
 
-                    @if($authorizedSignaturePath)
-                    <img
-                        src="{{ $authorizedSignaturePath }}"
-                        alt="Authorized Signature"
-                        class="signature-image">
-                    @endif
+                        @if($authorizedSignaturePath)
+                            <img src="{{ $authorizedSignaturePath }}" alt="Authorized Signature" class="signature-image">
+                        @endif
 
-                </td>
+                    </td>
 
-            </tr>
+                </tr>
 
-        </table>
+            </table>
 
 
         @else
 
 
-        {{-- =========================================================
-     USER SIGNATURE NOT AVAILABLE
-     2 COLUMNS
+            {{-- =========================================================
+            USER SIGNATURE NOT AVAILABLE
+            2 COLUMNS
 
-     Insurer | Authorized Signature
-========================================================== --}}
+            Insurer | Authorized Signature
+            ========================================================== --}}
 
-        <table class="signatures">
+            <table class="signatures">
 
-            <tr>
+                <tr>
 
-                {{-- INSURER --}}
-                <td>
+                    {{-- INSURER --}}
+                    <td>
 
-                    <div class="signature-title">
-                        Insurer
-                    </div>
+                        <div class="signature-title">
+                            Insurer
+                        </div>
 
-                    <div>
-                        {{ $data->company_name }}
-                    </div>
+                        <div>
+                            {{ $data->company_name }}
+                        </div>
 
-                    @if($companyStampPath)
-                    <img
-                        src="{{ $companyStampPath }}"
-                        alt="Company Stamp"
-                        class="signature-image">
-                    @endif
+                        @if($companyStampPath)
+                            <img src="{{ $companyStampPath }}" alt="Company Stamp" class="signature-image">
+                        @endif
 
-                </td>
+                    </td>
 
 
-                {{-- AUTHORIZED SIGNATURE --}}
-                <td>
+                    {{-- AUTHORIZED SIGNATURE --}}
+                    <td>
 
-                    <div class="signature-title">
-                        Authorized Signature
-                    </div>
+                        <div class="signature-title">
+                            Authorized Signature
+                        </div>
 
-                    @if($authorizedSignaturePath)
-                    <img
-                        src="{{ $authorizedSignaturePath }}"
-                        alt="Authorized Signature"
-                        class="signature-image">
-                    @endif
+                        @if($authorizedSignaturePath)
+                            <img src="{{ $authorizedSignaturePath }}" alt="Authorized Signature" class="signature-image">
+                        @endif
 
-                </td>
-            </tr>
-        </table>
+                    </td>
+                </tr>
+            </table>
         @endif
 
         <footer>

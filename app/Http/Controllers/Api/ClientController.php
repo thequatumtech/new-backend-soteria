@@ -161,10 +161,12 @@ class ClientController extends Controller
             $registeredOtp = $client['otp'] ?? null;
 
             if (!empty($request->email_id)) {
-                if (Auth::guard('client')->attempt([
-                    'email_id' => $request->email_id,
-                    'password' => $request->password
-                ])) {
+                if (
+                    Auth::guard('client')->attempt([
+                        'email_id' => $request->email_id,
+                        'password' => $request->password
+                    ])
+                ) {
 
                     $data = Auth::guard('client')->user();
 
@@ -190,10 +192,12 @@ class ClientController extends Controller
                 }
             } else if (!empty($request->mobile_no)) {
 
-                if (Auth::guard('client')->attempt([
-                    'mobile_no' => $request->mobile_no,
-                    'password' => $request->password
-                ])) {
+                if (
+                    Auth::guard('client')->attempt([
+                        'mobile_no' => $request->mobile_no,
+                        'password' => $request->password
+                    ])
+                ) {
 
                     $data = Auth::guard('client')->user();
 
@@ -394,10 +398,12 @@ class ClientController extends Controller
                     ]);
                 }
 
-                if (Auth::guard('client')->attempt([
-                    'email_id' => $request->email,
-                    'password' => $request->password
-                ])) {
+                if (
+                    Auth::guard('client')->attempt([
+                        'email_id' => $request->email,
+                        'password' => $request->password
+                    ])
+                ) {
 
                     $data = Auth::guard('client')->user();
 
@@ -436,10 +442,12 @@ class ClientController extends Controller
                     ]);
                 }
 
-                if (Auth::guard('client')->attempt([
-                    'mobile_no' => $request->mobile_no,
-                    'password' => $request->password
-                ])) {
+                if (
+                    Auth::guard('client')->attempt([
+                        'mobile_no' => $request->mobile_no,
+                        'password' => $request->password
+                    ])
+                ) {
 
                     $data = Auth::guard('client')->user();
 
@@ -694,7 +702,7 @@ class ClientController extends Controller
             $data = new \stdClass();
             $data->id = null;
             $data->mobile_no = $request->phone;
-            
+
             // $data->otp = str_pad(
             //     rand(0, 9999),
             //     4,
@@ -856,7 +864,7 @@ class ClientController extends Controller
         ]);
 
 
-// 'client_id' => 'required|integer|exists:clients,id',
+        // 'client_id' => 'required|integer|exists:clients,id',
 
         if ($validator->fails()) {
             return response()->json([
@@ -868,7 +876,7 @@ class ClientController extends Controller
         }
 
 
-         $client_id = $request->user_id;
+        $client_id = $request->user_id;
 
         /*------------Check purchase policy exists ---------------------*/
 
@@ -927,7 +935,7 @@ class ClientController extends Controller
             return response()->json([
                 'status' => false,
                 'can_renew' => false,
-                  'message' => __('messages.api.policy_insurance_company_not_found'),
+                'message' => __('messages.api.policy_insurance_company_not_found'),
             ], 200);
         }
 
@@ -936,7 +944,7 @@ class ClientController extends Controller
             return response()->json([
                 'status' => false,
                 'can_renew' => false,
-                   'message' => __('messages.api.policy_plan_missing'),
+                'message' => __('messages.api.policy_plan_missing'),
             ], 200);
         }
 
@@ -1044,7 +1052,7 @@ class ClientController extends Controller
         return response()->json([
             'status' => true,
             'can_renew' => true,
-           'message' => __('messages.api.policy_can_be_renewed'),
+            'message' => __('messages.api.policy_can_be_renewed'),
 
             'data' => [
 
@@ -1086,7 +1094,7 @@ class ClientController extends Controller
     }
 
 
-     public function saveSignature(Request $request)
+    public function saveSignature(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'purchase_policy_id' => 'required|integer|exists:purchase_policy,id',
@@ -1243,6 +1251,59 @@ class ClientController extends Controller
 
 
             $combinedDetails = PurchasePolicy::getCombinedPolicyDetails($purchasePolicy);
+
+            // Add all home-insurance fields to the final PDF data.
+            if ((int) $purchasePolicy->policy_type === 1 && $combinedDetails) {
+                $homeFields = [
+                    'nationality',
+                    'nationality_no',
+                    'id_residence_no',
+                    'birth_date',
+                    'gender',
+                    'marital_status',
+                    'place_of_residence',
+                    'home_type',
+                    'no_of_floor',
+                    'no_of_room',
+                    'size_of_apartment',
+                    'no_of_residence',
+                    'home_category',
+                    'block_no',
+                    'plate_no',
+                    'plot_no',
+                    'country_id',
+                    'city_id',
+                    'district_id',
+                    'street_name',
+                    'building_no',
+                    'company_name',
+                    'city_id_2',
+                    'position',
+                    'work_nature',
+                    'previous_policy',
+                    'company_declined_to_issue',
+                    'claims_accidents_past',
+                    'protection_system',
+                    'home_age',
+                    'insurance_limit',
+                    'plan_id',
+                    'rent_contract',
+                    'property_document',
+                    'content_document',
+                    'payment_status',
+                    'old_policy_id_for_renew',
+                    'renew',
+                ];
+
+                foreach ($homeFields as $field) {
+                    $dataValue = $combinedDetails->{$field} ?? null;
+
+                    // Add the property to the object even if its value is null.
+                    // The Blade template can safely access every field.
+                    $homePdfFields[$field] = $dataValue;
+                }
+            }
+
             $plan = $this->getPolicyPlan($purchasePolicy);
 
             $userSig = UserSignature::where('purchase_policy_id', $purchasePolicy->id)->first();
@@ -1312,6 +1373,25 @@ class ClientController extends Controller
                 // Full details object reference
                 'details' => $combinedDetails,
             ];
+
+            if ((int) $purchasePolicy->policy_type === 1 && !empty($combinedDetails)) {
+                foreach ($homePdfFields ?? [] as $field => $value) {
+                    $data->{$field} = $value;
+                }
+            }
+
+            // Copy all policy-specific fields into the PDF data object.
+if ($combinedDetails) {
+    $detailsArray = method_exists($combinedDetails, 'toArray')
+        ? $combinedDetails->toArray()
+        : (array) $combinedDetails;
+
+    foreach ($detailsArray as $field => $value) {
+        if (!property_exists($data, $field) || $data->{$field} === null) {
+            $data->{$field} = $value;
+        }
+    }
+}
 
             $policyTemplates = [
                 1 => ['view' => 'pdf/home_policy', 'folder' => 'home_policy'],
@@ -1446,6 +1526,17 @@ class ClientController extends Controller
 
             $path = $directory . '/' . $filename;
 
+
+            //   return response()->json([
+            //     'status' => true,
+            //     'message' => __('messages.api.final_pdf_success'),
+            //    'data' => $data,
+            //     'purchase' => $purchasePolicy,
+            //     'plan' => $plan,
+            //     'abbr' => $abbr,
+            // ], 200);
+
+
             $pdf = Pdf::loadView($templateConfig['view'], [
                 'data' => $data,
                 'purchase' => $purchasePolicy,
@@ -1457,14 +1548,11 @@ class ClientController extends Controller
 
             $pdfUrl = url(
                 'insurance_pdfs/'
-                    . $templateConfig['folder']
-                    . '/'
-                    . $filename
+                . $templateConfig['folder']
+                . '/'
+                . $filename
             );
 
-
-            // $purchasePolicy->policy_pdf_url = $path;
-            // $purchasePolicy->save();
 
             FinalPolicyPdf::updateOrCreate(
                 [

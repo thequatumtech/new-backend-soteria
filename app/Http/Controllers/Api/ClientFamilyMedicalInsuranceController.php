@@ -195,22 +195,51 @@ class ClientFamilyMedicalInsuranceController extends Controller
                 }
             }
 
+
             $existingMedical = PurchasePolicy::find($request->purchase_id ?? 0);
-            if ($data['insurance_type'] == 1) {
-                // $plan_data = InPatientPlan::find($data['plan_id']);
+
+            $insuranceType = (int) ($data['insurance_type'] ?? 0);
+            $planId = $data['plan_id'] ?? null;
+
+            if (!$planId) {
+                return response()->json([
+                    'status' => false,
+                    'status_code' => 422,
+                    'message' => 'plan_id is required.',
+                    'data' => [],
+                ], 422);
+            }
+
+            if ($insuranceType === 1) {
                 $plan_data = InPatientPlan::with([
                     'policy_covers',
-                    'additional_benefits'
-                ])->find($data['plan_id']);
-                $data['insurance_company_id'] = $plan_data->insurance_company_id;
-            } else {
-                // $plan_data = InOutPatientPlan::find($data['plan_id']);
+                    'additional_benefits',
+                ])->find($planId);
+            } elseif ($insuranceType === 2) {
                 $plan_data = InOutPatientPlan::with([
                     'policy_covers',
-                    'additional_benefits'
-                ])->find($data['plan_id']);
-                $data['insurance_company_id'] = $plan_data->insurance_company_id;
+                    'additional_benefits',
+                ])->find($planId);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'status_code' => 422,
+                    'message' => 'Invalid insurance_type. Use 1 or 2.',
+                    'data' => [],
+                ], 422);
             }
+
+            if (!$plan_data) {
+                return response()->json([
+                    'status' => false,
+                    'status_code' => 422,
+                    'message' => "Plan ID {$planId} was not found for insurance_type {$insuranceType}.",
+                    'data' => [],
+                ], 422);
+            }
+
+            $data['insurance_company_id'] = $plan_data->insurance_company_id;
+
 
             $client = Client::find($request->user_id);
             if (!$client) {
@@ -352,7 +381,7 @@ class ClientFamilyMedicalInsuranceController extends Controller
                 $path = $directory . '/' . $filename;
             }
 
-            
+
             $totalNetPremium = 0;
 
             // 1. Calculate Main Client Premium
