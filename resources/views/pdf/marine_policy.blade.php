@@ -362,7 +362,7 @@ if (!empty($data->letterhead)) {
                 </tr>
                 <tr>
                     <td>Company Country</td>
-                    <td>{{ $data->company_country_name ?? $data->company_country_id ?? '' }}</td>
+                    <td> {{ getCountryName($data->company_country_id ?? null) }} </td>
                 </tr>
                 <tr>
                     <td>Company City</td>
@@ -410,11 +410,11 @@ if (!empty($data->letterhead)) {
             </tr>
             <tr>
                 <td>Through Country</td>
-                <td>{{ $data->through_country_name ?? $data->through_country_id ?? '' }}</td>
+                <td> {{ getCountryName($data->through_country_id ?? null) }} </td>
             </tr>
             <tr>
                 <td>Destination Country</td>
-                <td>{{ $data->destination_country_name ?? $data->destination_country_id ?? '' }}</td>
+                <td>{{ getCountryName($data->destination_country_id ?? null) }} </td>
             </tr>
             <tr>
                 <td>Type of Transportation</td>
