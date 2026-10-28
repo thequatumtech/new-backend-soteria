@@ -344,7 +344,7 @@ if (!empty($data->letterhead)) {
                     </tr>
                     <tr>
                         <td>Nationality</td>
-                        <td>{{ $data->nationality ?? '' }}</td>
+                        <td>{{ getNationalityName($data->nationality ?? null) }}</td>
                     </tr>
                     <tr>
                         <td>Nationality Number</td>
@@ -452,7 +452,7 @@ if (!empty($data->letterhead)) {
                 <tbody>
                     <tr>
                         <td>Existing Policy Status</td>
-                        <td>{{ $data->existing_policy_status ?? '' }}</td>
+                        <td>{{ getYesNoStatus($data->existing_policy_status ?? null) }}</td>
                     </tr>
                     <tr>
                         <td>Previous Insurance Company</td>
@@ -465,7 +465,7 @@ if (!empty($data->letterhead)) {
                     </tr>
                     <tr>
                         <td>Existing Insurance Card</td>
-                        <td>{{ $data->existing_policy_card ?? '' }}</td>
+                        <td>{!! getDocumentLinks($data->existing_policy_card ?? null) !!}</td>
                     </tr>
                 </tbody>
             </table>
@@ -477,11 +477,11 @@ if (!empty($data->letterhead)) {
                 <tbody>
                     <tr>
                         <td>Chronic Diseases</td>
-                        <td>{{ $data->chronic_diseases_id ?? '' }}</td>
+                        <td>{{ getChronicDiseaseName($data->chronic_diseases_id ?? null) }}</td>
                     </tr>
                     <tr>
                         <td>Previous Operation</td>
-                        <td>{{ $data->previous_operation ?? '' }}</td>
+                        <td>{{ getYesNoStatus($data->previous_operation ?? null) }}</td>
                     </tr>
                     <tr>
                         <td>Operation Details</td>
@@ -489,7 +489,7 @@ if (!empty($data->letterhead)) {
                     </tr>
                     <tr>
                         <td>Pregnancy Status</td>
-                        <td>{{ $data->pregnant_status ?? '' }}</td>
+                        <td>{{ getYesNoStatus($data->pregnant_status ?? null) }}</td>
                     </tr>
                     <tr>
                         <td>Pregnancy Month</td>
@@ -497,11 +497,11 @@ if (!empty($data->letterhead)) {
                     </tr>
                     <tr>
                         <td>Dangerous Activity Status</td>
-                        <td>{{ $data->dangerous_status ?? '' }}</td>
+                        <td>{{ getYesNoStatus($data->dangerous_status ?? null) }}</td>
                     </tr>
                     <tr>
                         <td>Dangerous Activity</td>
-                        <td>{{ $data->dangerous_id ?? '' }}</td>
+                        <td>{{ getDangerousActivityName($data->dangerous_id ?? null) }}</td>
                     </tr>
                 </tbody>
             </table>

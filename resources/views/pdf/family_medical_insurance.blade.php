@@ -421,7 +421,7 @@ if (!empty($data->letterhead)) {
                                         </tr>
                                         <tr>
                                             <td>Nationality</td>
-                                            <td>{{ $data->nationality ?? '' }}</td>
+                                            <td>{{ getNationalityName($data->nationality ?? null) }}</td>
                                         </tr>
                                         <tr>
                                             <td>Nationality Number</td>
@@ -545,7 +545,7 @@ if (!empty($data->letterhead)) {
                                     <tbody>
                                         <tr>
                                             <td>Existing Policy Status</td>
-                                            <td>{{ $data->existing_policy_status ?? '' }}</td>
+                                            <td>{{ getYesNoStatus($data->existing_policy_status ?? null) }}</td>
                                         </tr>
                                         <tr>
                                             <td>Previous Insurance Company</td>
@@ -558,7 +558,7 @@ if (!empty($data->letterhead)) {
                                         </tr>
                                         <tr>
                                             <td>Existing Insurance Card</td>
-                                            <td>{{ $data->existing_policy_card ?? '' }}</td>
+                                            <td>{!! getDocumentLinks($data->existing_policy_card ?? null) !!}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -575,11 +575,11 @@ if (!empty($data->letterhead)) {
                                     <tbody>
                                         <tr>
                                             <td>Chronic Diseases</td>
-                                            <td>{{ $data->chronic_diseases_id ?? '' }}</td>
+                                            <td>{{ getChronicDiseaseName($data->chronic_diseases_id ?? null) }}</td>
                                         </tr>
                                         <tr>
                                             <td>Previous Operation</td>
-                                            <td>{{ $data->previous_operation ?? '' }}</td>
+                                            <td>{{ getYesNoStatus($data->previous_operation ?? null) }}</td>
                                         </tr>
                                         <tr>
                                             <td>Operation Details</td>
@@ -587,7 +587,7 @@ if (!empty($data->letterhead)) {
                                         </tr>
                                         <tr>
                                             <td>Pregnancy Status</td>
-                                            <td>{{ $data->pregnant_status ?? '' }}</td>
+                                            <td>{{ getYesNoStatus($data->pregnant_status ?? null) }}</td>
                                         </tr>
                                         <tr>
                                             <td>Pregnancy Month</td>
@@ -595,11 +595,11 @@ if (!empty($data->letterhead)) {
                                         </tr>
                                         <tr>
                                             <td>Dangerous Activity Status</td>
-                                            <td>{{ $data->dangerous_status ?? '' }}</td>
+                                            <td>{{ getYesNoStatus($data->dangerous_status ?? null) }}</td>
                                         </tr>
                                         <tr>
                                             <td>Dangerous Activity</td>
-                                            <td>{{ $data->dangerous_id ?? '' }}</td>
+                                            <td>{{ getDangerousActivityName($data->dangerous_id ?? null) }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -678,6 +678,69 @@ if (!empty($data->letterhead)) {
                         </tr>
                     @endif
 
+                    {{-- ROW 8: FAMILY MEMBERS --}}
+                    @foreach(($members ?? []) as $memberIndex => $member)
+                        @php
+                            $memberNationality = is_numeric($member->nationality ?? null)
+                                ? getNationalityName($member->nationality)
+                                : ($member->nationality ?? null);
+                            $memberChronic = getChronicDiseaseName($member->chronic_diseases_id ?? null);
+
+                            $memberRows = array_filter([
+                                'Full Name' => trim(($member->first_name ?? '') . ' ' . ($member->last_name ?? '') . ' ' . ($member->third_name ?? '') . ' ' . ($member->family_name ?? '')),
+                                'Relation' => $member->relation ?? null,
+                                'Nationality' => $memberNationality !== '-' ? $memberNationality : null,
+                                'Nationality Number' => $member->nationality_no ?? null,
+                                'Residence ID Number' => $member->id_residence_no ?? null,
+                                'Birth Date' => !empty($member->birth_date) ? date('m-d-Y', strtotime($member->birth_date)) . ' (Age ' . \Carbon\Carbon::parse($member->birth_date)->age . ')' : null,
+                                'Gender' => $member->gender ?? null,
+                                'Marital Status' => $member->marital_status ?? null,
+                                'Occupation / Work' => $member->occupancy_work ?? null,
+                                'Height' => $member->height ?? null,
+                                'Weight' => $member->wight ?? null,
+                                'Chronic Diseases' => $memberChronic !== '-' ? $memberChronic : null,
+                                'Previous Operation' => isset($member->previous_operation) ? getYesNoStatus($member->previous_operation) : null,
+                                'Operation Details' => $member->operation_details ?? null,
+                                'Pregnant' => isset($member->pregnant_status) ? getYesNoStatus($member->pregnant_status) : null,
+                                'Pregnancy Month' => $member->pregnant_month ?? null,
+                                'Dangerous Activities' => isset($member->dangerous_status) ? getYesNoStatus($member->dangerous_status) : null,
+                                'Dangerous Activity' => getDangerousActivityName($member->dangerous_id ?? null),
+                                'Premium' => isset($member->premium) ? number_format((float) $member->premium, 2) . ' ' . ($abbr ?? 'JOD') : null,
+                            ], fn($value) => $value !== null && $value !== '' && $value !== '-');
+
+                            $memberDocuments = array_filter([
+                                'Passport Front' => $member->passport_front_id ?? null,
+                                'Passport Back' => $member->passport_back_id ?? null,
+                                'Family Book' => $member->family_book_documents ?? null,
+                                'Personal Picture' => $member->personal_picture_documents ?? null,
+                                'Other Documents' => $member->other_documents ?? null,
+                            ], fn($value) => count(getDocumentPaths($value)));
+                        @endphp
+                        <tr>
+                            <td>
+                                <div class="policy-summary">
+                                    <h4>Family Member {{ $memberIndex + 1 }}</h4>
+                                    <table class="policy-details">
+                                        <tbody>
+                                            @foreach($memberRows as $label => $value)
+                                                <tr>
+                                                    <td>{{ $label }}</td>
+                                                    <td>{{ $value }}</td>
+                                                </tr>
+                                            @endforeach
+                                            @foreach($memberDocuments as $label => $value)
+                                                <tr>
+                                                    <td>{{ $label }}</td>
+                                                    <td>{!! getDocumentLinks($value) !!}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+
                 </tbody>
             </table>
         </div>
@@ -727,6 +790,18 @@ $summaryColumns = [];
 
 if (isset($plan->limit))
     $summaryColumns['Limit'] = number_format((float) $plan->limit, 2) . ' ' . $abbr;
+
+// Net premium = main insured + each family member (priced by own age / gender)
+$summaryMembers = $members ?? [];
+if (count($summaryMembers)) {
+    $summaryColumns['Insured Persons'] = count($summaryMembers) + 1;
+
+    if (isset($plan->main_member_premium))
+        $summaryColumns['Premium - ' . trim(($data->first_name ?? '') . ' ' . ($data->family_name ?? '')) . ' (Main)'] = number_format((float) $plan->main_member_premium, 2) . ' ' . $abbr;
+
+    foreach ($summaryMembers as $summaryIndex => $summaryMember)
+        $summaryColumns['Premium - Member ' . ($summaryIndex + 1) . ': ' . trim(($summaryMember->first_name ?? '') . ' ' . ($summaryMember->family_name ?? '')) . (!empty($summaryMember->relation) ? ' (' . $summaryMember->relation . ')' : '')] = number_format((float) ($summaryMember->premium ?? 0), 2) . ' ' . $abbr;
+}
 
 if (isset($plan->net_premium_amount))
     $summaryColumns['Net Premium'] = number_format((float) $plan->net_premium_amount, 2) . ' ' . $abbr;

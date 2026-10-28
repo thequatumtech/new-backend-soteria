@@ -77,6 +77,20 @@ class ClientFamilyMedicalInsuranceController extends Controller
 
         return $date;
     }
+    // members can arrive as an array or as a JSON string (multipart requests)
+    private function normalizeMembers($members)
+    {
+        if (is_string($members)) {
+            $members = json_decode($members, true);
+        }
+
+        if (!is_array($members)) {
+            return [];
+        }
+
+        return array_values(array_filter($members, 'is_array'));
+    }
+
     private function getPremiumForMember($planType, $planId, $age, $gender, $insuranceClass)
     {
         // Normalize gender: 1 = Male, 2 = Female
@@ -396,19 +410,20 @@ class ClientFamilyMedicalInsuranceController extends Controller
                 $data['insurance_class']
             );
 
-            // 2. Calculate Family Members Premium
-            if (!empty($request->members)) {
-                foreach ($request->members as $member) {
-                    $memberAge = Carbon::parse($member['birth_date'])->age;
-                    $memberGender = $member['gender'];
-                    $totalNetPremium += $this->getPremiumForMember(
-                        $data['insurance_type'],
-                        $data['plan_id'],
-                        $memberAge,
-                        $memberGender,
-                        $data['insurance_class']
-                    );
-                }
+            // 2. Calculate Family Members Premium (each member priced by own age / gender)
+            $members = $this->normalizeMembers($request->members);
+            $memberPremiums = [];
+
+            foreach ($members as $index => $member) {
+                $memberAge = !empty($member['birth_date']) ? Carbon::parse($member['birth_date'])->age : 0;
+                $memberPremiums[$index] = (float) $this->getPremiumForMember(
+                    $data['insurance_type'],
+                    $data['plan_id'],
+                    $memberAge,
+                    $member['gender'] ?? null,
+                    $data['insurance_class']
+                );
+                $totalNetPremium += $memberPremiums[$index];
             }
 
             $policy_limit = $this->cleanNumber($plan_data->limit);
@@ -479,6 +494,25 @@ class ClientFamilyMedicalInsuranceController extends Controller
             $plan_for_pdf->additional_benefits = $plan_data->additional_benefits ?? [];
             $client = Client::with('country.currency')->find($request->user_id);
             $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
+
+            // Save members before generating the PDF so they can be shown in it.
+            // On a draft update, replace the old members instead of adding duplicates.
+            FamilyMedicalInsuranceMember::where('client_insurance_id', $data->id)->delete();
+
+            $savedMembers = [];
+            foreach ($members as $index => $single) {
+                $memberFields = array_intersect_key($single, array_flip((new FamilyMedicalInsuranceMember)->getFillable()));
+                // Skip empty values so NOT NULL enum columns fall back to their defaults
+                $memberFields = array_filter($memberFields, fn($value) => $value !== null && !is_array($value));
+
+                $family_member = FamilyMedicalInsuranceMember::create(
+                    array_merge($memberFields, ['client_insurance_id' => $data->id])
+                );
+                $family_member->premium = $memberPremiums[$index] ?? 0;
+                $savedMembers[] = $family_member;
+            }
+
+            $plan_for_pdf->main_member_premium = $totalNetPremium - array_sum($memberPremiums);
             // Ensure percentages are set on the object if they came from fallbacks
             if (!isset($plan_for_pdf->cbj)) $plan_for_pdf->cbj = $cbjTaxPercentage;
             if (!isset($plan_for_pdf->sales_tax_cbj)) $plan_for_pdf->sales_tax_cbj = $cbjSalesTaxPercentage;
@@ -509,7 +543,8 @@ class ClientFamilyMedicalInsuranceController extends Controller
                     'data' => $data,
                     'abbr' => $abbr,
                     'purchaseData' => $purchaseData,
-                    'plan' => $plan_for_pdf
+                    'plan' => $plan_for_pdf,
+                    'members' => $savedMembers,
                 ]);
                 $filename = uniqid() . '_policy_' . $Medical->id . '.pdf';
                 $path = $directory . '/' . $filename;
@@ -517,35 +552,7 @@ class ClientFamilyMedicalInsuranceController extends Controller
                 $url = url('insurance_pdfs/family_medical_insurance/' . $filename);
             }
             $data['url'] = $url;
-
-            if (!empty($request->members)) {
-                foreach ($request->members as $single) {
-                    $family_member = new FamilyMedicalInsuranceMember();
-                    $family_member->client_insurance_id = $data['id'];
-                    $family_member->first_name = $single['first_name'];
-                    $family_member->last_name = $single['last_name'];
-                    $family_member->third_name = $single['third_name'];
-                    $family_member->family_name = $single['family_name'];
-                    $family_member->relation = $single['relation'];
-                    $family_member->nationality = $single['nationality'];
-                    $family_member->nationality_no = $single['nationality_no'];
-                    $family_member->id_residence_no = $single['id_residence_no'];
-                    $family_member->birth_date = $single['birth_date'];
-                    $family_member->gender = $single['gender'];
-                    $family_member->marital_status = $single['marital_status'];
-                    $family_member->occupancy_work = $single['occupancy_work'] ?? null;
-                    $family_member->height = $single['height'] ?? null;
-                    $family_member->wight = $single['wight'] ?? null;
-                    $family_member->chronic_diseases_id = $single['chronic_diseases_id'] ?? null;
-                    $family_member->previous_operation = $single['previous_operation'] ?? null;
-                    $family_member->operation_details = $single['operation_details'] ?? null;
-                    $family_member->pregnant_status = $single['pregnant_status'] ?? null;
-                    $family_member->pregnant_month = $single['pregnant_month'] ?? null;
-                    $family_member->dangerous_status = $single['dangerous_status'] ?? null;
-                    $family_member->dangerous_id = $single['dangerous_id'] ?? null;
-                    $family_member->save();
-                }
-            }
+            $data['members'] = $savedMembers;
 
 
             // $data->net_premium = number_format($plan_data->net_premium, 2) . ' ' . $abbr;
