@@ -292,16 +292,16 @@
         LETTERHEAD — show only if letterhead image exists
         ====================================================== --}}
         @php
-            $letterHeadPath = null;
-            if (!empty($data->letterhead)) {
-                $possibleLetterHeadPath = public_path('insurance/' . $data->insurance_company_id . '/' . $data->letterhead);
-                if (file_exists($possibleLetterHeadPath)) {
-                    $letterHeadPath = $possibleLetterHeadPath;
-                }
-            }
+$letterHeadPath = null;
+if (!empty($data->letterhead)) {
+    $possibleLetterHeadPath = public_path('insurance/' . $data->insurance_company_id . '/' . $data->letterhead);
+    if (file_exists($possibleLetterHeadPath)) {
+        $letterHeadPath = $possibleLetterHeadPath;
+    }
+}
         @endphp
 
-        @if($letterHeadPath)
+        @if(isset($isFinalPdf) && $isFinalPdf && !empty($letterHeadPath))
             <div class="letterhead">
                 <img src="{{ $letterHeadPath }}" alt="{{ $data->company_name ?? 'Insurance Company' }} Letterhead">
             </div>
@@ -364,7 +364,7 @@
                     </tr>
                     <tr>
                         <td>Marital Status</td>
-                        <td>{{ getMaritalStatusName($data->marital_status ?? null) }}</td>
+                        <td>{{ $data->marital_status ?? null }}</td>
                     </tr>
                     <tr>
                         <td>Place of Residence</td>
@@ -405,10 +405,10 @@
                         <td>Geographical Countries</td>
                         <td>
                             @php
-                                $countries = $data->geographical_countries ?? [];
-                                if (is_string($countries)) {
-                                    $countries = json_decode($countries, true) ?? [];
-                                }
+$countries = $data->geographical_countries ?? [];
+if (is_string($countries)) {
+    $countries = json_decode($countries, true) ?? [];
+}
                             @endphp
 
                             {{ is_array($countries) ? implode(', ', $countries) : $countries }}
@@ -527,10 +527,10 @@
                 <td><strong>Expiry Date</strong></td>
                 <td>{{ $data->expiry_date ? date('m-d-Y', strtotime($data->expiry_date)) : '' }}</td>
             </tr>
-            <tr>
+            <!-- <tr>
                 <td><strong>Payment Method</strong></td>
                 <td>Annual in advance</td>
-            </tr>
+            </tr> -->
         </table>
 
         <!-- POLICY SUMMARY -->
@@ -623,46 +623,46 @@
         <div class="policy-summary">
             {!! $data->insurance_policy_text !!}
         </div>
-
+    @if(isset($isFinalPdf) && $isFinalPdf)
         @php
-            /*
-            |--------------------------------------------------------------------------
-            | Check User Signature
-            |--------------------------------------------------------------------------
-            */
-            $userSignaturePath = null;
-            if (!empty($data->user_signature)) {
-                $path = public_path($data->user_signature);
-                if (file_exists($path)) {
-                    $userSignaturePath = $path;
-                }
-            }
+    /*
+    |--------------------------------------------------------------------------
+    | Check User Signature
+    |--------------------------------------------------------------------------
+    */
+    $userSignaturePath = null;
+    if (!empty($data->user_signature)) {
+        $path = public_path($data->user_signature);
+        if (file_exists($path)) {
+            $userSignaturePath = $path;
+        }
+    }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Company Stamp
-            |--------------------------------------------------------------------------
-            */
-            $companyStampPath = null;
-            if (!empty($data->company_stamp)) {
-                $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp);
-                if (file_exists($path)) {
-                    $companyStampPath = $path;
-                }
-            }
+    /*
+    |--------------------------------------------------------------------------
+    | Company Stamp
+    |--------------------------------------------------------------------------
+    */
+    $companyStampPath = null;
+    if (!empty($data->company_stamp)) {
+        $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp);
+        if (file_exists($path)) {
+            $companyStampPath = $path;
+        }
+    }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Authorized Signature
-            |--------------------------------------------------------------------------
-            */
-            $authorizedSignaturePath = null;
-            if (!empty($data->authorized_signature)) {
-                $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature);
-                if (file_exists($path)) {
-                    $authorizedSignaturePath = $path;
-                }
-            }
+    /*
+    |--------------------------------------------------------------------------
+    | Authorized Signature
+    |--------------------------------------------------------------------------
+    */
+    $authorizedSignaturePath = null;
+    if (!empty($data->authorized_signature)) {
+        $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature);
+        if (file_exists($path)) {
+            $authorizedSignaturePath = $path;
+        }
+    }
         @endphp
 
         @if($userSignaturePath)
@@ -729,7 +729,7 @@
                 </tr>
             </table>
         @endif
-
+    @endif
         <footer>
             <p>This contract is prepared in two replicas for each Contracting Party.</p>
         </footer>

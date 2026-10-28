@@ -13,6 +13,7 @@ use App\Models\Currency;
 use App\Models\InsuranceCompany;
 use App\Models\RenewalPolicy;
 use App\Helpers\InsurancePlanHelper;
+use Illuminate\Http\UploadedFile;
 
 class HomeInsuranceController extends Controller
 {
@@ -117,13 +118,31 @@ class HomeInsuranceController extends Controller
                 'plan_id' => 'nullable',
                 'effective_date' => 'nullable',
                 'expiry_date' => 'nullable',
-                'rent_contract' => 'nullable',
-                'property_document' => 'nullable',
-                'content_document' => 'nullable',
+                'rent_contract' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+                'property_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+                'content_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
                 'payment_status' => 'nullable',
 
                 'old_policy_id_for_renew' => 'nullable|integer',
                 'renew' => 'nullable|boolean',
+            ]);
+
+            foreach (['rent_contract', 'property_document', 'content_document'] as $field) {
+                $file = $request->file($field);
+
+                if ($file instanceof UploadedFile && $file->isValid()) {
+                    $storedPath = $file->store('home_insurance_documents', 'public');
+
+                    $data[$field] = json_encode([$storedPath]);
+                } else {
+                    unset($data[$field]);
+                }
+            }
+
+            \Log::info('Home insurance uploaded documents', [
+                'rent_contract' => $data['rent_contract'] ?? null,
+                'property_document' => $data['property_document'] ?? null,
+                'content_document' => $data['content_document'] ?? null,
             ]);
 
 
@@ -242,7 +261,7 @@ class HomeInsuranceController extends Controller
                     return $this->restrictionError('protection_system');
                 }
             }
-           
+
             if (!empty($restrictedHomeAges) && isset($data['home_age']) && $data['home_age'] !== '') {
                     $clientHomeAges = array_map('intval', $this->normalizeRestricted($data['home_age']));
 
@@ -323,7 +342,7 @@ class HomeInsuranceController extends Controller
                 }
             }
 
-           
+
 
             $data = ClientHomeInsurance::getHomeInsuranceDetails($data['policy_id']);
 
@@ -439,7 +458,7 @@ class HomeInsuranceController extends Controller
         } catch (\Exception $e) {
 
 
-         
+
             return response()->json([
                 'status' => false,
                 'status_code' => 500,
@@ -448,6 +467,7 @@ class HomeInsuranceController extends Controller
             ]);
         }
     }
+
     public function getHomeInsurancePlan(Request $request)
     {
         try {

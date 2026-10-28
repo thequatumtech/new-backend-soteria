@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\InsurancePlanModels\HomePlan;
 use App\Models\InsuranceCompany;
+use App\Models\Client;
 
 class ClientHomeInsurance extends Model
 {
@@ -87,9 +88,61 @@ class ClientHomeInsurance extends Model
                 $join->on('home_plans.insurance_company_id', '=', 'insurance_companies.id')
                     ->whereNull('insurance_companies.deleted_at');
             })
-            ->leftJoin('insurance_company_documents', 'insurance_companies.id', '=', 'insurance_company_documents.insurance_id')
+            ->leftJoin(
+                'insurance_company_documents',
+                'insurance_companies.id',
+                '=',
+                'insurance_company_documents.insurance_id'
+            )
             ->where('client_home_insurances.id', $id)
             ->first();
+
+        if ($plan) {
+            $plan->client_details = Client::with([
+                'nationality',
+                'city',
+                'district',
+                'country',
+                'occupation',
+                'company_city',
+                'company_district',
+            ])->find($plan->client_id);
+        }
+
         return $plan;
     }
+
+    // public static function getHomeInsuranceDetails($id)
+    // {
+    //     $plan = ClientHomeInsurance::select(
+    //         'client_home_insurances.*',
+    //         'home_plans.plan_name',
+    //         'home_plans.insurance_policy_text',
+    //         'home_plans.insurance_policy_pdf',
+    //         'home_plans.net_premium',
+    //         'home_plans.limit',
+    //         'home_plans.fees',
+    //         'home_plans.stamps',
+    //         'home_plans.sales_tax',
+    //         'home_plans.cbj',
+    //         'home_plans.sales_tax_cbj',
+    //         'home_plans.gross_premium',
+    //         'home_plans.commission_percentage',
+    //         'insurance_companies.company_name',
+    //         'insurance_company_documents.company_stamp',
+    //         'insurance_company_documents.logo',
+    //         'insurance_company_documents.letterhead',
+    //         'insurance_company_documents.authorized_signature',
+    //         'insurance_companies.id as insurance_company_id'
+    //     )
+    //         ->leftJoin('home_plans', 'client_home_insurances.plan_id', '=', 'home_plans.id')
+    //         ->leftJoin('insurance_companies', function ($join) {
+    //             $join->on('home_plans.insurance_company_id', '=', 'insurance_companies.id')
+    //                 ->whereNull('insurance_companies.deleted_at');
+    //         })
+    //         ->leftJoin('insurance_company_documents', 'insurance_companies.id', '=', 'insurance_company_documents.insurance_id')
+    //         ->where('client_home_insurances.id', $id)
+    //         ->first();
+    //     return $plan;
+    // }
 }

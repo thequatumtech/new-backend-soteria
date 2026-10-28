@@ -369,17 +369,19 @@
         ====================================================== --}} @php $letterHeadPath = null;
 
 
-            if (!empty($data->letterhead)) {
-                $possibleLetterHeadPath = public_path('insurance/' . $data->insurance_company_id . '/' . $data->letterhead);
-                if (file_exists($possibleLetterHeadPath)) {
-                    $letterHeadPath = $possibleLetterHeadPath;
-                }
-        } @endphp
+if (!empty($data->letterhead)) {
+    $possibleLetterHeadPath = public_path('insurance/' . $data->insurance_company_id . '/' . $data->letterhead);
+    if (file_exists($possibleLetterHeadPath)) {
+        $letterHeadPath = $possibleLetterHeadPath;
+    }
+} @endphp
 
 
-        @if($letterHeadPath)
-            <div class="letterhead"> <img src="{{ $letterHeadPath }}"
-        alt="{{ $data->company_name ?? 'Insurance Company' }} Letterhead"> </div> @endif
+        @if(isset($isFinalPdf) && $isFinalPdf && !empty($letterHeadPath))
+            <div class="letterhead">
+                <img src="{{ $letterHeadPath }}" alt="{{ $data->company_name ?? 'Insurance Company' }} Letterhead">
+            </div>
+        @endif
 
         <header class="policy-header">
             <img src="{{public_path('insurance/' . $data->insurance_company_id . '/' . $data->logo)}}"
@@ -440,7 +442,7 @@
                                         </tr>
                                         <tr>
                                             <td>Marital Status</td>
-                                            <td>{{ getMaritalStatusName($data->marital_status ?? null) }}</td>
+                                            <td>{{ $data->marital_status ?? null }}</td>
                                         </tr>
                                         <tr>
                                             <td>Occupation / Work</td>
@@ -648,39 +650,6 @@
                         </td>
                     </tr>
 
-                    {{-- ROW 7: DOCUMENT DETAILS --}}
-                    <tr>
-                        <td>
-                            <div class="policy-summary">
-                                <h4>Document Details</h4>
-                                <table class="policy-details">
-                                    <tbody>
-                                        <tr>
-                                            <td>Passport Front</td>
-                                            <td>{{ $data->passport_front_id ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Passport Back</td>
-                                            <td>{{ $data->passport_back_id ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Family Book</td>
-                                            <td>{{ $data->family_book_documents ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Personal Picture</td>
-                                            <td>{{ $data->personal_picture_documents ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Other Documents</td>
-                                            <td>{{ $data->other_documents ?? '' }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </td>
-                    </tr>
-
                 </tbody>
             </table>
         </div>
@@ -713,10 +682,10 @@
                 <td><strong>Geographical Coverage</strong></td>
                 <td></td>
             </tr> -->
-                <tr>
+                <!-- <tr>
                     <td><strong>Payment Method</strong></td>
                     <td>Annual in advance</td>
-                </tr>
+                </tr> -->
                 <!-- <tr>
                 <td><strong>TPA</strong></td>
                 <td>NatHealth</td>
@@ -725,32 +694,32 @@
         </div>
 
         @php
-            $abbr = $abbr ?? 'JOD';
-            $summaryColumns = [];
+$abbr = $abbr ?? 'JOD';
+$summaryColumns = [];
 
-            if (isset($plan->limit))
-                $summaryColumns['Limit'] = number_format((float) $plan->limit, 2) . ' ' . $abbr;
+if (isset($plan->limit))
+    $summaryColumns['Limit'] = number_format((float) $plan->limit, 2) . ' ' . $abbr;
 
-            if (isset($plan->net_premium_amount))
-                $summaryColumns['Net Premium'] = number_format((float) $plan->net_premium_amount, 2) . ' ' . $abbr;
+if (isset($plan->net_premium_amount))
+    $summaryColumns['Net Premium'] = number_format((float) $plan->net_premium_amount, 2) . ' ' . $abbr;
 
-            if (isset($plan->fees) && isset($plan->fees_amount))
-                $summaryColumns['Fees (' . $plan->fees . '%)'] = number_format((float) $plan->fees_amount, 2) . ' ' . $abbr;
+if (isset($plan->fees) && isset($plan->fees_amount))
+    $summaryColumns['Fees (' . $plan->fees . '%)'] = number_format((float) $plan->fees_amount, 2) . ' ' . $abbr;
 
-            if (isset($plan->stamps) && isset($plan->stamps_amount))
-                $summaryColumns['Stamps (' . $plan->stamps . '%)'] = number_format((float) $plan->stamps_amount, 2) . ' ' . $abbr;
+if (isset($plan->stamps) && isset($plan->stamps_amount))
+    $summaryColumns['Stamps (' . $plan->stamps . '%)'] = number_format((float) $plan->stamps_amount, 2) . ' ' . $abbr;
 
-            if (isset($plan->sales_tax) && isset($plan->sales_tax_amount))
-                $summaryColumns['Sales Tax (' . $plan->sales_tax . '%)'] = number_format((float) $plan->sales_tax_amount, 2) . ' ' . $abbr;
+if (isset($plan->sales_tax) && isset($plan->sales_tax_amount))
+    $summaryColumns['Sales Tax (' . $plan->sales_tax . '%)'] = number_format((float) $plan->sales_tax_amount, 2) . ' ' . $abbr;
 
-            if (isset($plan->cbj_amount) && $plan->cbj_amount > 0)
-                $summaryColumns['Contribution to Guarantee Fund (CBJ) (' . $plan->cbj . '%)'] = number_format((float) $plan->cbj_amount, 2) . ' ' . $abbr;
+if (isset($plan->cbj_amount) && $plan->cbj_amount > 0)
+    $summaryColumns['Contribution to Guarantee Fund (CBJ) (' . $plan->cbj . '%)'] = number_format((float) $plan->cbj_amount, 2) . ' ' . $abbr;
 
-            if (isset($plan->sales_tax_cbj_amount) && $plan->sales_tax_cbj_amount > 0)
-                $summaryColumns['Sales Tax on CBJ Contribution Fund (' . $plan->sales_tax_cbj . '%)'] = number_format((float) $plan->sales_tax_cbj_amount, 2) . ' ' . $abbr;
+if (isset($plan->sales_tax_cbj_amount) && $plan->sales_tax_cbj_amount > 0)
+    $summaryColumns['Sales Tax on CBJ Contribution Fund (' . $plan->sales_tax_cbj . '%)'] = number_format((float) $plan->sales_tax_cbj_amount, 2) . ' ' . $abbr;
 
-            if (isset($plan->gross_premium_amount))
-                $summaryColumns['Gross Premium'] = number_format((float) $plan->gross_premium_amount, 2) . ' ' . $abbr;
+if (isset($plan->gross_premium_amount))
+    $summaryColumns['Gross Premium'] = number_format((float) $plan->gross_premium_amount, 2) . ' ' . $abbr;
         @endphp
 
         @if(count($summaryColumns) > 0)
@@ -758,39 +727,7 @@
                 <h4>Policy Summary</h4>
 
                 <div class="table-responsive">
-                    {{-- <table class="policy-details">
-                        <tr>
-                            @isset($plan->limit)<td>Limit</td>@endisset
-                            @isset($plan->net_premium_amount)<td>Net Premium</td>@endisset
-                            @isset($plan->fees)<td>Fees ({{ $plan->fees }}%)</td>@endisset
-                            @isset($plan->stamps)<td>Stamps ({{ $plan->stamps }}%)</td>@endisset
-                            @isset($plan->sales_tax)<td>Sales Tax ({{ $plan->sales_tax }}%)</td>@endisset
-                            @if(isset($plan->cbj_amount) && $plan->cbj_amount > 0)<td>Contribution to Guarantee Fund (CBJ)
-                                ({{ $plan->cbj }}%)</td>@endif
-                            @if(isset($plan->sales_tax_cbj_amount) && $plan->sales_tax_cbj_amount > 0)<td>Sales Tax on CBJ
-                                Contribution Fund ({{ $plan->sales_tax_cbj }}%)</td>@endif
-                            @isset($plan->gross_premium_amount)<td>Gross Premium</td>@endisset
-                        </tr>
 
-                        <tr>
-                            @isset($plan->limit)<td>{{ number_format((float) $plan->limit, 2) }} {{ $abbr ?? 'JOD' }}</td>
-                            @endisset
-                            @isset($plan->net_premium_amount)<td>{{ number_format((float) $plan->net_premium_amount, 2) }}
-                                {{ $abbr ?? 'JOD' }}</td>@endisset
-                            @isset($plan->fees_amount)<td>{{ number_format((float) $plan->fees_amount, 2) }} {{ $abbr ??
-                                'JOD' }}</td>@endisset
-                            @isset($plan->stamps_amount)<td>{{ number_format((float) $plan->stamps_amount, 2) }} {{ $abbr ??
-                                'JOD' }}</td>@endisset
-                            @isset($plan->sales_tax_amount)<td>{{ number_format((float) $plan->sales_tax_amount, 2) }} {{
-                                $abbr ?? 'JOD' }}</td>@endisset
-                            @if(isset($plan->cbj_amount) && $plan->cbj_amount > 0)<td>{{ number_format((float)
-                                $plan->cbj_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endif
-                            @if(isset($plan->sales_tax_cbj_amount) && $plan->sales_tax_cbj_amount > 0)<td>{{
-                                number_format((float) $plan->sales_tax_cbj_amount, 2) }} {{ $abbr ?? 'JOD' }}</td>@endif
-                            @isset($plan->gross_premium_amount)<td>{{ number_format((float) $plan->gross_premium_amount, 2)
-                                }} {{ $abbr ?? 'JOD' }}</td>@endisset
-                        </tr>
-                    </table> --}}
                     <table class="premium-summary-table">
                         @foreach($summaryColumns as $label => $value)
                             <tr>
@@ -856,189 +793,192 @@
             {!! $data->insurance_policy_text !!}
         </div>
 
-        @php
+        @if(isset($isFinalPdf) && $isFinalPdf)
+
+            @php
 
 
-            /* |
-            | -------------------------------------------------------------------------- |
-            | Check User Signature |
-            | -------------------------------------------------------------------------- |
-            | */
-            $userSignaturePath = null;
+                /* |
+                | -------------------------------------------------------------------------- |
+                | Check User Signature |
+                | -------------------------------------------------------------------------- |
+                | */
+                $userSignaturePath = null;
 
-            if (!empty($data->user_signature)) {
-                $path = public_path($data->user_signature);
+                if (!empty($data->user_signature)) {
+                    $path = public_path($data->user_signature);
 
 
-                if (file_exists($path)) {
-                    $userSignaturePath = $path;
+                    if (file_exists($path)) {
+                        $userSignaturePath = $path;
+                    }
+
+
                 }
 
+                /* |
+                | -------------------------------------------------------------------------- |
+                | Company Stamp |
+                | -------------------------------------------------------------------------- |
+                | */
+                $companyStampPath = null;
 
-            }
-
-            /* |
-            | -------------------------------------------------------------------------- |
-            | Company Stamp |
-            | -------------------------------------------------------------------------- |
-            | */
-            $companyStampPath = null;
-
-            if (!empty($data->company_stamp)) {
-                $path = public_path(
-                    'insurance/' .
-                    $data->insurance_company_id .
-                    '/' .
-                    $data->company_stamp
-                );
+                if (!empty($data->company_stamp)) {
+                    $path = public_path(
+                        'insurance/' .
+                        $data->insurance_company_id .
+                        '/' .
+                        $data->company_stamp
+                    );
 
 
-                if (file_exists($path)) {
-                    $companyStampPath = $path;
+                    if (file_exists($path)) {
+                        $companyStampPath = $path;
+                    }
+
+
                 }
 
+                /* |
+                | -------------------------------------------------------------------------- |
+                | Authorized Signature |
+                | -------------------------------------------------------------------------- |
+                */
+                $authorizedSignaturePath = null;
 
-            }
-
-            /* |
-            | -------------------------------------------------------------------------- |
-            | Authorized Signature |
-            | -------------------------------------------------------------------------- |
-            */
-            $authorizedSignaturePath = null;
-
-            if (!empty($data->authorized_signature)) {
-                $path = public_path(
-                    'insurance/' .
-                    $data->insurance_company_id .
-                    '/' .
-                    $data->authorized_signature
-                );
+                if (!empty($data->authorized_signature)) {
+                    $path = public_path(
+                        'insurance/' .
+                        $data->insurance_company_id .
+                        '/' .
+                        $data->authorized_signature
+                    );
 
 
-                if (file_exists($path)) {
-                    $authorizedSignaturePath = $path;
+                    if (file_exists($path)) {
+                        $authorizedSignaturePath = $path;
+                    }
+
+
                 }
+            @endphp
+
+            @if($userSignaturePath)
 
 
-            }
-        @endphp
+                {{-- =========================================================
+                USER SIGNATURE AVAILABLE
+                3 COLUMNS
 
-        @if($userSignaturePath)
+                Insurer | Insured | Authorized Signature
+                ========================================================== --}}
 
+                <table class="signatures three-columns">
 
-            {{-- =========================================================
-            USER SIGNATURE AVAILABLE
-            3 COLUMNS
+                    <tr>
 
-            Insurer | Insured | Authorized Signature
-            ========================================================== --}}
+                        {{-- INSURER --}}
+                        <td>
 
-            <table class="signatures three-columns">
+                            <div class="signature-title">
+                                Insurer
+                            </div>
 
-                <tr>
+                            <div>
+                                {{ $data->company_name }}
+                            </div>
 
-                    {{-- INSURER --}}
-                    <td>
+                            @if($companyStampPath)
+                                <img src="{{ $companyStampPath }}" alt="Company Stamp" class="signature-image">
+                            @endif
 
-                        <div class="signature-title">
-                            Insurer
-                        </div>
-
-                        <div>
-                            {{ $data->company_name }}
-                        </div>
-
-                        @if($companyStampPath)
-                            <img src="{{ $companyStampPath }}" alt="Company Stamp" class="signature-image">
-                        @endif
-
-                    </td>
+                        </td>
 
 
-                    {{-- INSURED --}}
-                    <td>
+                        {{-- INSURED --}}
+                        <td>
 
-                        <div class="signature-title">
-                            Insured
-                        </div>
+                            <div class="signature-title">
+                                Insured
+                            </div>
 
-                        <div>
-                            {{ $data->first_name }}
-                            {{ $data->last_name }}
-                            {{ $data->third_name }}
-                            {{ $data->family_name }}
-                        </div>
+                            <div>
+                                {{ $data->first_name }}
+                                {{ $data->last_name }}
+                                {{ $data->third_name }}
+                                {{ $data->family_name }}
+                            </div>
 
-                        <img src="{{ $userSignaturePath }}" alt="User Signature" class="signature-image">
+                            <img src="{{ $userSignaturePath }}" alt="User Signature" class="signature-image">
 
-                    </td>
-
-
-                    {{-- AUTHORIZED SIGNATURE --}}
-                    <td>
-
-                        <div class="signature-title">
-                            Authorized Signature
-                        </div>
-
-                        @if($authorizedSignaturePath)
-                            <img src="{{ $authorizedSignaturePath }}" alt="Authorized Signature" class="signature-image">
-                        @endif
-
-                    </td>
-
-                </tr>
-
-            </table>
+                        </td>
 
 
-        @else
+                        {{-- AUTHORIZED SIGNATURE --}}
+                        <td>
+
+                            <div class="signature-title">
+                                Authorized Signature
+                            </div>
+
+                            @if($authorizedSignaturePath)
+                                <img src="{{ $authorizedSignaturePath }}" alt="Authorized Signature" class="signature-image">
+                            @endif
+
+                        </td>
+
+                    </tr>
+
+                </table>
 
 
-            {{-- =========================================================
-            USER SIGNATURE NOT AVAILABLE
-            2 COLUMNS
+            @else
 
-            Insurer | Authorized Signature
-            ========================================================== --}}
+                {{-- =========================================================
+                USER SIGNATURE NOT AVAILABLE
+                2 COLUMNS
 
-            <table class="signatures">
+                Insurer | Authorized Signature
+                ========================================================== --}}
 
-                <tr>
+                <table class="signatures">
 
-                    {{-- INSURER --}}
-                    <td>
+                    <tr>
 
-                        <div class="signature-title">
-                            Insurer
-                        </div>
+                        {{-- INSURER --}}
+                        <td>
 
-                        <div>
-                            {{ $data->company_name }}
-                        </div>
+                            <div class="signature-title">
+                                Insurer
+                            </div>
 
-                        @if($companyStampPath)
-                            <img src="{{ $companyStampPath }}" alt="Company Stamp" class="signature-image">
-                        @endif
+                            <div>
+                                {{ $data->company_name }}
+                            </div>
 
-                    </td>
+                            @if($companyStampPath)
+                                <img src="{{ $companyStampPath }}" alt="Company Stamp" class="signature-image">
+                            @endif
+
+                        </td>
 
 
-                    {{-- AUTHORIZED SIGNATURE --}}
-                    <td>
+                        {{-- AUTHORIZED SIGNATURE --}}
+                        <td>
 
-                        <div class="signature-title">
-                            Authorized Signature
-                        </div>
+                            <div class="signature-title">
+                                Authorized Signature
+                            </div>
 
-                        @if($authorizedSignaturePath)
-                            <img src="{{ $authorizedSignaturePath }}" alt="Authorized Signature" class="signature-image">
-                        @endif
+                            @if($authorizedSignaturePath)
+                                <img src="{{ $authorizedSignaturePath }}" alt="Authorized Signature" class="signature-image">
+                            @endif
 
-                    </td>
-                </tr>
-            </table>
+                        </td>
+                    </tr>
+                </table>
+            @endif
+
         @endif
 
         <footer>

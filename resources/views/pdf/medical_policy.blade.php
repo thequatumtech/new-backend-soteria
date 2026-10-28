@@ -298,16 +298,19 @@
 
 
         @php
-        $letterHeadPath = null;
-        if (!empty($data->letterhead)) {
-        $possibleLetterHeadPath = public_path('insurance/' . $data->insurance_company_id . '/' . $data->letterhead);
-        if (file_exists($possibleLetterHeadPath)) {
+$letterHeadPath = null;
+if (!empty($data->letterhead)) {
+    $possibleLetterHeadPath = public_path('insurance/' . $data->insurance_company_id . '/' . $data->letterhead);
+    if (file_exists($possibleLetterHeadPath)) {
         $letterHeadPath = $possibleLetterHeadPath;
-        }
-        }
+    }
+}
         @endphp
 
-        @if($letterHeadPath)
+
+
+
+ @if(isset($isFinalPdf) && $isFinalPdf && !empty($letterHeadPath))
         <div class="letterhead">
             <img src="{{ $letterHeadPath }}" alt="{{ $data->company_name ?? 'Insurance Company' }} Letterhead">
         </div>
@@ -344,10 +347,10 @@
                     <td><strong>Geographical Coverage</strong></td>
                     <td></td>
                 </tr>
-                <tr>
+                <!-- <tr>
                     <td><strong>Payment Method</strong></td>
                     <td>Annual in advance</td>
-                </tr>
+                </tr> -->
                 <tr>
                     <td><strong>TPA</strong></td>
                     <td>NatHealth</td>
@@ -357,25 +360,25 @@
 
         {{-- ========================= NET PREMIUM (vertical label|value — matches Personal Accident) ========================= --}}
         @php
-        $premiumColumns = [];
+$premiumColumns = [];
 
-        if (!empty($data->limit))
-        $premiumColumns['Limit'] = $data->limit;
+if (!empty($data->limit))
+    $premiumColumns['Limit'] = $data->limit;
 
-        if (!empty($data->net_premium))
-        $premiumColumns['Net Premium'] = $data->net_premium;
+if (!empty($data->net_premium))
+    $premiumColumns['Net Premium'] = $data->net_premium;
 
-        if (!empty($data->fees))
-        $premiumColumns['Fees'] = $data->fees;
+if (!empty($data->fees))
+    $premiumColumns['Fees'] = $data->fees;
 
-        if (!empty($data->stamps))
-        $premiumColumns['Stamps'] = $data->stamps;
+if (!empty($data->stamps))
+    $premiumColumns['Stamps'] = $data->stamps;
 
-        if (!empty($data->sales_tax))
-        $premiumColumns['Sales Tax'] = $data->sales_tax;
+if (!empty($data->sales_tax))
+    $premiumColumns['Sales Tax'] = $data->sales_tax;
 
-        if (!empty($data->gross_premium))
-        $premiumColumns['Gross Premium'] = $data->gross_premium;
+if (!empty($data->gross_premium))
+    $premiumColumns['Gross Premium'] = $data->gross_premium;
         @endphp
 
         @if(count($premiumColumns) > 0)
@@ -397,25 +400,31 @@
         <div class="policy-summary">
             {!! $data->insurance_policy_text !!}
         </div>
-
+    @if(isset($isFinalPdf) && $isFinalPdf)
         @php
-        $userSignaturePath = null;
-        if (!empty($data->user_signature)) {
+    $userSignaturePath = null;
+    if (!empty($data->user_signature)) {
         $path = public_path($data->user_signature);
-        if (file_exists($path)) { $userSignaturePath = $path; }
+        if (file_exists($path)) {
+            $userSignaturePath = $path;
         }
+    }
 
-        $companyStampPath = null;
-        if (!empty($data->company_stamp)) {
+    $companyStampPath = null;
+    if (!empty($data->company_stamp)) {
         $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp);
-        if (file_exists($path)) { $companyStampPath = $path; }
+        if (file_exists($path)) {
+            $companyStampPath = $path;
         }
+    }
 
-        $authorizedSignaturePath = null;
-        if (!empty($data->authorized_signature)) {
+    $authorizedSignaturePath = null;
+    if (!empty($data->authorized_signature)) {
         $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature);
-        if (file_exists($path)) { $authorizedSignaturePath = $path; }
+        if (file_exists($path)) {
+            $authorizedSignaturePath = $path;
         }
+    }
         @endphp
 
         @if($userSignaturePath)
@@ -466,6 +475,7 @@
         </table>
 
         @endif
+    @endif
 
         <footer>
             <p>This contract is prepared in two replicas for each Contracting Party.</p>

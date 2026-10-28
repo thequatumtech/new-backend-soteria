@@ -309,7 +309,7 @@ if (!empty($data->letterhead)) {
 }
         @endphp
 
-        @if($letterHeadPath)
+    @if(isset($isFinalPdf) && $isFinalPdf && !empty($letterHeadPath))
         <div class="letterhead">
             <img src="{{ $letterHeadPath }}" alt="{{ $data->company_name ?? 'Insurance Company' }} Letterhead">
         </div>
@@ -364,7 +364,7 @@ if (!empty($data->letterhead)) {
                     </tr>
                     <tr>
                         <td>Marital Status</td>
-                        <td>{{ getMaritalStatusName($data->marital_status ?? null) }}</td>
+                        <td>{{ $data->marital_status ?? null }}</td>
                     </tr>
                     <tr>
                         <td>Occupation / Work</td>
@@ -611,10 +611,10 @@ if (!empty($data->letterhead)) {
                 <td><strong>Geographical Coverage</strong></td>
                 <td></td>
             </tr> -->
-                <tr>
+                <!-- <tr>
                     <td><strong>Payment Method</strong></td>
                     <td>Annual in advance</td>
-                </tr>
+                </tr> -->
                 <!-- <tr>
                 <td><strong>TPA</strong></td>
                 <td>NatHealth</td>
@@ -708,81 +708,85 @@ if (isset($plan->gross_premium_amount))
             {!! $data->insurance_policy_text !!}
         </div>
 
-        @php
-$userSignaturePath = null;
-if (!empty($data->user_signature)) {
-    $path = public_path($data->user_signature);
-    if (file_exists($path)) {
-        $userSignaturePath = $path;
-    }
-}
 
-$companyStampPath = null;
-if (!empty($data->company_stamp)) {
-    $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp);
-    if (file_exists($path)) {
-        $companyStampPath = $path;
-    }
-}
+    @if(isset($isFinalPdf) && $isFinalPdf)
 
-$authorizedSignaturePath = null;
-if (!empty($data->authorized_signature)) {
-    $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature);
-    if (file_exists($path)) {
-        $authorizedSignaturePath = $path;
-    }
-}
-        @endphp
+            @php
+        $userSignaturePath = null;
+        if (!empty($data->user_signature)) {
+            $path = public_path($data->user_signature);
+            if (file_exists($path)) {
+                $userSignaturePath = $path;
+            }
+        }
 
-        @if($userSignaturePath)
+        $companyStampPath = null;
+        if (!empty($data->company_stamp)) {
+            $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp);
+            if (file_exists($path)) {
+                $companyStampPath = $path;
+            }
+        }
 
-        {{-- 3 COLUMNS: Insurer | Insured | Authorized Signature --}}
-        <table class="signatures three-columns">
-            <tr>
-                <td>
-                    <div class="signature-title">Insurer</div>
-                    <div>{{ $data->company_name }}</div>
-                    @if($companyStampPath)
-                    <img src="{{ $companyStampPath }}" alt="Company Stamp" class="signature-image">
-                    @endif
-                </td>
-                <td>
-                    <div class="signature-title">Insured</div>
-                    <div>{{ $data->first_name }} {{ $data->last_name }} {{ $data->third_name }} {{ $data->family_name }}</div>
-                    <img src="{{ $userSignaturePath }}" alt="User Signature" class="signature-image">
-                </td>
-                <td>
-                    <div class="signature-title">Authorized Signature</div>
-                    @if($authorizedSignaturePath)
-                    <img src="{{ $authorizedSignaturePath }}" alt="Authorized Signature" class="signature-image">
-                    @endif
-                </td>
-            </tr>
-        </table>
+        $authorizedSignaturePath = null;
+        if (!empty($data->authorized_signature)) {
+            $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature);
+            if (file_exists($path)) {
+                $authorizedSignaturePath = $path;
+            }
+        }
+            @endphp
 
-        @else
+            @if($userSignaturePath)
 
-        {{-- 2 COLUMNS: Insurer | Authorized Signature --}}
-        <table class="signatures">
-            <tr>
-                <td>
-                    <div class="signature-title">Insurer</div>
-                    <div>{{ $data->company_name }}</div>
-                    @if($companyStampPath)
-                    <img src="{{ $companyStampPath }}" alt="Company Stamp" class="signature-image">
-                    @endif
-                </td>
-                <td>
-                    <div class="signature-title">Authorized Signature</div>
-                    @if($authorizedSignaturePath)
-                    <img src="{{ $authorizedSignaturePath }}" alt="Authorized Signature" class="signature-image">
-                    @endif
-                </td>
-            </tr>
-        </table>
+            {{-- 3 COLUMNS: Insurer | Insured | Authorized Signature --}}
+            <table class="signatures three-columns">
+                <tr>
+                    <td>
+                        <div class="signature-title">Insurer</div>
+                        <div>{{ $data->company_name }}</div>
+                        @if($companyStampPath)
+                        <img src="{{ $companyStampPath }}" alt="Company Stamp" class="signature-image">
+                        @endif
+                    </td>
+                    <td>
+                        <div class="signature-title">Insured</div>
+                        <div>{{ $data->first_name }} {{ $data->last_name }} {{ $data->third_name }} {{ $data->family_name }}</div>
+                        <img src="{{ $userSignaturePath }}" alt="User Signature" class="signature-image">
+                    </td>
+                    <td>
+                        <div class="signature-title">Authorized Signature</div>
+                        @if($authorizedSignaturePath)
+                        <img src="{{ $authorizedSignaturePath }}" alt="Authorized Signature" class="signature-image">
+                        @endif
+                    </td>
+                </tr>
+            </table>
 
-        @endif
+            @else
 
+            {{-- 2 COLUMNS: Insurer | Authorized Signature --}}
+            <table class="signatures">
+                <tr>
+                    <td>
+                        <div class="signature-title">Insurer</div>
+                        <div>{{ $data->company_name }}</div>
+                        @if($companyStampPath)
+                        <img src="{{ $companyStampPath }}" alt="Company Stamp" class="signature-image">
+                        @endif
+                    </td>
+                    <td>
+                        <div class="signature-title">Authorized Signature</div>
+                        @if($authorizedSignaturePath)
+                        <img src="{{ $authorizedSignaturePath }}" alt="Authorized Signature" class="signature-image">
+                        @endif
+                    </td>
+                </tr>
+            </table>
+
+            @endif
+
+    @endif
         <footer>
             <p>This contract is prepared in two copies for each contracting party.</p>
         </footer>

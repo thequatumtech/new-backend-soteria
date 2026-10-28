@@ -279,7 +279,7 @@ if (!empty($data->letterhead)) {
 }
         @endphp
 
-        @if($letterHeadPath)
+        @if(isset($isFinalPdf) && $isFinalPdf && !empty($letterHeadPath))
             <div class="letterhead">
                 <img src="{{ $letterHeadPath }}" alt="{{ $data->company_name ?? 'Insurance Company' }} Letterhead">
             </div>
@@ -293,221 +293,498 @@ if (!empty($data->letterhead)) {
         </header>
 
         {{-- HOME INSURANCE DETAILS: EACH SECTION IN ITS OWN ROW --}}
+
+        {{-- HOME INSURANCE DETAILS --}}
         <div class="home-details-grid">
             <table class="home-layout-table">
                 <tbody>
 
                     {{-- ROW 1: POLICYHOLDER DETAILS --}}
-                    <tr>
-                        <td>
-                            <div class="policy-summary">
-                                <h4>Policyholder Details</h4>
-
-                                <table class="policy-details">
-                                    <tbody>
-                                        <tr>
-                                            <td>First Name</td>
-                                            <td>{{ $data->first_name ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Last Name</td>
-                                            <td>{{ $data->last_name ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Third Name</td>
-                                            <td>{{ $data->third_name ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Family Name</td>
-                                            <td>{{ $data->family_name ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Nationality</td>
-                                            <td>{{ $data->nationality ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Nationality Number</td>
-                                            <td>{{ $data->nationality_no ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Residence ID Number</td>
-                                            <td>{{ $data->id_residence_no ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Birth Date</td>
-                                            <td>
-                                                {{ !empty($data->birth_date) ? date('m-d-Y', strtotime($data->birth_date)) : '' }}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Gender</td>
-                                            <td>{{ $data->gender ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Marital Status</td>
-                                            <td>{{ getMaritalStatusName($data->marital_status ?? null) }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Place of Residence</td>
-                                            <td>{{ $data->place_of_residence ?? '' }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </td>
-                    </tr>
+                    @if(
+    !empty($data->first_name) ||
+    !empty($data->last_name) ||
+    !empty($data->third_name) ||
+    !empty($data->family_name) ||
+    !empty($data->nationality) ||
+    !empty($data->nationality_no) ||
+    !empty($data->id_residence_no) ||
+    !empty($data->birth_date) ||
+    !empty($data->gender) ||
+    !empty($data->marital_status) ||
+    !empty($data->place_of_residence)
+)
+                        <tr>
+                            <td>
+                                <div class="policy-summary">
+                                    <h4>Policyholder Details</h4>
+                                    <table class="policy-details">
+                                        <tbody>
+                                            @if(!empty($data->first_name))
+                                                <tr>
+                                                    <td>First Name</td>
+                                                    <td>{{ $data->first_name }}</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->last_name))
+                                                <tr>
+                                                    <td>Last Name</td>
+                                                    <td>{{ $data->last_name }}</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->third_name))
+                                                <tr>
+                                                    <td>Third Name</td>
+                                                    <td>{{ $data->third_name }}</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->family_name))
+                                                <tr>
+                                                    <td>Family Name</td>
+                                                    <td>{{ $data->family_name }}</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->nationality))
+                                                <tr>
+                                                    <td>Nationality</td>
+                                                    <td>{{ $data->nationality }}</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->nationality_no))
+                                                <tr>
+                                                    <td>Nationality Number</td>
+                                                    <td>{{ $data->nationality_no }}</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->id_residence_no))
+                                                <tr>
+                                                    <td>Residence ID Number</td>
+                                                    <td>{{ $data->id_residence_no }}</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->birth_date))
+                                                <tr>
+                                                    <td>Birth Date</td>
+                                                    <td>{{ date('m-d-Y', strtotime($data->birth_date)) }}</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->gender))
+                                                <tr>
+                                                    <td>Gender</td>
+                                                    <td>{{ $data->gender }}</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->marital_status))
+                                                <tr>
+                                                    <td>Marital Status</td>
+                                                    <td>{{ $data->marital_status }}</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->place_of_residence))
+                                                <tr>
+                                                    <td>Place of Residence</td>
+                                                    <td>{{ $data->place_of_residence }}</td>
+                                                </tr>
+                                            @endif
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    @endif
 
                     {{-- ROW 2: PROPERTY DETAILS --}}
-                    <tr>
-                        <td>
-                            <div class="policy-summary">
-                                <h4>Property Details</h4>
-
-                                <table class="policy-details">
-                                    <tbody>
-                                        <tr>
-                                            <td>Home Type</td>
-                                            <td>{{ $data->home_type ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Home Category</td>
-                                            <td>{{ $data->home_category ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Home Age</td>
-                                            <td>{{ $data->home_age ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Number of Floors</td>
-                                            <td>{{ $data->no_of_floor ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Number of Rooms</td>
-                                            <td>{{ $data->no_of_room ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Apartment Size</td>
-                                            <td>{{ $data->size_of_apartment ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Number of Residences</td>
-                                            <td>{{ $data->no_of_residence ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Block Number</td>
-                                            <td>{{ $data->block_no ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Plate Number</td>
-                                            <td>{{ $data->plate_no ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Plot Number</td>
-                                            <td>{{ $data->plot_no ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Street Name</td>
-                                            <td>{{ $data->street_name ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Building Number</td>
-                                            <td>{{ $data->building_no ?? '' }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </td>
-                    </tr>
+                    @if(
+    !empty($data->home_type) ||
+    !empty($data->home_category) ||
+    !empty($data->home_age) ||
+    !empty($data->no_of_floor) ||
+    !empty($data->no_of_room) ||
+    !empty($data->size_of_apartment) ||
+    !empty($data->no_of_residence) ||
+    !empty($data->block_no) ||
+    !empty($data->plate_no) ||
+    !empty($data->plot_no) ||
+    !empty($data->street_name) ||
+    !empty($data->building_no)
+)
+                        <tr>
+                            <td>
+                                <div class="policy-summary">
+                                    <h4>Property Details</h4>
+                                    <table class="policy-details">
+                                        <tbody>
+                                            @if(!empty($data->home_type))
+                                                <tr>
+                                                    <td>Home Type</td>
+                                                    <td>{{ $data->home_type }}</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->home_category))
+                                                <tr>
+                                                    <td>Home Category</td>
+                                                    <td>{{ $data->home_category }}</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->home_age))
+                                                <tr>
+                                                    <td>Home Age</td>
+                                                    <td>{{ $data->home_age }} Years</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->no_of_floor))
+                                                <tr>
+                                                    <td>Number of Floors</td>
+                                                    <td>{{ $data->no_of_floor }}</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->no_of_room))
+                                                <tr>
+                                                    <td>Number of Rooms</td>
+                                                    <td>{{ $data->no_of_room }}</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->size_of_apartment))
+                                                <tr>
+                                                    <td>Apartment Size</td>
+                                                    <td>{{ $data->size_of_apartment }}</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->no_of_residence))
+                                                <tr>
+                                                    <td>Number of Residences</td>
+                                                    <td>{{ $data->no_of_residence }}</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->block_no))
+                                                <tr>
+                                                    <td>Block Number</td>
+                                                    <td>{{ $data->block_no }}</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->plate_no))
+                                                <tr>
+                                                    <td>Plate Number</td>
+                                                    <td>{{ $data->plate_no }}</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->plot_no))
+                                                <tr>
+                                                    <td>Plot Number</td>
+                                                    <td>{{ $data->plot_no }}</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->street_name))
+                                                <tr>
+                                                    <td>Street Name</td>
+                                                    <td>{{ $data->street_name }}</td>
+                                                </tr>
+                                            @endif
+                                            @if(!empty($data->building_no))
+                                                <tr>
+                                                    <td>Building Number</td>
+                                                    <td>{{ $data->building_no }}</td>
+                                                </tr>
+                                            @endif
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    @endif
 
                     {{-- ROW 3: LOCATION DETAILS --}}
-                    <tr>
-                        <td>
-                            <div class="policy-summary">
-                                <h4>Location Details</h4>
+                    @php
+$countryName = !empty($data->country_id) ? getCountryName($data->country_id) : null;
+$cityName = !empty($data->city_id) ? getCityName($data->city_id) : null;
+$districtName = !empty($data->district_id) ? getDistrictName($data->district_id) : null;
+$workplaceCityName = !empty($data->city_id_2) ? getCityName($data->city_id_2) : null;
 
-                                <table class="policy-details">
-                                    <tbody>
-                                        <tr>
-                                            <td>Country</td>
-                                            <td>{{ getCountryName($data->country_id ?? null) ?? '-' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>City</td>
-                                            <td>{{ getCityName($data->city_id ?? null) ?? '-' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>District</td>
-                                            <td>{{ getDistrictName($data->district_id ?? null) ?? '-' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Workplace City</td>
-                                            <td>{{ getCityName($data->city_id_2 ?? null) ?? '-' }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </td>
-                    </tr>
+$countryName = $countryName !== '-' ? $countryName : null;
+$cityName = $cityName !== '-' ? $cityName : null;
+$districtName = $districtName !== '-' ? $districtName : null;
+$workplaceCityName = $workplaceCityName !== '-' ? $workplaceCityName : null;
+                    @endphp
 
-                    {{-- ROW 4: EMPLOYMENT DETAILS --}}
-                    <tr>
-                        <td>
-                            <div class="policy-summary">
-                                <h4>Employment Details</h4>
+                    @if($countryName || $cityName || $districtName || $workplaceCityName)
+                        <tr>
+                            <td>
+                                <div class="policy-summary">
+                                    <h4>Location Details</h4>
+                                    <table class="policy-details">
+                                        <tbody>
+                                            @if($countryName)
+                                                <tr>
+                                                    <td>Country</td>
+                                                    <td>{{ $countryName }}</td>
+                                                </tr>
+                                            @endif
+                                            @if($cityName)
+                                                <tr>
+                                                    <td>City</td>
+                                                    <td>{{ $cityName }}</td>
+                                                </tr>
+                                            @endif
+                                            @if($districtName)
+                                                <tr>
+                                                    <td>District</td>
+                                                    <td>{{ $districtName }}</td>
+                                                </tr>
+                                            @endif
+                                            @if($workplaceCityName)
+                                                <tr>
+                                                    <td>Workplace City</td>
+                                                    <td>{{ $workplaceCityName }}</td>
+                                                </tr>
+                                            @endif
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    @endif
 
-                                <table class="policy-details">
-                                    <tbody>
-                                        <tr>
-                                            <td>Company Name</td>
-                                            <td>{{ $data->company_name ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Position</td>
-                                            <td>{{ $data->position ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Nature of Work</td>
-                                            <td>{{ $data->work_nature ?? '' }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </td>
-                    </tr>
+                  {{-- EMPLOYMENT INFORMATION --}}
+@php
+$clientInfo = $data->client_details ?? null;
+
+$clientCompanyCity = null;
+$clientCompanyDistrict = null;
+
+if ($clientInfo) {
+    if (!empty($clientInfo->company_city_id)) {
+        $clientCompanyCity = getCityName($clientInfo->company_city_id);
+    }
+
+    if (empty($clientCompanyCity) || $clientCompanyCity === '-') {
+        $clientCompanyCity = $clientInfo->company_city->name ?? null;
+    }
+
+    if (!empty($clientInfo->company_district_id)) {
+        $clientCompanyDistrict = getDistrictName($clientInfo->company_district_id);
+    }
+
+    if (empty($clientCompanyDistrict) || $clientCompanyDistrict === '-') {
+        $clientCompanyDistrict = $clientInfo->company_district->name ?? null;
+    }
+}
+
+$employmentType = $clientInfo->employment_type ?? null;
+$occupation = $data->occupancy_work
+    ?? ($clientInfo->occupation->name ?? null);
+$companyName = $clientInfo->company_name
+    ?? ($data->company_name ?? null);
+$position = $clientInfo->position
+    ?? ($data->position ?? null);
+$workNature = $clientInfo->work_nature
+    ?? ($data->work_nature ?? null);
+$companyContact = $clientInfo->company_contact_no
+    ?? ($data->company_contact ?? null);
+$companyStreet = $clientInfo->company_street_name ?? null;
+$companyBuilding = $clientInfo->company_building_no ?? null;
+
+$hasEmploymentInfo =
+    !empty($employmentType) ||
+    !empty($occupation) ||
+    !empty($companyName) ||
+    !empty($position) ||
+    !empty($workNature) ||
+    !empty($companyContact) ||
+    !empty($companyStreet) ||
+    !empty($companyBuilding) ||
+    (!empty($clientCompanyCity) && $clientCompanyCity !== '-') ||
+    (!empty($clientCompanyDistrict) && $clientCompanyDistrict !== '-');
+@endphp
+
+@if($hasEmploymentInfo)
+    <tr>
+        <td>
+            <div class="policy-summary">
+                <h4>Employment Information</h4>
+                <table class="policy-details">
+                    <tbody>
+                        @if(!empty($employmentType))
+                            <tr>
+                                <td>Employment Type</td>
+                                <td>{{ $employmentType }}</td>
+                            </tr>
+                        @endif
+
+                        @if(!empty($occupation))
+                            <tr>
+                                <td>Occupation / Work</td>
+                                <td>{{ $occupation }}</td>
+                            </tr>
+                        @endif
+
+                        @if(!empty($companyName))
+                            <tr>
+                                <td>Company Name</td>
+                                <td>{{ $companyName }}</td>
+                            </tr>
+                        @endif
+
+                        @if(!empty($position))
+                            <tr>
+                                <td>Position</td>
+                                <td>{{ $position }}</td>
+                            </tr>
+                        @endif
+
+                        @if(!empty($workNature))
+                            <tr>
+                                <td>Nature of Work</td>
+                                <td>{{ $workNature }}</td>
+                            </tr>
+                        @endif
+
+                        @if(!empty($companyContact))
+                            <tr>
+                                <td>Company Contact Number</td>
+                                <td>{{ $companyContact }}</td>
+                            </tr>
+                        @endif
+
+                        @if(!empty($companyStreet))
+                            <tr>
+                                <td>Company Street Name</td>
+                                <td>{{ $companyStreet }}</td>
+                            </tr>
+                        @endif
+
+                        @if(!empty($companyBuilding))
+                            <tr>
+                                <td>Company Building Number</td>
+                                <td>{{ $companyBuilding }}</td>
+                            </tr>
+                        @endif
+
+                        @if(!empty($clientCompanyCity) && $clientCompanyCity !== '-')
+                            <tr>
+                                <td>Company City</td>
+                                <td>{{ $clientCompanyCity }}</td>
+                            </tr>
+                        @endif
+
+                        @if(!empty($clientCompanyDistrict) && $clientCompanyDistrict !== '-')
+                            <tr>
+                                <td>Company District</td>
+                                <td>{{ $clientCompanyDistrict }}</td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </td>
+    </tr>
+@endif
+
+@php
+    $normalizeDocuments = function ($value) {
+        if (empty($value)) {
+            return [];
+        }
+
+        if (is_array($value)) {
+            return $value;
+        }
+
+        $decoded = json_decode($value, true);
+
+        return is_array($decoded) ? $decoded : [$value];
+    };
+
+    $rentDocuments = $normalizeDocuments($data->rent_contract ?? null);
+    $propertyDocuments = $normalizeDocuments($data->property_document ?? null);
+    $contentDocuments = $normalizeDocuments($data->content_document ?? null);
+@endphp
+
+@if(count($rentDocuments) || count($propertyDocuments) || count($contentDocuments))
+    <tr>
+        <td>
+            <div class="policy-summary">
+                <h4>Supporting Documents</h4>
+
+                <table class="policy-details">
+                    <tbody>
+                        @foreach([
+                                'Rent Contract' => $rentDocuments,
+                                'Property Document' => $propertyDocuments,
+                                'Content Document' => $contentDocuments,
+                            ] as $label => $documents)
+                            @foreach($documents as $index => $document)
+                                @php
+                                    $relativePath = ltrim($document, '/');
+                                    $filePath = storage_path('app/public/' . $relativePath);
+                                    $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+                                @endphp
+
+                                <tr>
+                                    <td>{{ $label }} {{ $index + 1 }}</td>
+                                    <td>
+                                         @if(file_exists($filePath))
+                                            {{ $filePath }}
+                                        @else
+                                            Document not found
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </td>
+    </tr>
+@endif
 
                     {{-- ROW 5: INSURANCE HISTORY AND DECLARATIONS --}}
-                    <tr>
-                        <td>
-                            <div class="policy-summary">
-                                <h4>Insurance History and Declarations</h4>
-
-                                <table class="policy-details">
-                                    <tbody>
-                                        <tr>
-                                            <td>Previous Policy</td>
-                                            <td>{{ $data->previous_policy ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Company Declined to Issue</td>
-                                            <td>{{ $data->company_declined_to_issue ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Claims / Accidents in the Past</td>
-                                            <td>{{ $data->claims_accidents_past ?? '' }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Protection System</td>
-                                            <td>{{ $data->protection_system ?? '' }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </td>
-                    </tr>
+                    @if(
+                            !empty($data->previous_policy) ||
+                            !empty($data->company_declined_to_issue) ||
+                            !empty($data->claims_accidents_past) ||
+                            !empty($data->protection_system)
+                        )
+                            <tr>
+                                <td>
+                                    <div class="policy-summary">
+                                        <h4>Insurance History and Declarations</h4>
+                                        <table class="policy-details">
+                                            <tbody>
+                                                @if(!empty($data->previous_policy))
+                                                    <tr>
+                                                        <td>Previous Policy</td>
+                                                        <td>{{ $data->previous_policy }}</td>
+                                                    </tr>
+                                                @endif
+                                                @if(!empty($data->company_declined_to_issue))
+                                                    <tr>
+                                                        <td>Company Declined to Issue</td>
+                                                        <td>{{ $data->company_declined_to_issue }}</td>
+                                                    </tr>
+                                                @endif
+                                                @if(!empty($data->claims_accidents_past))
+                                                    <tr>
+                                                        <td>Claims / Accidents in the Past</td>
+                                                        <td>{{ $data->claims_accidents_past }}</td>
+                                                    </tr>
+                                                @endif
+                                                @if(!empty($data->protection_system))
+                                                    <tr>
+                                                        <td>Protection System</td>
+                                                        <td>{{ $data->protection_system }}</td>
+                                                    </tr>
+                                                @endif
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                    @endif
 
                 </tbody>
             </table>
         </div>
+
 
         {{-- POLICY DETAILS --}}
         <table class="policy-details">
@@ -541,10 +818,10 @@ if (!empty($data->letterhead)) {
                         {{ !empty($data->expiry_date) ? date('m-d-Y', strtotime($data->expiry_date)) : '' }}
                     </td>
                 </tr>
-                <tr>
+                <!-- <tr>
                     <td><strong>Payment Method</strong></td>
                     <td>Annual in advance</td>
-                </tr>
+                </tr> -->
             </tbody>
         </table>
 
@@ -655,104 +932,107 @@ if (!empty($purchase->gross_premium)) {
             {!! $data->insurance_policy_text ?? '' !!}
         </div>
 
-        {{-- SIGNATURE AND STAMP PATHS --}}
-        @php
-$userSignaturePath = null;
+        @if(isset($isFinalPdf) && $isFinalPdf)
 
-if (!empty($data->user_signature)) {
-    $path = public_path($data->user_signature);
+            {{-- SIGNATURE AND STAMP PATHS --}}
+            @php
+    $userSignaturePath = null;
 
-    if (file_exists($path)) {
-        $userSignaturePath = $path;
+    if (!empty($data->user_signature)) {
+        $path = public_path($data->user_signature);
+
+        if (file_exists($path)) {
+            $userSignaturePath = $path;
+        }
     }
-}
 
-$companyStampPath = null;
+    $companyStampPath = null;
 
-if (!empty($data->company_stamp)) {
-    $path = public_path(
-        'insurance/' . $data->insurance_company_id . '/' . $data->company_stamp
-    );
+    if (!empty($data->company_stamp)) {
+        $path = public_path(
+            'insurance/' . $data->insurance_company_id . '/' . $data->company_stamp
+        );
 
-    if (file_exists($path)) {
-        $companyStampPath = $path;
+        if (file_exists($path)) {
+            $companyStampPath = $path;
+        }
     }
-}
 
-$authorizedSignaturePath = null;
+    $authorizedSignaturePath = null;
 
-if (!empty($data->authorized_signature)) {
-    $path = public_path(
-        'insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature
-    );
+    if (!empty($data->authorized_signature)) {
+        $path = public_path(
+            'insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature
+        );
 
-    if (file_exists($path)) {
-        $authorizedSignaturePath = $path;
+        if (file_exists($path)) {
+            $authorizedSignaturePath = $path;
+        }
     }
-}
-        @endphp
+            @endphp
 
-        {{-- SIGNATURES --}}
-        @if($userSignaturePath)
-            <table class="signatures three-columns">
-                <tbody>
-                    <tr>
-                        <td>
-                            <div class="signature-title">Insurer</div>
-                            <div>{{ $data->company_name ?? '' }}</div>
+            {{-- SIGNATURES --}}
+            @if($userSignaturePath)
+                <table class="signatures three-columns">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="signature-title">Insurer</div>
+                                <div>{{ $data->company_name ?? '' }}</div>
 
-                            @if($companyStampPath)
-                                <img src="{{ $companyStampPath }}" alt="Company Stamp" class="signature-image">
-                            @endif
-                        </td>
+                                @if($companyStampPath)
+                                    <img src="{{ $companyStampPath }}" alt="Company Stamp" class="signature-image">
+                                @endif
+                            </td>
 
-                        <td>
-                            <div class="signature-title">Insured</div>
-                            <div>
-                                {{ $data->first_name ?? '' }}
-                                {{ $data->last_name ?? '' }}
-                                {{ $data->third_name ?? '' }}
-                                {{ $data->family_name ?? '' }}
-                            </div>
+                            <td>
+                                <div class="signature-title">Insured</div>
+                                <div>
+                                    {{ $data->first_name ?? '' }}
+                                    {{ $data->last_name ?? '' }}
+                                    {{ $data->third_name ?? '' }}
+                                    {{ $data->family_name ?? '' }}
+                                </div>
 
-                            <img src="{{ $userSignaturePath }}" alt="User Signature" class="signature-image">
-                        </td>
+                                <img src="{{ $userSignaturePath }}" alt="User Signature" class="signature-image">
+                            </td>
 
-                        <td>
-                            <div class="signature-title">Authorized Signature</div>
+                            <td>
+                                <div class="signature-title">Authorized Signature</div>
 
-                            @if($authorizedSignaturePath)
-                                <img src="{{ $authorizedSignaturePath }}" alt="Authorized Signature" class="signature-image">
-                            @endif
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        @else
-            <table class="signatures">
-                <tbody>
-                    <tr>
-                        <td>
-                            <div class="signature-title">Insurer</div>
-                            <div>{{ $data->company_name ?? '' }}</div>
+                                @if($authorizedSignaturePath)
+                                    <img src="{{ $authorizedSignaturePath }}" alt="Authorized Signature" class="signature-image">
+                                @endif
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            @else
+                <table class="signatures">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="signature-title">Insurer</div>
+                                <div>{{ $data->company_name ?? '' }}</div>
 
-                            @if($companyStampPath)
-                                <img src="{{ $companyStampPath }}" alt="Company Stamp" class="signature-image">
-                            @endif
-                        </td>
+                                @if($companyStampPath)
+                                    <img src="{{ $companyStampPath }}" alt="Company Stamp" class="signature-image">
+                                @endif
+                            </td>
 
-                        <td>
-                            <div class="signature-title">Authorized Signature</div>
+                            <td>
+                                <div class="signature-title">Authorized Signature</div>
 
-                            @if($authorizedSignaturePath)
-                                <img src="{{ $authorizedSignaturePath }}" alt="Authorized Signature" class="signature-image">
-                            @endif
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                                @if($authorizedSignaturePath)
+                                    <img src="{{ $authorizedSignaturePath }}" alt="Authorized Signature" class="signature-image">
+                                @endif
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            @endif
+
         @endif
-
         {{-- FOOTER --}}
         <footer>
             <p>This contract is prepared in two replicas for each Contracting Party.</p>
@@ -762,4 +1042,3 @@ if (!empty($data->authorized_signature)) {
 </body>
 
 </html>
-

@@ -293,7 +293,7 @@ if (!empty($data->letterhead)) {
 }
         @endphp
 
-        @if($letterHeadPath)
+    @if(isset($isFinalPdf) && $isFinalPdf && !empty($letterHeadPath))
         <div class="letterhead">
             <img src="{{ $letterHeadPath }}" alt="{{ $data->company_name ?? 'Insurance Company' }} Letterhead">
         </div>
@@ -494,16 +494,16 @@ if (!empty($data->letterhead)) {
                 </td>
             </tr>
             @foreach([
-                    'register_document' => 'Registration Document',
-                    'billing_of_landing_doc' => 'Bill of Lading',
-                    'copy_of_invoice_doc' => 'Invoice Copy',
-                    'insured_id_doc' => 'Insured ID Document',
-                    'policy_issuer_doc' => 'Policy Issuer Document',
-                    'company_reg_owner_doc' => 'Company Registration/Owner Document',
-                    'career_municipality_license_doc' => 'Carrier/Municipality License',
-                    'company_tax_certificate_doc' => 'Company Tax Certificate',
-                    'practice_certificate_doc' => 'Practice Certificate',
-                ] as $field => $label)
+    'register_document' => 'Registration Document',
+    'billing_of_landing_doc' => 'Bill of Lading',
+    'copy_of_invoice_doc' => 'Invoice Copy',
+    'insured_id_doc' => 'Insured ID Document',
+    'policy_issuer_doc' => 'Policy Issuer Document',
+    'company_reg_owner_doc' => 'Company Registration/Owner Document',
+    'career_municipality_license_doc' => 'Carrier/Municipality License',
+    'company_tax_certificate_doc' => 'Company Tax Certificate',
+    'practice_certificate_doc' => 'Practice Certificate',
+] as $field => $label)
                 @if(!empty($data->$field))
                     <tr>
                         <td>{{ $label }}</td>
@@ -548,10 +548,10 @@ if (!empty($data->letterhead)) {
                 <td><strong>Expiry Date</strong></td>
                 <td>{{ date('m-d-Y', strtotime($data->expiry_date)) }}</td>
             </tr>
-            <tr>
+            <!-- <tr>
                 <td><strong>Payment Method</strong></td>
                 <td>Annual in advance</td>
-            </tr>
+            </tr> -->
         </table>
 
         {{-- ========================= PREMIUM SUMMARY (vertical label|value — matches Personal Accident) ========================= --}}
@@ -636,31 +636,31 @@ if (!empty($purchase->gross_premium))
         <div class="policy-summary">
             {!! $data->insurance_policy_text !!}
         </div>
-
+  @if(isset($isFinalPdf) && $isFinalPdf)
         @php
-$userSignaturePath = null;
-if (!empty($data->user_signature)) {
-    $path = public_path($data->user_signature);
-    if (file_exists($path)) {
-        $userSignaturePath = $path;
+    $userSignaturePath = null;
+    if (!empty($data->user_signature)) {
+        $path = public_path($data->user_signature);
+        if (file_exists($path)) {
+            $userSignaturePath = $path;
+        }
     }
-}
 
-$companyStampPath = null;
-if (!empty($data->company_stamp)) {
-    $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp);
-    if (file_exists($path)) {
-        $companyStampPath = $path;
+    $companyStampPath = null;
+    if (!empty($data->company_stamp)) {
+        $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp);
+        if (file_exists($path)) {
+            $companyStampPath = $path;
+        }
     }
-}
 
-$authorizedSignaturePath = null;
-if (!empty($data->authorized_signature)) {
-    $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature);
-    if (file_exists($path)) {
-        $authorizedSignaturePath = $path;
+    $authorizedSignaturePath = null;
+    if (!empty($data->authorized_signature)) {
+        $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature);
+        if (file_exists($path)) {
+            $authorizedSignaturePath = $path;
+        }
     }
-}
         @endphp
 
         @if($userSignaturePath)
@@ -708,7 +708,7 @@ if (!empty($data->authorized_signature)) {
             </tr>
         </table>
         @endif
-
+@endif
         <footer>
             <p>This contract is prepared in two replicas for each Contracting Party.</p>
         </footer>

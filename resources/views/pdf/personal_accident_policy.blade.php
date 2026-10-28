@@ -313,7 +313,7 @@ if (!empty($data->letterhead)) {
     }
 } @endphp
 
-        @if($letterHeadPath)
+    @if(isset($isFinalPdf) && $isFinalPdf && !empty($letterHeadPath))
         <div class="letterhead"> <img src="{{ $letterHeadPath }}"
                 alt="{{ $data->company_name ?? 'Insurance Company' }} Letterhead"> </div> @endif
 
@@ -369,7 +369,7 @@ if (!empty($data->letterhead)) {
                     </tr>
                     <tr>
                         <td>Marital Status</td>
-                        <td>{{ getMaritalStatusName($data->marital_status ?? null) }}</td>
+                        <td>{{ $data->marital_status ?? null }}</td>
                     </tr>
                     <tr>
                         <td>Place of Residence</td>
@@ -525,10 +525,10 @@ if (!empty($data->letterhead)) {
                     <td>Expiry Date</td>
                     <td>{{ date('m-d-Y', strtotime($data->expiry_date)) }}</td>
                 </tr>
-                <tr>
+                <!-- <tr>
                     <td>Payment Method</td>
                     <td>Annual in Advance</td>
-                </tr>
+                </tr> -->
 
             </table>
         </div>
@@ -623,61 +623,63 @@ if (!empty($purchase['gross_premium']))
             {!! $data->insurance_policy_text !!}
         </div>
 
+
+    @if(isset($isFinalPdf) && $isFinalPdf)
         @php
-/*
-Check User Signature
---------------------------------------------------------------------------
-*/
-$userSignaturePath = null;
+    /*
+    Check User Signature
+    --------------------------------------------------------------------------
+    */
+    $userSignaturePath = null;
 
-if (!empty($data->user_signature)) {
-    $path = public_path($data->user_signature);
+    if (!empty($data->user_signature)) {
+        $path = public_path($data->user_signature);
 
-    if (file_exists($path)) {
-        $userSignaturePath = $path;
+        if (file_exists($path)) {
+            $userSignaturePath = $path;
+        }
+
     }
 
-}
+    /*
+    Company Stamp
+    --------------------------------------------------------------------------
+    */
+    $companyStampPath = null;
 
-/*
-Company Stamp
---------------------------------------------------------------------------
-*/
-$companyStampPath = null;
+    if (!empty($data->company_stamp)) {
+        $path = public_path(
+            'insurance/' .
+            $data->insurance_company_id .
+            '/' .
+            $data->company_stamp
+        );
 
-if (!empty($data->company_stamp)) {
-    $path = public_path(
-        'insurance/' .
-        $data->insurance_company_id .
-        '/' .
-        $data->company_stamp
-    );
+        if (file_exists($path)) {
+            $companyStampPath = $path;
+        }
 
-    if (file_exists($path)) {
-        $companyStampPath = $path;
     }
 
-}
+    /*
+    Authorized Signature
+    --------------------------------------------------------------------------
+    */
+    $authorizedSignaturePath = null;
 
-/*
-Authorized Signature
---------------------------------------------------------------------------
-*/
-$authorizedSignaturePath = null;
+    if (!empty($data->authorized_signature)) {
+        $path = public_path(
+            'insurance/' .
+            $data->insurance_company_id .
+            '/' .
+            $data->authorized_signature
+        );
 
-if (!empty($data->authorized_signature)) {
-    $path = public_path(
-        'insurance/' .
-        $data->insurance_company_id .
-        '/' .
-        $data->authorized_signature
-    );
+        if (file_exists($path)) {
+            $authorizedSignaturePath = $path;
+        }
 
-    if (file_exists($path)) {
-        $authorizedSignaturePath = $path;
     }
-
-}
         @endphp
 
         @if($userSignaturePath)
@@ -817,6 +819,8 @@ if (!empty($data->authorized_signature)) {
         </table>
 
         @endif
+
+            @endif
 
         <footer>
             <p>This contract is prepared in two copies for each contracting party.</p>

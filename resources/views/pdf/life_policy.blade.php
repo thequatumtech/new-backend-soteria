@@ -285,16 +285,16 @@
          LETTERHEAD — show only if letterhead image exists
     ====================================================== --}}
         @php
-        $letterHeadPath = null;
-        if (!empty($data->letterhead)) {
-        $possibleLetterHeadPath = public_path('insurance/' . $data->insurance_company_id . '/' . $data->letterhead);
-        if (file_exists($possibleLetterHeadPath)) {
+$letterHeadPath = null;
+if (!empty($data->letterhead)) {
+    $possibleLetterHeadPath = public_path('insurance/' . $data->insurance_company_id . '/' . $data->letterhead);
+    if (file_exists($possibleLetterHeadPath)) {
         $letterHeadPath = $possibleLetterHeadPath;
-        }
-        }
+    }
+}
         @endphp
 
-        @if($letterHeadPath)
+        @if(isset($isFinalPdf) && $isFinalPdf && !empty($letterHeadPath))
         <div class="letterhead">
             <img src="{{ $letterHeadPath }}" alt="{{ $data->company_name ?? 'Insurance Company' }} Letterhead">
         </div>
@@ -320,7 +320,7 @@
             <tr><td>Residence ID Number</td><td>{{ $data->id_residence_no ?? '' }}</td></tr>
             <tr><td>Birth Date</td><td>{{ !empty($data->birth_date) ? date('m-d-Y', strtotime($data->birth_date)) : '' }}</td></tr>
             <tr><td>Gender</td><td>{{ $data->gender ?? '' }}</td></tr>
-            <tr><td>Marital Status</td><td>{{ getMaritalStatusName($data->marital_status ?? null) }}</td></tr>
+            <tr><td>Marital Status</td><td>{{ $data->marital_status ?? null }}</td></tr>
             <tr><td>Place of Residence</td><td>{{ $data->place_residence ?? '' }}</td></tr>
             <tr><td>Occupation / Work</td><td>{{ $data->occupancy_work ?? '' }}</td></tr>
             <tr><td>American Nationality Status</td><td>{{ $data->american_notionality_status ?? '' }}</td></tr>
@@ -434,10 +434,10 @@
                 <td><strong>Expiry Date</strong></td>
                 <td>{{ date('m-d-Y', strtotime($data->expiry_date)) }}</td>
             </tr>
-            <tr>
+            <!-- <tr>
                 <td><strong>Payment Method</strong></td>
                 <td>Annual in advance</td>
-            </tr>
+            </tr> -->
         </table>
 
         <!-- POLICY SUMMARY -->
@@ -534,45 +534,50 @@
             {!! $data->insurance_policy_text !!}
         </div>
 
+
+
+    @if(isset($isFinalPdf) && $isFinalPdf)
+
+
         @php
-        /*
-        |--------------------------------------------------------------------------
-        | Check User Signature
-        |--------------------------------------------------------------------------
-        */
-        $userSignaturePath = null;
-        if (!empty($data->user_signature)) {
-        $path = public_path($data->user_signature);
-        if (file_exists($path)) {
+/*
+|--------------------------------------------------------------------------
+| Check User Signature
+|--------------------------------------------------------------------------
+*/
+$userSignaturePath = null;
+if (!empty($data->user_signature)) {
+    $path = public_path($data->user_signature);
+    if (file_exists($path)) {
         $userSignaturePath = $path;
-        }
-        }
+    }
+}
 
-        /*
-        |--------------------------------------------------------------------------
-        | Company Stamp
-        |--------------------------------------------------------------------------
-        */
-        $companyStampPath = null;
-        if (!empty($data->company_stamp)) {
-        $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp);
-        if (file_exists($path)) {
+/*
+|--------------------------------------------------------------------------
+| Company Stamp
+|--------------------------------------------------------------------------
+*/
+$companyStampPath = null;
+if (!empty($data->company_stamp)) {
+    $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp);
+    if (file_exists($path)) {
         $companyStampPath = $path;
-        }
-        }
+    }
+}
 
-        /*
-        |--------------------------------------------------------------------------
-        | Authorized Signature
-        |--------------------------------------------------------------------------
-        */
-        $authorizedSignaturePath = null;
-        if (!empty($data->authorized_signature)) {
-        $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature);
-        if (file_exists($path)) {
+/*
+|--------------------------------------------------------------------------
+| Authorized Signature
+|--------------------------------------------------------------------------
+*/
+$authorizedSignaturePath = null;
+if (!empty($data->authorized_signature)) {
+    $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature);
+    if (file_exists($path)) {
         $authorizedSignaturePath = $path;
-        }
-        }
+    }
+}
         @endphp
 
         @if($userSignaturePath)
@@ -639,6 +644,8 @@
             </tr>
         </table>
         @endif
+
+            @endif
 
         <footer>
             <p>This contract is prepared in two replicas for each Contracting Party.</p>

@@ -109,6 +109,21 @@ class CriticalIllnessInsurance extends Model
             $plan->net_premium = $plan->$netPremiumsField ?? 0;
             $plan->gross_premium = $plan->$netPremiumsField + $plan->fees + $plan->stamps + $plan->sales_tax ?? 0;
         }
+
+        if ($plan) {
+            $plan->client_details = Client::with([
+                'nationality',
+                'city',
+                'district',
+                'country',
+                'occupation',
+                'company_city',
+                'company_district',
+            ])->find($plan->client_id);
+
+          
+        }
+
         return $plan;
     }
     public function client()

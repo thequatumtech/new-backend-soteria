@@ -48,19 +48,19 @@ class ClientDentalsInsurance extends Model
     {
         // Find the birth date of the client
         $client = ClientDentalsInsurance::find($id);
-    
+
         if (!$client) {
             return null; // Handle case where the client is not found
         }
-    
+
         $birthdate = new DateTime($client->birth_date);
         $today   = new DateTime('today');
         $age = $birthdate->diff($today)->y;
-    
+
         // Fetch the criticalIllness insurance details
         $plan = ClientDentalsInsurance::select(
-                'client_dentals_insurances.*', 
-                'dental_plans.plan_name', 
+                'client_dentals_insurances.*',
+                'dental_plans.plan_name',
                 'dental_plans.fees',
                 'dental_plans.stamps',
                 'dental_plans.sales_tax',
@@ -81,16 +81,29 @@ class ClientDentalsInsurance extends Model
             // ->leftJoin('insurance_periods', 'client_dentals_insurances.insurance_period', '=', 'insurance_periods.id')
             ->where('client_dentals_insurances.id', $id)
             ->first();
-    
+
         if ($plan) {
             // Dynamically set the net_premium based on insurance_periods.name
             $insurancePeriodVal = $plan->periods_val; // Assuming this returns a value like '2'
             $netPremiumsField = 'year_' . $insurancePeriodVal;
-    
+
             // Set net_premium based on the dynamically generated field
             $plan->net_premium = $plan->$netPremiumsField ?? 0;
             $plan->gross_premium = $plan->$netPremiumsField+$plan->fees+$plan->stamps+$plan->sales_tax ?? 0;
         }
+
+        if ($plan) {
+            $plan->client_details = Client::with([
+                'nationality',
+                'city',
+                'district',
+                'country',
+                'occupation',
+                'company_city',
+                'company_district',
+            ])->find($plan->client_id);
+        }
+        
         return $plan;
     }
 }

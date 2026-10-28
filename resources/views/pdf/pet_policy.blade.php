@@ -329,7 +329,7 @@ if (!empty($data->letterhead)) {
 }
         @endphp
 
-        @if($letterHeadPath)
+    @if(isset($isFinalPdf) && $isFinalPdf && !empty($letterHeadPath))
         <div class="letterhead">
             <img src="{{ $letterHeadPath }}" alt="{{ $data->company_name ?? 'Insurance Company' }} Letterhead">
         </div>
@@ -390,7 +390,7 @@ if (!empty($data->letterhead)) {
                         <td>Pet Type</td>
                         <td>
                             @php
-                                $petType = $data->pets_type ?? $data->type_of_pets ?? null;
+$petType = $data->pets_type ?? $data->type_of_pets ?? null;
                             @endphp
                             {{ $petType == 1 ? 'Dog' : ($petType == 2 ? 'Cat' : ($petType ?? '')) }}
                         </td>
@@ -625,6 +625,8 @@ if (!empty($purchase->gross_premium))
             {!! $data->insurance_policy_text !!}
         </div>
 
+            @if(isset($isFinalPdf) && $isFinalPdf)
+
         @php
 /*
 |--------------------------------------------------------------------------
@@ -750,6 +752,8 @@ if (!empty($data->authorized_signature)) {
 
         @endif
 
+           @endif
+           
         <footer>
             <p>This contract is prepared in two replicas for each Contracting Party.</p>
         </footer>

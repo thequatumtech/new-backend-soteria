@@ -12,6 +12,8 @@ use Carbon\Carbon;
 use App\Models\RenewalPolicy;
 use App\Models\Currency;
 use App\Helpers\InsurancePlanHelper;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\UploadedFile;
 
 class CriticalIllnessInsuranceController extends Controller
 {
@@ -83,7 +85,14 @@ class CriticalIllnessInsuranceController extends Controller
 
     public function storeCriticalIllnessInsurance(Request $request)
     {
+
+        Log::info('storeCriticalIllnessInsurance() CALLED', [
+            'request_data' => $request->all(),
+        ]);
+
         try {
+
+
 
             $data = $request->validate([
                 'first_name' => 'nullable',
@@ -124,8 +133,8 @@ class CriticalIllnessInsuranceController extends Controller
                 'insurance_plan' => 'nullable',
                 'inception_date' => 'required',
                 'expiry_date' => 'required',
-                'passport_id_documents' => 'nullable',
-                'insured_documents' => 'nullable',
+                'passport_id_documents' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+                'insured_documents' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
                 'plan_id' => 'nullable',
                 'payment_status' => 'nullable',
 
@@ -133,6 +142,20 @@ class CriticalIllnessInsuranceController extends Controller
                 'renew' => 'nullable|boolean',
 
             ]);
+
+            foreach (['passport_id_documents', 'insured_documents'] as $field) {
+                $file = $request->file($field);
+
+                if ($file instanceof UploadedFile && $file->isValid()) {
+                    $data[$field] = json_encode([
+                        $file->store('critical_illness_documents', 'public')
+                    ]);
+                } else {
+                    unset($data[$field]);
+                }
+            }
+
+          
 
             // $plan_data = CriticalIllnessPlan::find($data['plan_id']);
             $plan_data = CriticalIllnessPlan::with('insurance_company.currency')->find($data['plan_id']);
@@ -257,6 +280,11 @@ class CriticalIllnessInsuranceController extends Controller
             }
 
             $data = CriticalIllnessInsurance::getCriticalIllnessInsuranceDetails($data['policy_id']);
+
+            Log::info('Uploaded document paths', [
+                'passport_documents' => $data->passport_id_documents,
+                'insured_documents' => $data->insured_documents,
+            ]);
 
             $directory = public_path('insurance_pdfs/criticalIllness_policy');
 

@@ -284,16 +284,16 @@
              LETTERHEAD — show only if letterhead image exists
         ====================================================== --}}
         @php
-        $letterHeadPath = null;
-        if (!empty($data->letterhead)) {
-        $possibleLetterHeadPath = public_path('insurance/' . $data->insurance_company_id . '/' . $data->letterhead);
-        if (file_exists($possibleLetterHeadPath)) {
+$letterHeadPath = null;
+if (!empty($data->letterhead)) {
+    $possibleLetterHeadPath = public_path('insurance/' . $data->insurance_company_id . '/' . $data->letterhead);
+    if (file_exists($possibleLetterHeadPath)) {
         $letterHeadPath = $possibleLetterHeadPath;
-        }
-        }
+    }
+}
         @endphp
 
-        @if($letterHeadPath)
+    @if(isset($isFinalPdf) && $isFinalPdf && !empty($letterHeadPath))
         <div class="letterhead">
             <img src="{{ $letterHeadPath }}" alt="{{ $data->company_name ?? 'Insurance Company' }} Letterhead">
         </div>
@@ -522,7 +522,7 @@
         </tr>
     @endif
 
-   
+
 </table>
 
 
@@ -548,48 +548,48 @@
                 <td><strong>Expiry Date</strong></td>
                 <td>{{ date('m-d-Y', strtotime($data->expiry_date)) }}</td>
             </tr>
-            <tr>
+            <!-- <tr>
                 <td><strong>Payment Method</strong></td>
                 <td>Annual in advance</td>
-            </tr>
+            </tr> -->
         </table>
 
         @php
-        $columns = [];
+$columns = [];
 
-        if (!empty($purchase->policy_plan_limit))
-        $columns['Limit'] = number_format($purchase->policy_plan_limit, 2) . ' ' . $abbr;
+if (!empty($purchase->policy_plan_limit))
+    $columns['Limit'] = number_format($purchase->policy_plan_limit, 2) . ' ' . $abbr;
 
-        if (!empty($purchase->net_premium))
-        $columns['Net Premium'] = number_format($purchase->net_premium, 2) . ' ' . $abbr;
+if (!empty($purchase->net_premium))
+    $columns['Net Premium'] = number_format($purchase->net_premium, 2) . ' ' . $abbr;
 
-        $feesRate = $plan->fees ?? 0;
-        $fees_label = 'Issuance Fees' . ($feesRate > 0 ? ' (' . $feesRate . '%)' : '');
-        if (!empty($purchase->fees))
-        $columns[$fees_label] = number_format($purchase->fees, 2) . ' ' . $abbr;
+$feesRate = $plan->fees ?? 0;
+$fees_label = 'Issuance Fees' . ($feesRate > 0 ? ' (' . $feesRate . '%)' : '');
+if (!empty($purchase->fees))
+    $columns[$fees_label] = number_format($purchase->fees, 2) . ' ' . $abbr;
 
-        $stampsRate = $plan->stamps ?? 0;
-        $stamps_label = 'Stamps' . ($stampsRate > 0 ? ' (' . $stampsRate . '%)' : '');
-        if (!empty($purchase->stamps))
-        $columns[$stamps_label] = number_format($purchase->stamps, 2) . ' ' . $abbr;
+$stampsRate = $plan->stamps ?? 0;
+$stamps_label = 'Stamps' . ($stampsRate > 0 ? ' (' . $stampsRate . '%)' : '');
+if (!empty($purchase->stamps))
+    $columns[$stamps_label] = number_format($purchase->stamps, 2) . ' ' . $abbr;
 
-        $salesTaxRate = $plan->sales_tax ?? 0;
-        $sales_tax_label = 'Sales Tax' . ($salesTaxRate > 0 ? ' (' . $salesTaxRate . '%)' : '');
-        if (!empty($purchase->sales_tax))
-        $columns[$sales_tax_label] = number_format($purchase->sales_tax, 2) . ' ' . $abbr;
+$salesTaxRate = $plan->sales_tax ?? 0;
+$sales_tax_label = 'Sales Tax' . ($salesTaxRate > 0 ? ' (' . $salesTaxRate . '%)' : '');
+if (!empty($purchase->sales_tax))
+    $columns[$sales_tax_label] = number_format($purchase->sales_tax, 2) . ' ' . $abbr;
 
-        $cbjRate = $plan->cbj ?? 0;
-        $cbj_label = 'Contribution to the Guarantee Fund (CBJ)' . ($cbjRate > 0 ? ' (' . $cbjRate . '%)' : '');
-        if (!empty($purchase->cbj))
-        $columns[$cbj_label] = number_format($purchase->cbj, 2) . ' ' . $abbr;
+$cbjRate = $plan->cbj ?? 0;
+$cbj_label = 'Contribution to the Guarantee Fund (CBJ)' . ($cbjRate > 0 ? ' (' . $cbjRate . '%)' : '');
+if (!empty($purchase->cbj))
+    $columns[$cbj_label] = number_format($purchase->cbj, 2) . ' ' . $abbr;
 
-        $cbjTaxRate = $plan->sales_tax_cbj ?? 0;
-        $cbj_tax_label = 'Sales Tax on CBJ Contribution Fund' . ($cbjTaxRate > 0 ? ' (' . $cbjTaxRate . '%)' : '');
-        if (!empty($purchase->sales_tax_cbj))
-        $columns[$cbj_tax_label] = number_format($purchase->sales_tax_cbj, 2) . ' ' . $abbr;
+$cbjTaxRate = $plan->sales_tax_cbj ?? 0;
+$cbj_tax_label = 'Sales Tax on CBJ Contribution Fund' . ($cbjTaxRate > 0 ? ' (' . $cbjTaxRate . '%)' : '');
+if (!empty($purchase->sales_tax_cbj))
+    $columns[$cbj_tax_label] = number_format($purchase->sales_tax_cbj, 2) . ' ' . $abbr;
 
-        if (!empty($purchase->gross_premium))
-        $columns['Gross Premium'] = number_format($purchase->gross_premium, 2) . ' ' . $abbr;
+if (!empty($purchase->gross_premium))
+    $columns['Gross Premium'] = number_format($purchase->gross_premium, 2) . ' ' . $abbr;
         @endphp
 
         <!-- PREMIUM SUMMARY -->
@@ -638,46 +638,46 @@
         <div class="policy-summary">
             {!! $data->insurance_policy_text !!}
         </div>
-
+  @if(isset($isFinalPdf) && $isFinalPdf)
         @php
-        /*
-        |--------------------------------------------------------------------------
-        | Check User Signature
-        |--------------------------------------------------------------------------
-        */
-        $userSignaturePath = null;
-        if (!empty($data->user_signature)) {
+    /*
+    |--------------------------------------------------------------------------
+    | Check User Signature
+    |--------------------------------------------------------------------------
+    */
+    $userSignaturePath = null;
+    if (!empty($data->user_signature)) {
         $path = public_path($data->user_signature);
         if (file_exists($path)) {
-        $userSignaturePath = $path;
+            $userSignaturePath = $path;
         }
-        }
+    }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Company Stamp
-        |--------------------------------------------------------------------------
-        */
-        $companyStampPath = null;
-        if (!empty($data->company_stamp)) {
+    /*
+    |--------------------------------------------------------------------------
+    | Company Stamp
+    |--------------------------------------------------------------------------
+    */
+    $companyStampPath = null;
+    if (!empty($data->company_stamp)) {
         $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp);
         if (file_exists($path)) {
-        $companyStampPath = $path;
+            $companyStampPath = $path;
         }
-        }
+    }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Authorized Signature
-        |--------------------------------------------------------------------------
-        */
-        $authorizedSignaturePath = null;
-        if (!empty($data->authorized_signature)) {
+    /*
+    |--------------------------------------------------------------------------
+    | Authorized Signature
+    |--------------------------------------------------------------------------
+    */
+    $authorizedSignaturePath = null;
+    if (!empty($data->authorized_signature)) {
         $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature);
         if (file_exists($path)) {
-        $authorizedSignaturePath = $path;
+            $authorizedSignaturePath = $path;
         }
-        }
+    }
         @endphp
 
         @if($userSignaturePath)
@@ -743,6 +743,8 @@
                 </td>
             </tr>
         </table>
+        @endif
+
         @endif
 
         <footer>

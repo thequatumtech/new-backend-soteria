@@ -285,21 +285,21 @@
 <body>
     <div class="policy-container">
 
-        
+
         {{-- =====================================================
          LETTERHEAD — show only if letterhead image exists
     ====================================================== --}}
         @php
-        $letterHeadPath = null;
-        if (!empty($data->letterhead)) {
-        $possibleLetterHeadPath = public_path('insurance/' . $data->insurance_company_id . '/' . $data->letterhead);
-        if (file_exists($possibleLetterHeadPath)) {
+$letterHeadPath = null;
+if (!empty($data->letterhead)) {
+    $possibleLetterHeadPath = public_path('insurance/' . $data->insurance_company_id . '/' . $data->letterhead);
+    if (file_exists($possibleLetterHeadPath)) {
         $letterHeadPath = $possibleLetterHeadPath;
-        }
-        }
+    }
+}
         @endphp
 
-        @if($letterHeadPath)
+    @if(isset($isFinalPdf) && $isFinalPdf && !empty($letterHeadPath))
         <div class="letterhead">
             <img src="{{ $letterHeadPath }}" alt="{{ $data->company_name ?? 'Insurance Company' }} Letterhead">
         </div>
@@ -333,40 +333,40 @@
                 <td><strong>Expiry Date</strong></td>
                 <td>{{ date('m-d-Y', strtotime($data->expiry_date)) }}</td>
             </tr>
-            <tr>
+            <!-- <tr>
                 <td><strong>Payment Method</strong></td>
                 <td>Annual in advance</td>
-            </tr>
+            </tr> -->
         </table>
 
         {{-- ========================= PREMIUM SUMMARY (vertical label|value — matches Personal Accident) ========================= --}}
         @php
-        $abbr = $abbr ?? 'JOD';
-        $summaryColumns = [];
+$abbr = $abbr ?? 'JOD';
+$summaryColumns = [];
 
-        if (isset($plan->limit))
-        $summaryColumns['Limit'] = number_format((float) $plan->limit, 2) . ' ' . $abbr;
+if (isset($plan->limit))
+    $summaryColumns['Limit'] = number_format((float) $plan->limit, 2) . ' ' . $abbr;
 
-        if (isset($plan->net_premium_amount))
-        $summaryColumns['Net Premium'] = number_format((float) $plan->net_premium_amount, 2) . ' ' . $abbr;
+if (isset($plan->net_premium_amount))
+    $summaryColumns['Net Premium'] = number_format((float) $plan->net_premium_amount, 2) . ' ' . $abbr;
 
-        if (isset($plan->fees->fees))
-        $summaryColumns['Fees (' . $plan->fees->fees . '%)'] = number_format((float) ($plan->fees_amount ?? 0), 2) . ' ' . $abbr;
+if (isset($plan->fees->fees))
+    $summaryColumns['Fees (' . $plan->fees->fees . '%)'] = number_format((float) ($plan->fees_amount ?? 0), 2) . ' ' . $abbr;
 
-        if (isset($plan->fees->stamps))
-        $summaryColumns['Stamps (' . $plan->fees->stamps . '%)'] = number_format((float) ($plan->stamps_amount ?? 0), 2) . ' ' . $abbr;
+if (isset($plan->fees->stamps))
+    $summaryColumns['Stamps (' . $plan->fees->stamps . '%)'] = number_format((float) ($plan->stamps_amount ?? 0), 2) . ' ' . $abbr;
 
-        if (isset($plan->fees->sales_tax))
-        $summaryColumns['Sales Tax (' . $plan->fees->sales_tax . '%)'] = number_format((float) ($plan->sales_tax_amount ?? 0), 2) . ' ' . $abbr;
+if (isset($plan->fees->sales_tax))
+    $summaryColumns['Sales Tax (' . $plan->fees->sales_tax . '%)'] = number_format((float) ($plan->sales_tax_amount ?? 0), 2) . ' ' . $abbr;
 
-        if (isset($plan->fees->cbj) && $plan->fees->cbj > 0)
-        $summaryColumns['Contribution to Guarantee Fund (CBJ) (' . $plan->fees->cbj . '%)'] = number_format((float) ($plan->cbj_amount ?? 0), 2) . ' ' . $abbr;
+if (isset($plan->fees->cbj) && $plan->fees->cbj > 0)
+    $summaryColumns['Contribution to Guarantee Fund (CBJ) (' . $plan->fees->cbj . '%)'] = number_format((float) ($plan->cbj_amount ?? 0), 2) . ' ' . $abbr;
 
-        if (isset($plan->fees->sales_tax_cbj) && $plan->fees->sales_tax_cbj > 0)
-        $summaryColumns['Sales Tax on CBJ Contribution Fund (' . $plan->fees->sales_tax_cbj . '%)'] = number_format((float) ($plan->sales_tax_cbj_amount ?? 0), 2) . ' ' . $abbr;
+if (isset($plan->fees->sales_tax_cbj) && $plan->fees->sales_tax_cbj > 0)
+    $summaryColumns['Sales Tax on CBJ Contribution Fund (' . $plan->fees->sales_tax_cbj . '%)'] = number_format((float) ($plan->sales_tax_cbj_amount ?? 0), 2) . ' ' . $abbr;
 
-        if (isset($plan->gross_premium_amount))
-        $summaryColumns['Gross Premium'] = number_format((float) $plan->gross_premium_amount, 2) . ' ' . $abbr;
+if (isset($plan->gross_premium_amount))
+    $summaryColumns['Gross Premium'] = number_format((float) $plan->gross_premium_amount, 2) . ' ' . $abbr;
         @endphp
 
         <!-- PREMIUM SUMMARY -->
@@ -441,24 +441,32 @@
             {!! $data->insurance_policy_text !!}
         </div>
 
+            @if(isset($isFinalPdf) && $isFinalPdf)
+
         @php
-        $userSignaturePath = null;
-        if (!empty($data->user_signature)) {
-        $path = public_path($data->user_signature);
-        if (file_exists($path)) { $userSignaturePath = $path; }
-        }
+$userSignaturePath = null;
+if (!empty($data->user_signature)) {
+    $path = public_path($data->user_signature);
+    if (file_exists($path)) {
+        $userSignaturePath = $path;
+    }
+}
 
-        $companyStampPath = null;
-        if (!empty($data->company_stamp)) {
-        $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp);
-        if (file_exists($path)) { $companyStampPath = $path; }
-        }
+$companyStampPath = null;
+if (!empty($data->company_stamp)) {
+    $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp);
+    if (file_exists($path)) {
+        $companyStampPath = $path;
+    }
+}
 
-        $authorizedSignaturePath = null;
-        if (!empty($data->authorized_signature)) {
-        $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature);
-        if (file_exists($path)) { $authorizedSignaturePath = $path; }
-        }
+$authorizedSignaturePath = null;
+if (!empty($data->authorized_signature)) {
+    $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature);
+    if (file_exists($path)) {
+        $authorizedSignaturePath = $path;
+    }
+}
         @endphp
 
         @if($userSignaturePath)
@@ -507,12 +515,15 @@
         </table>
         @endif
 
+
+    @endif
+
         <footer>
             <p>This contract is prepared in two replicas for each Contracting Party.</p>
         </footer>
 
     </div>
-    
+
 
 </body>
 

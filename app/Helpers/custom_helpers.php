@@ -16,6 +16,8 @@ use App\Models\VehicleBrand;
 use App\Models\VehicleCategory;
 use App\Models\VehicleColor;
 use Illuminate\Support\Facades\Route;
+use App\Models\ChronicDisease;
+
 
 if (!function_exists('is_admin_authorized')) {
     function is_admin_authorized($route)
@@ -255,5 +257,38 @@ if (!function_exists('get_engine_type_name')) {
 
             return in_array($route, $authorizedRoutes);
         }
+    }
+}
+
+if (!function_exists('getChronicDiseaseName')) {
+    function getChronicDiseaseName($value)
+    {
+        if (empty($value)) {
+            return '-';
+        }
+
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $value = $decoded;
+            }
+        }
+
+        $ids = is_array($value) ? $value : [$value];
+
+        $ids = array_filter(
+            $ids,
+            fn($id) =>
+                is_scalar($id) && is_numeric($id)
+        );
+
+        if (empty($ids)) {
+            return '-';
+        }
+
+        $names = ChronicDisease::whereIn('id', $ids)->pluck('name')->toArray();
+
+        return count($names) ? implode(', ', $names) : '-';
     }
 }
