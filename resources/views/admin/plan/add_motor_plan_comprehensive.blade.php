@@ -93,7 +93,7 @@
             @csrf
             <input type="hidden" name="plan_id" value="{{isset($plan)?$plan->id:null}}">
             <input type="hidden" id="form_type" name="form_type" value="{{isset($plan)?'edit':'add'}}">
-            <input type="hidden" id="motor_plan_id" name="motor_plan_id" value="1">
+            <input type="hidden" id="motor_plan_id" name="motor_plan_id" value="{{ $selected_motor_plan_id ?? 1 }}">
             <div class="body bg-white py-4 px-4 d-flex flex-column gap-3 pb-5">
                 <div class="row p-3" style="color: #92959A;">
                     <div class="container">

@@ -89,17 +89,18 @@
                 @csrf
                 <input type="hidden" name="plan_id" value="{{ $plan->id }}">
                 <input type="hidden" id="form_type" name="form_type" value="edit">
-                <input type="hidden" id="motor_plan_id" name="motor_plan_id" value="1">
+                <input type="hidden" id="motor_plan_id" name="motor_plan_id" value="{{ $plan->motor_plan_id ?? 1 }}">
                 <div class="body bg-white py-4 px-4 d-flex flex-column gap-3 pb-5">
                     <div class="row p-3" style="color: #92959A;">
                         <div class="container">
                             <div class="row">
                                 <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
                                     <div>{{ __('messages.plans.insurance_company') }}</div>
-                                    <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
-                                        <input type="text" style="border: none;" disabled
-                                            value="{{ $plan->insurance_company->company_name ?? '' }}">
-                                    </div>
+                                    <select name="insurance_company_id" class="form-select rounded-0 flex-grow-1 border-0 shadow1" style="height: 3.5rem;" required>
+    @foreach($insurance_companies as $single)
+    <option value="{{$single->id}}" {{ (old('insurance_company_id', $plan->insurance_company_id) == $single->id) ? 'selected' : '' }}>{{$single->company_name}}</option>
+    @endforeach
+</select>
                                 </div>
                                 <div class="col-12 col-lg-6 pt-4 d-flex flex-column">
                                     <div>{{ __('messages.plans.line_of_business') }}</div>

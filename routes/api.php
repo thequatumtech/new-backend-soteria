@@ -110,6 +110,7 @@ Route::group(['middleware' => ['apitoken', 'api.decrypt','api.encrypt']], functi
 
     // Motor Insurance plan
     Route::get('/getComprehensivePlan', [MotorInsuranceController::class, 'getComprehensivePlan']);
+    Route::get('/getMotorPlansByType', [MotorInsuranceController::class, 'getMotorPlansByType']);
     Route::get('/getCompulsory3MonthsPlan', [MotorInsuranceController::class, 'getCompulsory3MonthsPlan']);
     Route::get('/getCompulsory6MonthsPlan', [MotorInsuranceController::class, 'getCompulsory6MonthsPlan']);
     Route::get('/getCompulsory9MonthsPlan', [MotorInsuranceController::class, 'getCompulsory9MonthsPlan']);
