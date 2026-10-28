@@ -327,17 +327,58 @@
             </tr>
             <tr>
                 <td><strong>Effective Date</strong></td>
-                <td>{{ date('m-d-Y', strtotime($data->inception_date)) }}</td>
+                <td>{{ date('d/m/Y', strtotime($data->inception_date)) }}</td>
             </tr>
             <tr>
                 <td><strong>Expiry Date</strong></td>
-                <td>{{ date('m-d-Y', strtotime($data->expiry_date)) }}</td>
+                <td>{{ date('d/m/Y', strtotime($data->expiry_date)) }}</td>
             </tr>
             <tr>
                 <td><strong>Payment Method</strong></td>
                 <td>Annual in advance</td>
             </tr>
+            @if(!empty($country))
+            <tr>
+                <td><strong>Geographical Coverage</strong></td>
+                <td>{{ $country }}</td>
+            </tr>
+            @endif
         </table>
+
+        {{-- ========================= VEHICLE & UNDERWRITING INFORMATION ========================= --}}
+        @php
+        $uwBrand = $data->vahicle_brand_id ?? $data->vehicle_brand_id ?? null;
+        $uwRows = [
+            'Vehicle Brand' => optional(\App\Models\VehicleBrand::find($data->vahicle_brand_id ?? null))->name,
+            'Vehicle Category' => optional(\App\Models\VehicleCategory::find($data->vahicle_category_id ?? null))->name,
+            'Vehicle Type' => optional(\App\Models\VehicleType::find($data->vahicle_type_id ?? null))->name,
+            'Engine Type' => optional(\App\Models\EngineType::find($data->engine_type_id ?? null))->name,
+            'Engine Capacity' => $data->engine_capacity ?? null,
+            'Vehicle Plate No.' => $data->vahicle_no ?? null,
+            'Registration No.' => $data->vahicle_register_no ?? null,
+            'Engine No.' => $data->engine_no ?? null,
+            'Chassis No.' => $data->chassis_no ?? null,
+            'Manufacturing Date' => !empty($data->vehicle_manufacturing_date) ? date('d/m/Y', strtotime($data->vehicle_manufacturing_date)) : null,
+            'Vehicle Value' => isset($data->vehicle_value) ? number_format((float) $data->vehicle_value, 2) . ' ' . ($abbr ?? 'JOD') : null,
+            'Accidents in last 3 years' => $data->no_accident_3_year ?? null,
+            'Tickets in last 12 months' => $data->no_ticket_12_month ?? null,
+            'Points in last 12 months' => $data->no_point_12_month ?? null,
+        ];
+        $uwRows = array_filter($uwRows, fn($v) => $v !== null && $v !== '');
+        @endphp
+        @if(count($uwRows) > 0)
+        <div class="policy-summary">
+            <h4>Vehicle &amp; Underwriting Information</h4>
+            <table class="policy-details">
+                @foreach($uwRows as $label => $value)
+                <tr>
+                    <td><strong>{{ $label }}</strong></td>
+                    <td>{{ $value }}</td>
+                </tr>
+                @endforeach
+            </table>
+        </div>
+        @endif
 
         {{-- ========================= PREMIUM SUMMARY (vertical label|value — matches Personal Accident) ========================= --}}
         @php
@@ -356,8 +397,8 @@
         if (isset($plan->fees->stamps))
         $summaryColumns['Stamps (' . $plan->fees->stamps . '%)'] = number_format((float) ($plan->stamps_amount ?? 0), 2) . ' ' . $abbr;
 
-        if (isset($plan->fees->sales_tax))
-        $summaryColumns['Sales Tax (' . $plan->fees->sales_tax . '%)'] = number_format((float) ($plan->sales_tax_amount ?? 0), 2) . ' ' . $abbr;
+        // Tax is always shown, even when it is 0
+        $summaryColumns['Sales Tax (' . ($plan->fees->sales_tax ?? 0) . '%)'] = number_format((float) ($plan->sales_tax_amount ?? 0), 2) . ' ' . $abbr;
 
         if (isset($plan->fees->cbj) && $plan->fees->cbj > 0)
         $summaryColumns['Contribution to Guarantee Fund (CBJ) (' . $plan->fees->cbj . '%)'] = number_format((float) ($plan->cbj_amount ?? 0), 2) . ' ' . $abbr;
@@ -508,7 +549,7 @@
         @endif
 
         <footer>
-            <p>This contract is prepared in two replicas for each Contracting Party.</p>
+            <p>This policy is prepared in two replicas for each Contracting Party.</p>
         </footer>
 
     </div>

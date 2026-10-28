@@ -29,6 +29,7 @@ class ClaimDeductibleController extends Controller
                     'max:100',
                     Rule::unique('claim_deductibles')->whereNull('deleted_at'),
                 ],
+                'percentage' => ['required', 'numeric', 'min:0', 'max:100'],
             ]);
             ClaimDeductible::create($request->all());
             return redirect()->route('claim_deductible.list')->with('success', __('messages.claim_deductible.claim_deductible_created'));
@@ -52,6 +53,7 @@ class ClaimDeductibleController extends Controller
                     'max:100',
                     Rule::unique('claim_deductibles')->ignore($request->cd_id)->whereNull('deleted_at'),
                 ],
+                'percentage' => ['required', 'numeric', 'min:0', 'max:100'],
             ]);
 
             $claim_deductible = ClaimDeductible::findOrFail($request->cd_id);
