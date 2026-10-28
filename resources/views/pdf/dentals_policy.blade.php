@@ -602,7 +602,7 @@ $hasInsurance = !empty($data->plan_name)
                         </tr>
                         <tr>
                             <td>Documents</td>
-                            <td>{{ $data->documents }}</td>
+                            <td>{!! getDocumentLinks($data->documents) !!}</td>
                         </tr>
                     @endif
                 </tbody>

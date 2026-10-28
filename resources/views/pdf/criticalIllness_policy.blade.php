@@ -435,31 +435,8 @@ $companyAddress = collect([
             @endif
 
             @php
-$normalizeDocuments = function ($value) {
-    if (empty($value)) {
-        return [];
-    }
-
-    $decoded = json_decode($value, true);
-
-    if (is_array($decoded)) {
-        return $decoded;
-    }
-
-    if (is_string($decoded) && $decoded !== '') {
-        return [$decoded];
-    }
-
-    return [$value];
-};
-
-$passportDocuments = $normalizeDocuments(
-    $data->passport_id_documents ?? null
-);
-
-$insuredDocuments = $normalizeDocuments(
-    $data->insured_documents ?? null
-);
+$passportDocuments = getDocumentPaths($data->passport_id_documents ?? null);
+$insuredDocuments = getDocumentPaths($data->insured_documents ?? null);
             @endphp
 
             {{-- Beneficiary Information --}}
@@ -719,22 +696,20 @@ $insuredDocuments = $normalizeDocuments(
                 </td>
             </tr>
 
-            @foreach($passportDocuments as $index => $document)
-                <tr>
-                    <td>Passport / ID Document {{ $index + 1 }}</td>
-                    <td>
-                        {{ storage_path('app/public/' . $document) }}
-                    </td>
-                </tr>
-            @endforeach
-
-            @foreach($insuredDocuments as $index => $document)
-                <tr>
-                    <td>Insured Document {{ $index + 1 }}</td>
-                    <td>
-                        {{ storage_path('app/public/' . $document) }}
-                    </td>
-                </tr>
+            @foreach(['Passport / ID Document' => $passportDocuments, 'Insured Document' => $insuredDocuments] as $label => $documents)
+                @foreach($documents as $index => $document)
+                    @php $documentUrl = getDocumentUrl($document); @endphp
+                    <tr>
+                        <td>{{ $label }} {{ $index + 1 }}</td>
+                        <td>
+                            @if($documentUrl)
+                                <a href="{{ $documentUrl }}">{{ $documentUrl }}</a>
+                            @else
+                                Document not found
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
             @endforeach
         @endif
 

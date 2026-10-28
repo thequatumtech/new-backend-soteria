@@ -461,23 +461,23 @@ $petType = $data->pets_type ?? $data->type_of_pets ?? null;
                     </tr>
                     <tr>
                         <td>Vaccine Document</td>
-                        <td>{{ $data->vaccine_document ?? 'Not provided' }}</td>
+                        <td>{!! getDocumentLinks($data->vaccine_document ?? null, 'Not provided') !!}</td>
                     </tr>
                     <tr>
                         <td>Pet Picture</td>
-                        <td>{{ $data->pets_picture ?? 'Not provided' }}</td>
+                        <td>{!! getDocumentLinks($data->pets_picture ?? null, 'Not provided') !!}</td>
                     </tr>
                     <tr>
                         <td>Pet Passport</td>
-                        <td>{{ $data->pets_passport ?? 'Not provided' }}</td>
+                        <td>{!! getDocumentLinks($data->pets_passport ?? null, 'Not provided') !!}</td>
                     </tr>
                     <tr>
                         <td>Owner Picture</td>
-                        <td>{{ $data->personal_picture_documents ?? 'Not provided' }}</td>
+                        <td>{!! getDocumentLinks($data->personal_picture_documents ?? null, 'Not provided') !!}</td>
                     </tr>
                     <tr>
                         <td>Pet Permit</td>
-                        <td>{{ $data->pets_permit ?? 'Not provided' }}</td>
+                        <td>{!! getDocumentLinks($data->pets_permit ?? null, 'Not provided') !!}</td>
                     </tr>
                 </table>
             </div>

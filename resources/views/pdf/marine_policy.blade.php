@@ -507,7 +507,7 @@ if (!empty($data->letterhead)) {
                 @if(!empty($data->$field))
                     <tr>
                         <td>{{ $label }}</td>
-                        <td>{{ is_array($data->$field) ? implode(', ', $data->$field) : $data->$field }}</td>
+                        <td>{!! getDocumentLinks($data->$field) !!}</td>
                     </tr>
                 @endif
             @endforeach

@@ -513,23 +513,23 @@ if (!empty($data->letterhead)) {
                 <tbody>
                     <tr>
                         <td>Passport Front</td>
-                        <td>{{ $data->passport_front_id ?? '' }}</td>
+                        <td>{!! getDocumentLinks($data->passport_front_id ?? null) !!}</td>
                     </tr>
                     <tr>
                         <td>Passport Back</td>
-                        <td>{{ $data->passport_back_id ?? '' }}</td>
+                        <td>{!! getDocumentLinks($data->passport_back_id ?? null) !!}</td>
                     </tr>
                     <tr>
                         <td>Family Book</td>
-                        <td>{{ $data->family_book_documents ?? '' }}</td>
+                        <td>{!! getDocumentLinks($data->family_book_documents ?? null) !!}</td>
                     </tr>
                     <tr>
                         <td>Personal Picture</td>
-                        <td>{{ $data->personal_picture_documents ?? '' }}</td>
+                        <td>{!! getDocumentLinks($data->personal_picture_documents ?? null) !!}</td>
                     </tr>
                     <tr>
                         <td>Other Documents</td>
-                        <td>{{ $data->other_documents ?? '' }}</td>
+                        <td>{!! getDocumentLinks($data->other_documents ?? null) !!}</td>
                     </tr>
                 </tbody>
             </table>

@@ -465,7 +465,7 @@ if (!empty($data->letterhead)) {
     </tr>
     <tr>
         <td>Protection System</td>
-        <td>{{ $data->protection_system ?? '' }}</td>
+        <td>{{ getProtectionSystemName($data->protection_system ?? null) }}</td>
     </tr>
     <tr>
         <td>Inception Date</td>
@@ -522,6 +522,34 @@ if (!empty($data->letterhead)) {
         </tr>
     @endif
 
+    @php
+        $officeDocuments = [
+            'Rent Contract' => $data->rent_contract_documents ?? null,
+            'Property Photo' => $data->property_photo_documents ?? null,
+            'Contents' => $data->contents_documents ?? null,
+            'Owner ID' => $data->owner_id_documents ?? null,
+            'Policy Issuer' => $data->policy_issuer_documents ?? null,
+            'Company Owner' => $data->company_owner_documents ?? null,
+            'Career / Municipality License' => $data->career_municipality_license_documents ?? null,
+            'Company Tax Certificate' => $data->company_tax_certi_documents ?? null,
+            'Practice Certificate' => $data->practice_documents ?? null,
+        ];
+        $officeDocuments = array_filter($officeDocuments, fn($value) => count(getDocumentPaths($value)));
+    @endphp
+
+    @if(count($officeDocuments))
+        <tr>
+            <td colspan="2" style="background-color: #d0d0d0;">
+                Supporting Documents
+            </td>
+        </tr>
+        @foreach($officeDocuments as $label => $value)
+            <tr>
+                <td>{{ $label }}</td>
+                <td>{!! getDocumentLinks($value) !!}</td>
+            </tr>
+        @endforeach
+    @endif
 
 </table>
 

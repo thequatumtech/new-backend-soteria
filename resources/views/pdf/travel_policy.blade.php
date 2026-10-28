@@ -458,7 +458,7 @@ if (is_string($countries)) {
                     </tr>
                     <tr>
                         <td>Passport Document</td>
-                        <td>{{ $data->passport_document ?? '' }}</td>
+                        <td>{!! getDocumentLinks($data->passport_document ?? null) !!}</td>
                     </tr>
                 </tbody>
             </table>

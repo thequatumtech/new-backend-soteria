@@ -115,7 +115,7 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">American Nationality Status</div>
                 <div class="detail-value">
-                    {{ $policy_details->american_notionality_status ?? '-' }}
+                    {{ getYesNoStatus($policy_details->american_notionality_status ?? null) }}
                 </div>
             </div>
 
@@ -211,7 +211,7 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Employee Status</div>
                 <div class="detail-value">
-                    {{ $policy_details->employee_status ?? '-' }}
+                    {{ getYesNoStatus($policy_details->employee_status ?? null) }}
                 </div>
             </div>
 
@@ -306,7 +306,7 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Previous Operation</div>
                 <div class="detail-value">
-                    {{ $policy_details->previous_operation ?? '-' }}
+                    {{ getYesNoStatus($policy_details->previous_operation ?? null) }}
                 </div>
             </div>
 
@@ -331,7 +331,7 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Company Declined Policy</div>
                 <div class="detail-value">
-                    {{ $policy_details->company_declined_policy ?? '-' }}
+                    {{ getYesNoStatus($policy_details->company_declined_policy ?? null) }}
                 </div>
             </div>
 
@@ -345,7 +345,7 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Existing Life Insurance</div>
                 <div class="detail-value">
-                    {{ $policy_details->exiting_life_insur ?? '-' }}
+                    {{ getYesNoStatus($policy_details->exiting_life_insur ?? null) }}
                 </div>
             </div>
 

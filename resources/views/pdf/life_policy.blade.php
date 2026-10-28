@@ -315,7 +315,7 @@ if (!empty($data->letterhead)) {
             <tr><td>Last Name</td><td>{{ $data->last_name ?? '' }}</td></tr>
             <tr><td>Third Name</td><td>{{ $data->third_name ?? '' }}</td></tr>
             <tr><td>Family Name</td><td>{{ $data->family_name ?? '' }}</td></tr>
-            <tr><td>Nationality</td><td>{{ $data->nationality ?? '' }}</td></tr>
+            <tr><td>Nationality</td><td>{{ getNationalityName($data->nationality ?? null) }}</td></tr>
             <tr><td>Nationality Number</td><td>{{ $data->nationality_no ?? '' }}</td></tr>
             <tr><td>Residence ID Number</td><td>{{ $data->id_residence_no ?? '' }}</td></tr>
             <tr><td>Birth Date</td><td>{{ !empty($data->birth_date) ? date('m-d-Y', strtotime($data->birth_date)) : '' }}</td></tr>
@@ -323,7 +323,7 @@ if (!empty($data->letterhead)) {
             <tr><td>Marital Status</td><td>{{ $data->marital_status ?? null }}</td></tr>
             <tr><td>Place of Residence</td><td>{{ $data->place_residence ?? '' }}</td></tr>
             <tr><td>Occupation / Work</td><td>{{ $data->occupancy_work ?? '' }}</td></tr>
-            <tr><td>American Nationality Status</td><td>{{ $data->american_notionality_status ?? '' }}</td></tr>
+            <tr><td>American Nationality Status</td><td>{{ getYesNoStatus($data->american_notionality_status ?? null) }}</td></tr>
             <tr><td>Beneficiary First Name</td><td>{{ $data->beneficiary_first_name ?? '' }}</td></tr>
             <tr><td>Beneficiary Last Name</td><td>{{ $data->beneficiary_last_name ?? '' }}</td></tr>
             <tr><td>Beneficiary Third Name</td><td>{{ $data->beneficiary_third_name ?? '' }}</td></tr>
@@ -345,23 +345,47 @@ if (!empty($data->letterhead)) {
     </table>
 </div>
 
-{{-- EMPLOYMENT DETAILS --}}
+{{-- EMPLOYMENT DETAILS (from client profile, only for employed / self employed) --}}
+@php
+    $clientInfo = $data->client_details ?? null;
+
+    $employmentType = $clientInfo->employment_type ?? null;
+    $normalizedEmploymentType = str_replace(['-', '_'], ' ', strtolower(trim((string) $employmentType)));
+    $showEmployment = in_array($normalizedEmploymentType, ['employed', 'self employed']);
+
+    $employmentRows = [];
+
+    if ($showEmployment) {
+        $companyCity = !empty($clientInfo->company_city_id) ? getCityName($clientInfo->company_city_id) : null;
+        $companyDistrict = !empty($clientInfo->company_district_id) ? getDistrictName($clientInfo->company_district_id) : null;
+
+        $employmentRows = array_filter([
+            'Employment Type' => ucwords($normalizedEmploymentType),
+            'Occupation / Work' => $clientInfo->occupation->name ?? null,
+            'Company Name' => $clientInfo->company_name ?? null,
+            'Position' => $clientInfo->position ?? null,
+            'Nature of Work' => $clientInfo->work_nature ?? null,
+            'Company City' => $companyCity !== '-' ? $companyCity : null,
+            'Company District' => $companyDistrict !== '-' ? $companyDistrict : null,
+            'Company Street' => $clientInfo->company_street_name ?? null,
+            'Company Building Number' => $clientInfo->company_building_no ?? null,
+            'Company Contact' => $clientInfo->company_contact_no ?? null,
+        ], fn($value) => !empty($value));
+    }
+@endphp
+
+@if($showEmployment)
 <div class="policy-summary">
     <h4>Employment Details</h4>
     <table class="policy-details">
         <tbody>
-            <tr><td>Employee Status</td><td>{{ $data->employee_status ?? '' }}</td></tr>
-            <tr><td>Company Name</td><td>{{ $data->company_name ?? '' }}</td></tr>
-            <tr><td>Position</td><td>{{ $data->position ?? '' }}</td></tr>
-            <tr><td>Nature of Work</td><td>{{ $data->work_nature ?? '' }}</td></tr>
-            <tr><td>Company City</td><td>{{ getCityName($data->employee_city_id ?? null) }}</td></tr>
-            <tr><td>Company District</td><td>{{ getDistrictName($data->employee_district_id ?? null) }}</td></tr>
-            <tr><td>Company Street</td><td>{{ $data->employee_street_name ?? '' }}</td></tr>
-            <tr><td>Company Building Number</td><td>{{ $data->employee_building_no ?? '' }}</td></tr>
-            <tr><td>Company Contact</td><td>{{ $data->company_contact ?? '' }}</td></tr>
+            @foreach($employmentRows as $label => $value)
+                <tr><td>{{ $label }}</td><td>{{ $value }}</td></tr>
+            @endforeach
         </tbody>
     </table>
 </div>
+@endif
 
 {{-- MEDICAL HISTORY --}}
 <div class="policy-summary">
@@ -371,11 +395,11 @@ if (!empty($data->letterhead)) {
             <tr><td>Height</td><td>{{ $data->height ?? '' }}</td></tr>
             <tr><td>Weight</td><td>{{ $data->wight ?? '' }}</td></tr>
             <tr><td>Chronic Diseases</td><td>{{ getChronicDiseaseName($data->chronic_diseases_id ?? null) }}</td></tr>
-            <tr><td>Previous Operation</td><td>{{ $data->previous_operation ?? '' }}</td></tr>
+            <tr><td>Previous Operation</td><td>{{ getYesNoStatus($data->previous_operation ?? null) }}</td></tr>
             <tr><td>Operation Details</td><td>{{ $data->operation_details ?? '' }}</td></tr>
-            <tr><td>Company Declined Policy</td><td>{{ $data->company_declined_policy ?? '' }}</td></tr>
+            <tr><td>Company Declined Policy</td><td>{{ getYesNoStatus($data->company_declined_policy ?? null) }}</td></tr>
             <tr><td>Declined Policy Details</td><td>{{ $data->declined_policy_details ?? '' }}</td></tr>
-            <tr><td>Existing Life Insurance</td><td>{{ $data->exiting_life_insur ?? '' }}</td></tr>
+            <tr><td>Existing Life Insurance</td><td>{{ getYesNoStatus($data->exiting_life_insur ?? null) }}</td></tr>
             <tr><td>Existing Life Insurance Details</td><td>{{ $data->exiting_life_insur_details ?? '' }}</td></tr>
         </tbody>
     </table>
@@ -400,7 +424,7 @@ if (!empty($data->letterhead)) {
         <tbody>
             <tr><td>Insurance Amount</td><td>{{ $data->insurance_amount ?? '' }}</td></tr>
             <tr><td>Effective Date</td><td>{{ !empty($data->effective_date) ? date('m-d-Y', strtotime($data->effective_date)) : '' }}</td></tr>
-            <tr><td>Insurance Period (Years)</td><td>{{ $data->insurance_period ?? '' }}</td></tr>
+            <tr><td>Insurance Period (Years)</td><td>{{ $data->periods_val ?? getInsurancePeriodName($data->insurance_period ?? null) }}</td></tr>
             <tr><td>Inception Date</td><td>{{ !empty($data->inception_date) ? date('m-d-Y', strtotime($data->inception_date)) : '' }}</td></tr>
             <tr><td>Expiry Date</td><td>{{ !empty($data->expiry_date) ? date('m-d-Y', strtotime($data->expiry_date)) : '' }}</td></tr>
             <tr><td>Renewal</td><td>{{ !empty($data->renew) ? 'Yes' : 'No' }}</td></tr>
@@ -408,6 +432,40 @@ if (!empty($data->letterhead)) {
         </tbody>
     </table>
 </div>
+
+{{-- SUPPORTING DOCUMENTS --}}
+@php
+    $lifeDocuments = [
+        'Photo' => getDocumentPaths($data->photo_documents ?? null),
+        'Insured Document' => getDocumentPaths($data->insured_documents ?? null),
+        'Family Book' => getDocumentPaths($data->family_book_documents ?? null),
+    ];
+@endphp
+
+@if(count(array_merge(...array_values($lifeDocuments))))
+<div class="policy-summary">
+    <h4>Supporting Documents</h4>
+    <table class="policy-details">
+        <tbody>
+            @foreach($lifeDocuments as $label => $documents)
+                @foreach($documents as $index => $document)
+                    @php $documentUrl = getDocumentUrl($document); @endphp
+                    <tr>
+                        <td>{{ $label }} {{ $index + 1 }}</td>
+                        <td>
+                            @if($documentUrl)
+                                <a href="{{ $documentUrl }}">{{ $documentUrl }}</a>
+                            @else
+                                Document not found
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+            @endforeach
+        </tbody>
+    </table>
+</div>
+@endif
 
 
 

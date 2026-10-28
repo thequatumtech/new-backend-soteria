@@ -679,23 +679,9 @@ $hasEmploymentInfo =
 @endif
 
 @php
-    $normalizeDocuments = function ($value) {
-        if (empty($value)) {
-            return [];
-        }
-
-        if (is_array($value)) {
-            return $value;
-        }
-
-        $decoded = json_decode($value, true);
-
-        return is_array($decoded) ? $decoded : [$value];
-    };
-
-    $rentDocuments = $normalizeDocuments($data->rent_contract ?? null);
-    $propertyDocuments = $normalizeDocuments($data->property_document ?? null);
-    $contentDocuments = $normalizeDocuments($data->content_document ?? null);
+    $rentDocuments = getDocumentPaths($data->rent_contract ?? null);
+    $propertyDocuments = getDocumentPaths($data->property_document ?? null);
+    $contentDocuments = getDocumentPaths($data->content_document ?? null);
 @endphp
 
 @if(count($rentDocuments) || count($propertyDocuments) || count($contentDocuments))
@@ -712,17 +698,13 @@ $hasEmploymentInfo =
                                 'Content Document' => $contentDocuments,
                             ] as $label => $documents)
                             @foreach($documents as $index => $document)
-                                @php
-                                    $relativePath = ltrim($document, '/');
-                                    $filePath = storage_path('app/public/' . $relativePath);
-                                    $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
-                                @endphp
+                                @php $documentUrl = getDocumentUrl($document); @endphp
 
                                 <tr>
                                     <td>{{ $label }} {{ $index + 1 }}</td>
                                     <td>
-                                         @if(file_exists($filePath))
-                                            {{ $filePath }}
+                                        @if($documentUrl)
+                                            <a href="{{ $documentUrl }}">{{ $documentUrl }}</a>
                                         @else
                                             Document not found
                                         @endif
@@ -771,7 +753,7 @@ $hasEmploymentInfo =
                                                 @if(!empty($data->protection_system))
                                                     <tr>
                                                         <td>Protection System</td>
-                                                        <td>{{ $data->protection_system }}</td>
+                                                        <td>{{ getProtectionSystemName($data->protection_system) }}</td>
                                                     </tr>
                                                 @endif
                                             </tbody>

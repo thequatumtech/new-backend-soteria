@@ -650,6 +650,34 @@ if (!empty($data->letterhead)) {
                         </td>
                     </tr>
 
+                    {{-- ROW 7: SUPPORTING DOCUMENTS --}}
+                    @php
+                        $familyDocuments = array_filter([
+                            'Family Book' => $data->family_book_documents ?? null,
+                            'Personal Picture' => $data->personal_picture_documents ?? null,
+                            'Other Documents' => $data->other_documents ?? null,
+                        ], fn($value) => count(getDocumentPaths($value)));
+                    @endphp
+                    @if(count($familyDocuments))
+                        <tr>
+                            <td>
+                                <div class="policy-summary">
+                                    <h4>Supporting Documents</h4>
+                                    <table class="policy-details">
+                                        <tbody>
+                                            @foreach($familyDocuments as $label => $value)
+                                                <tr>
+                                                    <td>{{ $label }}</td>
+                                                    <td>{!! getDocumentLinks($value) !!}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    @endif
+
                 </tbody>
             </table>
         </div>

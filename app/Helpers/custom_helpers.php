@@ -7,6 +7,8 @@ use App\Models\OutPatientDeductible;
 use App\Models\InsurancePeriod;
 use App\Models\InsuranceCompany;
 use App\Models\Country;
+use App\Models\Nationality;
+use App\Models\ProtectionSystem;
 use App\Models\InsuredItemCategory;
 use App\Models\InsuredItemSubCategory;
 use App\Models\EngineType;
@@ -103,6 +105,17 @@ if (!function_exists('getInsuranceCompanyName')) {
 
 
 
+if (!function_exists('getNationalityName')) {
+    function getNationalityName($id)
+    {
+        if (empty($id)) {
+            return '-';
+        }
+
+        return Nationality::where('id', $id)->value('name') ?? '-';
+    }
+}
+
 if (!function_exists('getCountryName')) {
     function getCountryName($id)
     {
@@ -157,7 +170,7 @@ if (!function_exists('getYesNoStatus')) {
     {
         return match ((string) $value) {
             '1' => 'Yes',
-            '2' => 'No',
+            '0', '2' => 'No', // 2 = legacy "no" (still used by marine)
             default => '-',
         };
     }
@@ -257,6 +270,87 @@ if (!function_exists('get_engine_type_name')) {
 
             return in_array($route, $authorizedRoutes);
         }
+    }
+}
+
+if (!function_exists('getProtectionSystemName')) {
+    // Stored as "2,3" or a JSON array of ids
+    function getProtectionSystemName($value)
+    {
+        if (empty($value)) {
+            return '-';
+        }
+
+        $decoded = is_string($value) ? json_decode($value, true) : $value;
+        $ids = is_array($decoded) ? $decoded : explode(',', (string) $value);
+        $ids = array_filter(array_map('trim', $ids), 'is_numeric');
+
+        if (empty($ids)) {
+            return '-';
+        }
+
+        $names = ProtectionSystem::withTrashed()->whereIn('id', $ids)->pluck('name')->toArray();
+
+        return count($names) ? implode(', ', $names) : '-';
+    }
+}
+
+if (!function_exists('getDocumentPaths')) {
+    // Document fields hold "path", "path1,path2" or a JSON array of paths
+    function getDocumentPaths($value)
+    {
+        if (empty($value)) {
+            return [];
+        }
+
+        $decoded = is_string($value) ? json_decode($value, true) : $value;
+
+        if (is_array($decoded)) {
+            $paths = $decoded;
+        } elseif (is_string($decoded) && $decoded !== '') {
+            $paths = explode(',', $decoded);
+        } else {
+            $paths = explode(',', $value);
+        }
+
+        return array_values(array_filter(array_map(fn($path) => ltrim(trim((string) $path), '/'), $paths)));
+    }
+}
+
+if (!function_exists('getDocumentUrl')) {
+    // App uploads (/upload-document) live in public/, direct uploads in storage/app/public
+    function getDocumentUrl($path)
+    {
+        $path = ltrim(trim((string) $path), '/');
+
+        if ($path === '') {
+            return null;
+        }
+
+        if (file_exists(public_path($path))) {
+            return url($path);
+        }
+
+        if (file_exists(storage_path('app/public/' . $path))) {
+            return asset('storage/' . $path);
+        }
+
+        return null;
+    }
+}
+
+if (!function_exists('getDocumentLinks')) {
+    // HTML links for a document field, for use in PDFs with {!! !!}
+    function getDocumentLinks($value, $empty = '-')
+    {
+        $links = [];
+
+        foreach (getDocumentPaths($value) as $path) {
+            $url = getDocumentUrl($path);
+            $links[] = $url ? '<a href="' . e($url) . '">' . e($url) . '</a>' : 'Document not found';
+        }
+
+        return count($links) ? implode('<br>', $links) : e($empty);
     }
 }
 

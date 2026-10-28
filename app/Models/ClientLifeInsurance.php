@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use DateTime;
 use Carbon\Carbon;
+use App\Models\Client;
 
 class ClientLifeInsurance extends Model
 {
@@ -177,6 +178,16 @@ class ClientLifeInsurance extends Model
             $plan->sales_tax = $taxAmount;
 
             $plan->gross_premium = $netPremiumAmount + $feesAmount + $stampsAmount + $taxAmount;
+
+            $plan->client_details = Client::with([
+                'nationality',
+                'city',
+                'district',
+                'country',
+                'occupation',
+                'company_city',
+                'company_district',
+            ])->find($plan->client_id);
         }
 
         return $plan;
