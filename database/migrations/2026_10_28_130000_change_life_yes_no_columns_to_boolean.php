@@ -25,6 +25,8 @@ return new class extends Migration
         foreach ($this->columns as $column) {
             DB::statement("ALTER TABLE `client_life_insurances` MODIFY `{$column}` VARCHAR(10) NULL");
             DB::statement("UPDATE `client_life_insurances` SET `{$column}` = '0' WHERE `{$column}` = '2'");
+            // Old enum rows can hold '' (invalid value), which TINYINT rejects
+            DB::statement("UPDATE `client_life_insurances` SET `{$column}` = NULL WHERE `{$column}` NOT IN ('0', '1')");
             DB::statement("ALTER TABLE `client_life_insurances` MODIFY `{$column}` TINYINT(1) NULL DEFAULT 0 COMMENT '1=yes,0=no'");
         }
     }
