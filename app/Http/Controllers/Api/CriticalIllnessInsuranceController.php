@@ -83,6 +83,25 @@ class CriticalIllnessInsuranceController extends Controller
         return $date;
     }
 
+    // Documents are uploaded first via /upload-document, so here we receive
+    // comma-separated paths. Check each path has an allowed extension and exists.
+    private function uploadedDocumentRule()
+    {
+        return function ($attribute, $value, $fail) {
+            foreach (array_filter(array_map('trim', explode(',', $value))) as $path) {
+                $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+                if (!in_array($extension, ['pdf', 'jpg', 'jpeg', 'png'])) {
+                    return $fail("The {$attribute} must be a file of type: pdf, jpg, jpeg, png.");
+                }
+
+                if (!file_exists(public_path($path))) {
+                    return $fail("The {$attribute} file was not found. Please upload it again.");
+                }
+            }
+        };
+    }
+
     public function storeCriticalIllnessInsurance(Request $request)
     {
 
@@ -133,8 +152,8 @@ class CriticalIllnessInsuranceController extends Controller
                 'insurance_plan' => 'nullable',
                 'inception_date' => 'required',
                 'expiry_date' => 'required',
-                'passport_id_documents' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
-                'insured_documents' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+                'passport_id_documents' => ['bail', 'nullable', 'string', $this->uploadedDocumentRule()],
+                'insured_documents' => ['bail', 'nullable', 'string', $this->uploadedDocumentRule()],
                 'plan_id' => 'nullable',
                 'payment_status' => 'nullable',
 
@@ -150,8 +169,6 @@ class CriticalIllnessInsuranceController extends Controller
                     $data[$field] = json_encode([
                         $file->store('critical_illness_documents', 'public')
                     ]);
-                } else {
-                    unset($data[$field]);
                 }
             }
 

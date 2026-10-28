@@ -370,7 +370,7 @@ if (!empty($data->letterhead)) {
         <tbody>
             <tr><td>Height</td><td>{{ $data->height ?? '' }}</td></tr>
             <tr><td>Weight</td><td>{{ $data->wight ?? '' }}</td></tr>
-            <tr><td>Chronic Diseases</td><td>{{ $data->chronic_diseases_id ?? '' }}</td></tr>
+            <tr><td>Chronic Diseases</td><td>{{ getChronicDiseaseName($data->chronic_diseases_id ?? null) }}</td></tr>
             <tr><td>Previous Operation</td><td>{{ $data->previous_operation ?? '' }}</td></tr>
             <tr><td>Operation Details</td><td>{{ $data->operation_details ?? '' }}</td></tr>
             <tr><td>Company Declined Policy</td><td>{{ $data->company_declined_policy ?? '' }}</td></tr>

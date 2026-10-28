@@ -118,9 +118,9 @@ class HomeInsuranceController extends Controller
                 'plan_id' => 'nullable',
                 'effective_date' => 'nullable',
                 'expiry_date' => 'nullable',
-                'rent_contract' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
-                'property_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
-                'content_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+                'rent_contract' => 'nullable',
+                'property_document' => 'nullable',
+                'content_document' => 'nullable',
                 'payment_status' => 'nullable',
 
                 'old_policy_id_for_renew' => 'nullable|integer',
@@ -134,8 +134,6 @@ class HomeInsuranceController extends Controller
                     $storedPath = $file->store('home_insurance_documents', 'public');
 
                     $data[$field] = json_encode([$storedPath]);
-                } else {
-                    unset($data[$field]);
                 }
             }
 

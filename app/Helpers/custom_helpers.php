@@ -272,6 +272,9 @@ if (!function_exists('getChronicDiseaseName')) {
 
             if (json_last_error() === JSON_ERROR_NONE) {
                 $value = $decoded;
+            } else {
+                // App sends multiple selections as "5,6"
+                $value = array_map('trim', explode(',', $value));
             }
         }
 
