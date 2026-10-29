@@ -77,11 +77,27 @@ class ClientFamilyMedicalInsuranceController extends Controller
 
         return $date;
     }
-    // members can arrive as an array or as a JSON string (multipart requests)
-    private function normalizeMembers($members)
+    // members can arrive as an array, as a JSON string (multipart requests),
+    // or as flat "members[0][first_name]" keys inside a JSON body
+    private function normalizeMembers(Request $request)
     {
+        $members = $request->input('members');
+
         if (is_string($members)) {
             $members = json_decode($members, true);
+        }
+
+        if (empty($members)) {
+            $flatKeys = array_filter(
+                $request->all(),
+                fn($key) => str_starts_with($key, 'members['),
+                ARRAY_FILTER_USE_KEY
+            );
+
+            if (!empty($flatKeys)) {
+                parse_str(http_build_query($flatKeys), $parsed);
+                $members = $parsed['members'] ?? [];
+            }
         }
 
         if (!is_array($members)) {
@@ -396,13 +412,11 @@ class ClientFamilyMedicalInsuranceController extends Controller
             }
 
 
-            $totalNetPremium = 0;
-
             // 1. Calculate Main Client Premium
             $clientGender = $data['gender'] ?? $client->gender;
             $clientAge = Carbon::parse($data['birth_date'] ?? $client->birth_date)->age;
 
-            $totalNetPremium += $this->getPremiumForMember(
+            $mainPremium = (float) $this->getPremiumForMember(
                 $data['insurance_type'],
                 $data['plan_id'],
                 $clientAge,
@@ -410,21 +424,10 @@ class ClientFamilyMedicalInsuranceController extends Controller
                 $data['insurance_class']
             );
 
-            // 2. Calculate Family Members Premium (each member priced by own age / gender)
-            $members = $this->normalizeMembers($request->members);
-            $memberPremiums = [];
-
-            foreach ($members as $index => $member) {
-                $memberAge = !empty($member['birth_date']) ? Carbon::parse($member['birth_date'])->age : 0;
-                $memberPremiums[$index] = (float) $this->getPremiumForMember(
-                    $data['insurance_type'],
-                    $data['plan_id'],
-                    $memberAge,
-                    $member['gender'] ?? null,
-                    $data['insurance_class']
-                );
-                $totalNetPremium += $memberPremiums[$index];
-            }
+            // 2. Net premium = main client premium x number of family members (at least 1)
+            $members = $this->normalizeMembers($request);
+            $premiumMultiplier = max(count($members), 1);
+            $totalNetPremium = $mainPremium * $premiumMultiplier;
 
             $policy_limit = $this->cleanNumber($plan_data->limit);
             // $purchase['net_premium']       = ($plan_data->net_premium / 100) * $policy_limit;
@@ -508,11 +511,11 @@ class ClientFamilyMedicalInsuranceController extends Controller
                 $family_member = FamilyMedicalInsuranceMember::create(
                     array_merge($memberFields, ['client_insurance_id' => $data->id])
                 );
-                $family_member->premium = $memberPremiums[$index] ?? 0;
                 $savedMembers[] = $family_member;
             }
 
-            $plan_for_pdf->main_member_premium = $totalNetPremium - array_sum($memberPremiums);
+            $plan_for_pdf->main_member_premium = $mainPremium;
+            $plan_for_pdf->premium_multiplier = $premiumMultiplier;
             // Ensure percentages are set on the object if they came from fallbacks
             if (!isset($plan_for_pdf->cbj)) $plan_for_pdf->cbj = $cbjTaxPercentage;
             if (!isset($plan_for_pdf->sales_tax_cbj)) $plan_for_pdf->sales_tax_cbj = $cbjSalesTaxPercentage;

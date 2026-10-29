@@ -1004,7 +1004,7 @@ $summaryColumns = [];
 if (isset($plan->limit))
     $summaryColumns['Limit'] = number_format((float) $plan->limit, 2) . ' ' . $abbr;
 
-// Net premium = main insured + each family member (priced by own age / gender)
+// Net premium = main insured premium x number of family members
 $summaryMembers = $members ?? [];
 if (count($summaryMembers)) {
     $summaryColumns['Insured Persons'] = count($summaryMembers) + 1;
@@ -1012,8 +1012,8 @@ if (count($summaryMembers)) {
     if (isset($plan->main_member_premium))
         $summaryColumns['Premium - ' . trim(($data->first_name ?? '') . ' ' . ($data->family_name ?? '')) . ' (Main)'] = number_format((float) $plan->main_member_premium, 2) . ' ' . $abbr;
 
-    foreach ($summaryMembers as $summaryIndex => $summaryMember)
-        $summaryColumns['Premium - Member ' . ($summaryIndex + 1) . ': ' . trim(($summaryMember->first_name ?? '') . ' ' . ($summaryMember->family_name ?? '')) . (!empty($summaryMember->relation) ? ' (' . $summaryMember->relation . ')' : '')] = number_format((float) ($summaryMember->premium ?? 0), 2) . ' ' . $abbr;
+    if (isset($plan->premium_multiplier))
+        $summaryColumns['Family Members (x)'] = $plan->premium_multiplier;
 }
 
 if (isset($plan->net_premium_amount))
