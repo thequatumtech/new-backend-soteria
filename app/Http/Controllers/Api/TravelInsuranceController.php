@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\InsurancePlanModels\TravelPlan;
-use App\Models\{ClientTravelInsurance, FamilyTravelInsuranceMember, PurchasePolicy};
+use App\Models\{ClientTravelInsurance, DangerousActivities, FamilyTravelInsuranceMember, PurchasePolicy};
 use PDF;
 use App\Models\Client;
 use App\Models\InsuranceCompany;
@@ -66,6 +66,42 @@ class TravelInsuranceController extends Controller
         }
 
         return $date;
+    }
+
+    // Dangerous activities can arrive as an array, a JSON / comma separated string,
+    // or as flat "dangerous_activities[0]" keys inside a JSON body; values can be ids or names
+    private function requestedDangerousActivityIds(Request $request)
+    {
+        $value = $request->input('dangerous_activities');
+
+        if (empty($value)) {
+            $value = array_values(array_filter(
+                $request->all(),
+                fn($key) => str_starts_with($key, 'dangerous_activities['),
+                ARRAY_FILTER_USE_KEY
+            ));
+        }
+
+        if (is_string($value)) {
+            $value = str_starts_with(trim($value), '[') ? (json_decode($value, true) ?? []) : explode(',', $value);
+        }
+
+        $values = array_filter(array_map('trim', array_map('strval', (array) $value)), 'strlen');
+        $ids = array_filter($values, 'is_numeric');
+        $names = array_diff($values, $ids);
+
+        if (!empty($names)) {
+            $ids = array_merge($ids, DangerousActivities::whereIn('name', $names)->pluck('id')->all());
+        }
+
+        return array_values(array_unique(array_map('intval', $ids)));
+    }
+
+    private function isRestrictedForDangerousActivities($plan, array $activityIds)
+    {
+        $restricted = array_map('intval', $this->normalizeRestricted($plan->restricted_dangerous_activities_ids ?? null));
+
+        return count(array_intersect($activityIds, $restricted)) > 0;
     }
 
     // members can arrive as an array, as a JSON string (multipart requests),
@@ -132,10 +168,9 @@ class TravelInsuranceController extends Controller
                 'renew' => 'nullable|boolean',
             ]);
 
-            if ($request->has('dangerous_activities')) {
-                $data['dangerous_activities'] = is_array($request->dangerous_activities)
-                    ? implode(',', $request->dangerous_activities)
-                    : $request->dangerous_activities;
+            $userDangerousActivities = $this->requestedDangerousActivityIds($request);
+            if (!empty($userDangerousActivities)) {
+                $data['dangerous_activities'] = implode(',', $userDangerousActivities);
             }
 
             if ($request->has('multiple_destination')) {
@@ -178,14 +213,12 @@ class TravelInsuranceController extends Controller
             $clientCountry  = $client->country_id;
             $clientCity     = $client->city_id;
             $clientDistrict = $client->district_id;
-            $userDangerousActivities = [];
             $clientAge = Carbon::parse($client->birth_date)->age;
 
             $restrictedCountries = $this->normalizeRestricted($plan_data->restricted_country_ids);
             $restrictedCities    = $this->normalizeRestricted($plan_data->restricted_city_ids);
             $restrictedDistricts = $this->normalizeRestricted($plan_data->restricted_district_ids);
             $restrictedAges      = $this->normalizeRestricted($plan_data->restricted_age_ids);
-            $restrictedDangerousActivities = $this->normalizeRestricted($plan_data->restricted_dangerous_activities_ids ?? null);
             $restrictedDestinationCountries = $this->normalizeRestricted($plan_data->restricted_destination_country_ids ?? null);
             if ($clientCountry && in_array($clientCountry, $restrictedCountries)) {
                 return $this->restrictionError('country');
@@ -199,15 +232,8 @@ class TravelInsuranceController extends Controller
                 return $this->restrictionError('district');
             }
 
-            if (!empty($data['dangerous_activities'])) {
-                $userDangerousActivities = is_array($data['dangerous_activities'])
-                    ? $data['dangerous_activities']
-                    : explode(',', $data['dangerous_activities']);
-            }
-            foreach ($userDangerousActivities as $activityId) {
-                if (in_array(trim($activityId), $restrictedDangerousActivities)) {
-                    return $this->restrictionError('dangerous_activity');
-                }
+            if ($this->isRestrictedForDangerousActivities($plan_data, $userDangerousActivities)) {
+                return $this->restrictionError('dangerous_activity');
             }
             if (!empty($restrictedDestinationCountries) && !empty($data['destination_country_id'])) {
                 if (in_array((int)$data['destination_country_id'], array_map('intval', $restrictedDestinationCountries))) {
@@ -656,6 +682,25 @@ class TravelInsuranceController extends Controller
             }
 
             $data = $data->get();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Dangerous Activities Restriction
+            |--------------------------------------------------------------------------
+            */
+            $userDangerousActivities = $this->requestedDangerousActivityIds($request);
+
+            if (!empty($userDangerousActivities)) {
+                $hasPlans = $data->isNotEmpty();
+
+                $data = $data->reject(
+                    fn($plan) => $this->isRestrictedForDangerousActivities($plan, $userDangerousActivities)
+                )->values();
+
+                if ($hasPlans && $data->isEmpty()) {
+                    return $this->restrictionError('dangerous_activity');
+                }
+            }
 
             /*
             |--------------------------------------------------------------------------
