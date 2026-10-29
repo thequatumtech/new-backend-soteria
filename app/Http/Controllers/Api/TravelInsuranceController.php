@@ -68,6 +68,36 @@ class TravelInsuranceController extends Controller
         return $date;
     }
 
+    // members can arrive as an array, as a JSON string (multipart requests),
+    // or as flat "members[0][first_name]" keys inside a JSON body
+    private function normalizeMembers(Request $request)
+    {
+        $members = $request->input('members');
+
+        if (is_string($members)) {
+            $members = json_decode($members, true);
+        }
+
+        if (empty($members)) {
+            $flatKeys = array_filter(
+                $request->all(),
+                fn($key) => str_starts_with($key, 'members['),
+                ARRAY_FILTER_USE_KEY
+            );
+
+            if (!empty($flatKeys)) {
+                parse_str(http_build_query($flatKeys), $parsed);
+                $members = $parsed['members'] ?? [];
+            }
+        }
+
+        if (!is_array($members)) {
+            return [];
+        }
+
+        return array_values(array_filter($members, 'is_array'));
+    }
+
     public function storeTravelInsurance(Request $request)
     {
         try {
@@ -230,7 +260,11 @@ class TravelInsuranceController extends Controller
                 $netPremium += ($netPremium * $surchargeBand->surcharge) / 100;
             }
 
-            $netPremium = round($netPremium, 2);
+            // Net premium = main client premium x number of family members (at least 1)
+            $members = $this->normalizeMembers($request);
+            $mainPremium = round($netPremium, 2);
+            $premiumMultiplier = max(count($members), 1);
+            $netPremium = round($mainPremium * $premiumMultiplier, 2);
             // -------------------------
 
             // ---------- JOD Conversion Calculation ----------
@@ -348,6 +382,8 @@ class TravelInsuranceController extends Controller
             $plan_for_pdf->cbj_amount = $cbjContribution;
             $plan_for_pdf->sales_tax_cbj_amount = $cbjSalesTaxAmount;
             $plan_for_pdf->gross_premium_amount = $grossPremium;
+            $plan_for_pdf->main_member_premium = $mainPremium;
+            $plan_for_pdf->premium_multiplier = $premiumMultiplier;
             if (!isset($plan_for_pdf->cbj)) $plan_for_pdf->cbj = $cbjTaxPercentage;
             if (!isset($plan_for_pdf->sales_tax_cbj)) $plan_for_pdf->sales_tax_cbj = $cbjSalesTaxPercentage;
 
@@ -363,6 +399,22 @@ class TravelInsuranceController extends Controller
                 $abbr = optional(optional($client->country)->currency)->abbreviation ?? 'JOD';
             }
 
+
+            // Save members before generating the PDF so they can be shown in it.
+            // On a draft update, replace the old members instead of adding duplicates.
+            FamilyTravelInsuranceMember::where('client_insurance_id', $data->id)->delete();
+
+            $savedMembers = [];
+            foreach ($members as $single) {
+                $memberFields = array_intersect_key($single, array_flip((new FamilyTravelInsuranceMember)->getFillable()));
+                // Documents can arrive as a list of paths
+                $memberFields = array_map(fn($value) => is_array($value) ? json_encode(array_values($value)) : $value, $memberFields);
+
+                $savedMembers[] = FamilyTravelInsuranceMember::create(
+                    array_merge($memberFields, ['client_insurance_id' => $data->id])
+                );
+            }
+            $data->members = $savedMembers;
 
             $pdf = PDF::loadView('pdf/travel_policy', [
                 'data' => $data,
@@ -384,26 +436,6 @@ class TravelInsuranceController extends Controller
             $data->sales_tax_cbj = number_format($purchase['sales_tax_cbj'], 2) . ' ' . $abbr;
             $data->stamps = number_format($purchase['stamps'], 2) . ' ' . $abbr;
             $data->commission_amount = number_format($purchase['commission_amount'], 2) . ' ' . $abbr;
-
-            if (!empty($request->members)) {
-                foreach ($request->members as $single) {
-                    $family_member = new FamilyTravelInsuranceMember();
-                    $family_member->client_insurance_id = $travel->id;
-                    $family_member->first_name = $single['first_name'];
-                    $family_member->last_name = $single['last_name'];
-                    $family_member->third_name = $single['third_name'];
-                    $family_member->family_name = $single['family_name'];
-                    $family_member->relation = $single['relation'];
-                    $family_member->nationality = $single['nationality'];
-                    $family_member->nationality_no = $single['nationality_no'];
-                    $family_member->id_residence_no = $single['id_residence_no'];
-                    $family_member->birth_date = $single['birth_date'];
-                    $family_member->gender = $single['gender'];
-                    $family_member->place_residence = $single['place_residence'];
-                    $family_member->passport_document = $single['passport_document'];
-                    $family_member->save();
-                }
-            }
 
             return response()->json([
                 'status' => true,
@@ -554,6 +586,15 @@ class TravelInsuranceController extends Controller
 
             if ($request->filled('plan_id')) {
                 $data->where('id', $request->plan_id);
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Plan Name (selected plan in the app, e.g. "Travel - Schengen")
+            |--------------------------------------------------------------------------
+            */
+            if ($request->filled('plan')) {
+                $data->where('plan_name', 'LIKE', '%' . $request->plan . '%');
             }
             /*
             |--------------------------------------------------------------------------
