@@ -405,19 +405,8 @@ if (!empty($data->letterhead)) {
             $departureCountry = !empty($data->departure_from_country_id) ? getCountryName($data->departure_from_country_id) : null;
             $destinationCountry = !empty($data->destination_country_id) ? getCountryName($data->destination_country_id) : null;
             $addDestCountry = !empty($data->additional_destination_country_id) ? getCountryName($data->additional_destination_country_id) : null;
-            $geoArea = getNamesFromIds(\App\Models\GeographicalArea::class, $data->geographical_area_id ?? null);
             $multipleDestinations = getNamesFromIds(\App\Models\Country::class, $data->multiple_destination ?? null);
             $dangerousActivities = getDangerousActivityName($data->dangerous_activities ?? null);
-            $countries = $data->geographical_countries ?? [];
-            if (is_string($countries)) {
-                $countries = json_decode($countries, true) ?? [];
-            }
-            $countries = is_array($countries) ? array_filter($countries) : [];
-            // Countries can be stored as ids or as names
-            $formattedCountries = count($countries) && count(array_filter($countries, 'is_numeric')) === count($countries)
-                ? getNamesFromIds(\App\Models\Country::class, $countries)
-                : implode(', ', $countries);
-            $formattedCountries = $formattedCountries !== '-' ? $formattedCountries : null;
         @endphp
         <div class="policy-summary">
             <h4>Travel Details</h4>
@@ -445,18 +434,6 @@ if (!empty($data->letterhead)) {
                     <tr>
                         <td>Multiple Destinations</td>
                         <td>{{ $multipleDestinations }}</td>
-                    </tr>
-                    @endif
-                    @if(!empty($geoArea) && $geoArea !== '-')
-                    <tr>
-                        <td>Geographical Area</td>
-                        <td>{{ $geoArea }}</td>
-                    </tr>
-                    @endif
-                    @if(!empty($formattedCountries))
-                    <tr>
-                        <td>Geographical Countries</td>
-                        <td>{{ $formattedCountries }}</td>
                     </tr>
                     @endif
                     @if(!empty($data->effective_date))
