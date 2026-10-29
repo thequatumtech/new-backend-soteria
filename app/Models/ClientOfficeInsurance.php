@@ -73,10 +73,15 @@ class ClientOfficeInsurance extends Model
         'restricted_protection_system_ids',
         'restricted_office_age_ids',
         'office_age',
+        'authorized_position',
+        'previous_insurance_details',
+        'insurance_declined_details',
+        'claims_5_year_details',
     ];
     public static function getOfficeInsuranceDetails($id)
     {
-        $plan = ClientOfficeInsurance::select('client_office_insurances.*', 'office_plans.plan_name', 'office_plans.insurance_policy_text','office_plans.net_premium',
+        $plan = ClientOfficeInsurance::select('client_office_insurances.*',
+            'client_office_insurances.company_name as office_company_name','office_plans.plan_name', 'office_plans.insurance_policy_text','office_plans.net_premium',
         'office_plans.limit',
         'office_plans.fees',
         'office_plans.stamps',

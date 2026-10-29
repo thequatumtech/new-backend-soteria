@@ -320,56 +320,80 @@ if (!empty($data->letterhead)) {
             <h4>Policyholder Details</h4>
             <table class="policy-details">
                 <tbody>
+                    @if(!empty($data->self_family_status))
                     <tr>
                         <td>Family Status</td>
                         <td>
                             {{ ($data->self_family_status ?? null) == 1 ? 'Self' : (($data->self_family_status ?? null) == 2 ? 'Family' : '') }}
                         </td>
                     </tr>
+                    @endif
+                    @if(!empty($data->first_name))
                     <tr>
                         <td>First Name</td>
-                        <td>{{ $data->first_name ?? '' }}</td>
+                        <td>{{ $data->first_name }}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->last_name))
                     <tr>
                         <td>Last Name</td>
-                        <td>{{ $data->last_name ?? '' }}</td>
+                        <td>{{ $data->last_name }}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->third_name))
                     <tr>
                         <td>Third Name</td>
-                        <td>{{ $data->third_name ?? '' }}</td>
+                        <td>{{ $data->third_name }}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->family_name))
                     <tr>
                         <td>Family Name</td>
-                        <td>{{ $data->family_name ?? '' }}</td>
+                        <td>{{ $data->family_name }}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->nationality))
                     <tr>
                         <td>Nationality</td>
-                        <td>{{ $data->nationality ?? '' }}</td>
+                        <td>{{ getNationalityName($data->nationality) }}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->nationality_no))
                     <tr>
                         <td>Nationality Number</td>
-                        <td>{{ $data->nationality_no ?? '' }}</td>
+                        <td>{{ $data->nationality_no }}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->id_residence_no))
                     <tr>
                         <td>Residence ID Number</td>
-                        <td>{{ $data->id_residence_no ?? '' }}</td>
+                        <td>{{ $data->id_residence_no }}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->birth_date))
                     <tr>
                         <td>Birth Date</td>
-                        <td>{{ !empty($data->birth_date) ? date('m-d-Y', strtotime($data->birth_date)) : '' }}</td>
+                        <td>{{ date('m-d-Y', strtotime($data->birth_date)) }}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->gender))
                     <tr>
                         <td>Gender</td>
-                        <td>{{ $data->gender ?? '' }}</td>
+                        <td>{{ $data->gender }}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->marital_status))
                     <tr>
                         <td>Marital Status</td>
-                        <td>{{ $data->marital_status ?? null }}</td>
+                        <td>{{ $data->marital_status }}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->place_residence))
                     <tr>
                         <td>Place of Residence</td>
-                        <td>{{ $data->place_residence ?? '' }}</td>
+                        <td>{{ $data->place_residence }}</td>
                     </tr>
+                    @endif
                 </tbody>
             </table>
         </div>
@@ -377,70 +401,70 @@ if (!empty($data->letterhead)) {
         {{-- =====================================================
         TRAVEL DETAILS
         ====================================================== --}}
+        @php
+            $departureCountry = !empty($data->departure_from_country_id) ? getCountryName($data->departure_from_country_id) : null;
+            $destinationCountry = !empty($data->destination_country_id) ? getCountryName($data->destination_country_id) : null;
+            $addDestCountry = !empty($data->additional_destination_country_id) ? getCountryName($data->additional_destination_country_id) : null;
+            $multipleDestinations = getNamesFromIds(\App\Models\Country::class, $data->multiple_destination ?? null);
+            $dangerousActivities = getDangerousActivityName($data->dangerous_activities ?? null);
+        @endphp
         <div class="policy-summary">
             <h4>Travel Details</h4>
             <table class="policy-details">
                 <tbody>
+                    @if(!empty($departureCountry) && $departureCountry !== '-')
                     <tr>
                         <td>Departure Country</td>
-                        <td>{{ getCountryName($data->departure_from_country_id ?? null) }}</td>
+                        <td>{{ $departureCountry }}</td>
                     </tr>
+                    @endif
+                    @if(!empty($destinationCountry) && $destinationCountry !== '-')
                     <tr>
                         <td>Destination Country</td>
-                        <td>{{ getCountryName($data->destination_country_id ?? null) }}</td>
+                        <td>{{ $destinationCountry }}</td>
                     </tr>
+                    @endif
+                    @if(!empty($addDestCountry) && $addDestCountry !== '-')
                     <tr>
                         <td>Additional Destination Country</td>
-                        <td>{{ getCountryName($data->additional_destination_country_id ?? null) }}</td>
+                        <td>{{ $addDestCountry }}</td>
                     </tr>
+                    @endif
+                    @if($multipleDestinations !== '-')
                     <tr>
                         <td>Multiple Destinations</td>
-                        <td>{{ $data->multiple_destination ?? '' }}</td>
+                        <td>{{ $multipleDestinations }}</td>
                     </tr>
-                    <tr>
-                        <td>Geographical Area</td>
-                        <td>{{ $data->geographical_area_name ?? $data->geographical_area_id ?? '' }}</td>
-                    </tr>
-                    <tr>
-                        <td>Geographical Countries</td>
-                        <td>
-                            @php
-$countries = $data->geographical_countries ?? [];
-if (is_string($countries)) {
-    $countries = json_decode($countries, true) ?? [];
-}
-                            @endphp
-
-                            {{ is_array($countries) ? implode(', ', $countries) : $countries }}
-                        </td>
-                    </tr>
+                    @endif
+                    @if(!empty($data->effective_date))
                     <tr>
                         <td>Effective Date</td>
-                        <td>{{ !empty($data->effective_date) ? date('m-d-Y', strtotime($data->effective_date)) : '' }}
-                        </td>
+                        <td>{{ date('m-d-Y', strtotime($data->effective_date)) }}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->travel_days))
                     <tr>
                         <td>Travel Days</td>
-                        <td>{{ $data->travel_days ?? '' }}</td>
+                        <td>{{ $data->travel_days }}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->expiry_date))
                     <tr>
                         <td>Expiry Date</td>
-                        <td>{{ !empty($data->expiry_date) ? date('m-d-Y', strtotime($data->expiry_date)) : '' }}</td>
+                        <td>{{ date('m-d-Y', strtotime($data->expiry_date)) }}</td>
                     </tr>
+                    @endif
+                    @if(isset($data->insurance_limit) && $data->insurance_limit !== '')
                     <tr>
                         <td>Insurance Limit</td>
-                        <td>
-                            {{ isset($data->insurance_limit) ? $data->insurance_limit : (isset($plan->limit) ? number_format((float) $plan->limit, 2) . ' ' . ($abbr ?? 'JOD') : '') }}
-                        </td>
+                        <td>{{ $data->insurance_limit }}</td>
                     </tr>
+                    @elseif(isset($plan->limit) && $plan->limit !== '')
                     <tr>
-                        <td>Renewal</td>
-                        <td>{{ !empty($data->renew) ? 'Yes' : 'No' }}</td>
+                        <td>Insurance Limit</td>
+                        <td>{{ number_format((float) $plan->limit, 2) . ' ' . ($abbr ?? 'JOD') }}</td>
                     </tr>
-                    <tr>
-                        <td>Previous Policy ID</td>
-                        <td>{{ $data->old_policy_id_for_renew ?? '' }}</td>
-                    </tr>
+                    @endif
                 </tbody>
             </table>
         </div>
@@ -452,14 +476,18 @@ if (is_string($countries)) {
             <h4>Travel Declarations</h4>
             <table class="policy-details">
                 <tbody>
+                    @if($dangerousActivities !== '-')
                     <tr>
                         <td>Dangerous Activities</td>
-                        <td>{{ $data->dangerous_activities ?? '' }}</td>
+                        <td>{{ $dangerousActivities }}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->passport_document))
                     <tr>
                         <td>Passport Document</td>
-                        <td>{!! getDocumentLinks($data->passport_document ?? null) !!}</td>
+                        <td>{!! getDocumentLinks($data->passport_document) !!}</td>
                     </tr>
+                    @endif
                 </tbody>
             </table>
         </div>
@@ -477,8 +505,10 @@ if (is_string($countries)) {
                                 <td>Name</td>
                                 <td>Relationship</td>
                                 <td>Nationality</td>
+                                <td>Nationality / Residence No.</td>
                                 <td>Birth Date</td>
                                 <td>Gender</td>
+                                <td>Passport</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -491,11 +521,13 @@ if (is_string($countries)) {
                                         {{ $member->family_name ?? '' }}
                                     </td>
                                     <td>{{ $member->relation ?? '' }}</td>
-                                    <td>{{ $member->nationality ?? '' }}</td>
+                                    <td>{{ getNationalityName($member->nationality ?? null) }}</td>
+                                    <td>{{ trim(($member->nationality_no ?? '') . ' / ' . ($member->id_residence_no ?? ''), ' /') }}</td>
                                     <td>
                                         {{ !empty($member->birth_date) ? date('m-d-Y', strtotime($member->birth_date)) : '' }}
                                     </td>
                                     <td>{{ $member->gender ?? '' }}</td>
+                                    <td>{!! getDocumentLinks($member->passport_document ?? null) !!}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -507,30 +539,43 @@ if (is_string($countries)) {
 
         <!-- POLICY DETAILS -->
         <table class="policy-details">
+            @if(!empty($data->police_no))
             <tr>
                 <td><strong>Policy No.</strong></td>
                 <td>{{ $data->police_no }}</td>
             </tr>
+            @endif
+            @if(!empty($data->plan_name))
             <tr>
                 <td><strong>Plan Name</strong></td>
                 <td>{{ $data->plan_name }}</td>
             </tr>
+            @endif
+            @php
+                $policyHolder = trim(($data->first_name ?? '') . ' ' . ($data->last_name ?? '') . ' ' . ($data->third_name ?? '') . ' ' . ($data->family_name ?? ''));
+            @endphp
+            @if(!empty($policyHolder))
             <tr>
                 <td><strong>Policy Holder</strong></td>
-                <td>{{ $data->first_name }} {{ $data->last_name }} {{ $data->third_name }} {{ $data->family_name }}</td>
+                <td>{{ $policyHolder }}</td>
             </tr>
+            @endif
+            @if(!empty($data->effective_date) || !empty($data->inception_date))
             <tr>
                 <td><strong>Effective Date</strong></td>
-                <td>{{ $data->effective_date ? date('m-d-Y', strtotime($data->effective_date)) : '' }}</td>
+                <td>{{ date('m-d-Y', strtotime($data->effective_date ?? $data->inception_date)) }}</td>
             </tr>
+            @endif
+            @if(!empty($data->expiry_date))
             <tr>
                 <td><strong>Expiry Date</strong></td>
-                <td>{{ $data->expiry_date ? date('m-d-Y', strtotime($data->expiry_date)) : '' }}</td>
+                <td>{{ date('m-d-Y', strtotime($data->expiry_date)) }}</td>
             </tr>
-            <!-- <tr>
+            @endif
+            <tr>
                 <td><strong>Payment Method</strong></td>
-                <td>Annual in advance</td>
-            </tr> -->
+                <td>In advance</td>
+            </tr>
         </table>
 
         <!-- POLICY SUMMARY -->
@@ -545,6 +590,21 @@ if (is_string($countries)) {
                             <td>{{ number_format((float) $plan->limit, 2) }} {{ $abbr ?? 'JOD' }}</td>
                         </tr>
                     @endisset
+
+                    @if(isset($plan->premium_multiplier) && !empty($data->members) && count($data->members))
+                        <tr>
+                            <td>Insured Persons</td>
+                            <td>{{ count($data->members) + 1 }}</td>
+                        </tr>
+                        <tr>
+                            <td>Premium - {{ trim(($data->first_name ?? '') . ' ' . ($data->family_name ?? '')) }} (Main)</td>
+                            <td>{{ number_format((float) $plan->main_member_premium, 2) }} {{ $abbr ?? 'JOD' }}</td>
+                        </tr>
+                        <tr>
+                            <td>Family Members (x)</td>
+                            <td>{{ $plan->premium_multiplier }}</td>
+                        </tr>
+                    @endif
 
                     @isset($plan->net_premium_amount)
                         <tr>

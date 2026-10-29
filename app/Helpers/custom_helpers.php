@@ -9,6 +9,7 @@ use App\Models\InsuranceCompany;
 use App\Models\Country;
 use App\Models\Nationality;
 use App\Models\ProtectionSystem;
+use App\Models\DangerousActivities;
 use App\Models\InsuredItemCategory;
 use App\Models\InsuredItemSubCategory;
 use App\Models\EngineType;
@@ -110,6 +111,11 @@ if (!function_exists('getNationalityName')) {
     {
         if (empty($id)) {
             return '-';
+        }
+
+        // Some forms store the nationality name itself (e.g. "Jordanian")
+        if (!is_numeric($id)) {
+            return $id;
         }
 
         return Nationality::where('id', $id)->value('name') ?? '-';
@@ -273,9 +279,9 @@ if (!function_exists('get_engine_type_name')) {
     }
 }
 
-if (!function_exists('getProtectionSystemName')) {
-    // Stored as "2,3" or a JSON array of ids
-    function getProtectionSystemName($value)
+if (!function_exists('getNamesFromIds')) {
+    // Ids stored as "2,3" or a JSON array -> "Name A, Name B" (soft-deleted names included)
+    function getNamesFromIds($modelClass, $value)
     {
         if (empty($value)) {
             return '-';
@@ -289,9 +295,23 @@ if (!function_exists('getProtectionSystemName')) {
             return '-';
         }
 
-        $names = ProtectionSystem::withTrashed()->whereIn('id', $ids)->pluck('name')->toArray();
+        $names = $modelClass::withTrashed()->whereIn('id', $ids)->pluck('name')->toArray();
 
         return count($names) ? implode(', ', $names) : '-';
+    }
+}
+
+if (!function_exists('getProtectionSystemName')) {
+    function getProtectionSystemName($value)
+    {
+        return getNamesFromIds(ProtectionSystem::class, $value);
+    }
+}
+
+if (!function_exists('getDangerousActivityName')) {
+    function getDangerousActivityName($value)
+    {
+        return getNamesFromIds(DangerousActivities::class, $value);
     }
 }
 

@@ -313,26 +313,39 @@ if (!empty($data->letterhead)) {
 
         <!-- POLICY DETAILS -->
         <table class="policy-details">
+            @if(!empty($data->police_no))
             <tr>
                 <td><strong>Policy No.</strong></td>
                 <td>({{ $data->police_no }})</td>
             </tr>
+            @endif
+            @if(!empty($data->plan_name))
             <tr>
                 <td><strong>Plan Name</strong></td>
                 <td>{{ $data->plan_name }}</td>
             </tr>
+            @endif
+            @php
+                $policyHolder = trim(($data->first_name ?? '') . ' ' . ($data->last_name ?? '') . ' ' . ($data->third_name ?? '') . ' ' . ($data->family_name ?? ''));
+            @endphp
+            @if(!empty($policyHolder))
             <tr>
                 <td><strong>Policy Holder</strong></td>
-                <td>{{ $data->first_name }} {{ $data->last_name }} {{ $data->third_name }} {{ $data->family_name }}</td>
+                <td>{{ $policyHolder }}</td>
             </tr>
+            @endif
+            @if(!empty($data->inception_date))
             <tr>
                 <td><strong>Effective Date</strong></td>
                 <td>{{ date('d/m/Y', strtotime($data->inception_date)) }}</td>
             </tr>
+            @endif
+            @if(!empty($data->expiry_date))
             <tr>
                 <td><strong>Expiry Date</strong></td>
                 <td>{{ date('d/m/Y', strtotime($data->expiry_date)) }}</td>
             </tr>
+            @endif
             <!-- <tr>
                 <td><strong>Payment Method</strong></td>
                 <td>Annual in advance</td>

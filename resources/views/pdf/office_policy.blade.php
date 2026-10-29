@@ -308,219 +308,316 @@ if (!empty($data->letterhead)) {
 
 {{-- APPLICATION DETAILS --}}
 <table class="policy-details">
+    @php
+$fullName = trim(($data->first_name ?? '') . ' ' . ($data->last_name ?? '') . ' ' . ($data->third_name ?? '') . ' ' . ($data->family_name ?? ''));
+    @endphp
+    @if(!empty($fullName) || !empty($data->nationality) || !empty($data->nationality_no) || !empty($data->id_residence_no) || !empty($data->birth_date) || !empty($data->gender) || !empty($data->place_residence))
     <tr>
         <td colspan="2" style="background-color: #d0d0d0;">
             Applicant Details
         </td>
     </tr>
+    @if(!empty($fullName))
     <tr>
         <td>Full Name</td>
-        <td>{{ trim(($data->first_name ?? '') . ' ' . ($data->last_name ?? '') . ' ' . ($data->third_name ?? '') . ' ' . ($data->family_name ?? '')) }}</td>
+        <td>{{ $fullName }}</td>
     </tr>
+    @endif
+    @if(!empty($data->nationality))
     <tr>
         <td>Nationality</td>
-        <td>{{ $data->nationality ?? '' }}</td>
+        <td>{{ $data->nationality }}</td>
     </tr>
+    @endif
+    @if(!empty($data->nationality_no))
     <tr>
         <td>Nationality Number</td>
-        <td>{{ $data->nationality_no ?? '' }}</td>
+        <td>{{ $data->nationality_no }}</td>
     </tr>
+    @endif
+    @if(!empty($data->id_residence_no))
     <tr>
         <td>Residence ID</td>
-        <td>{{ $data->id_residence_no ?? '' }}</td>
+        <td>{{ $data->id_residence_no }}</td>
     </tr>
+    @endif
+    @if(!empty($data->birth_date))
     <tr>
         <td>Date of Birth</td>
-        <td>{{ !empty($data->birth_date) ? date('m-d-Y', strtotime($data->birth_date)) : '' }}</td>
+        <td>{{ date('m-d-Y', strtotime($data->birth_date)) }}</td>
     </tr>
+    @endif
+    @if(!empty($data->gender))
     <tr>
         <td>Gender</td>
-        <td>{{ $data->gender ?? '' }}</td>
+        <td>{{ $data->gender }}</td>
     </tr>
+    @endif
+    @if(!empty($data->place_residence))
     <tr>
         <td>Place of Residence</td>
-        <td>{{ $data->place_residence ?? '' }}</td>
+        <td>{{ $data->place_residence }}</td>
     </tr>
+    @endif
+    @endif
 
-    <tr>
-        <td colspan="2" style="background-color: #d0d0d0;">
-            Office / Company Details
-        </td>
-    </tr>
-    <tr>
-        <td>Company Name</td>
-        <td>{{ $data->company_name ?? '' }}</td>
-    </tr>
-    <tr>
-        <td>Company Registration National ID</td>
-        <td>{{ $data->company_register_national_id ?? '' }}</td>
-    </tr>
-    <tr>
-        <td>Company Registration ID</td>
-        <td>{{ $data->company_register_id ?? '' }}</td>
-    </tr>
-    <tr>
-        <td>Office Type</td>
-        <td>{{ $data->office_type ?? '' }}</td>
-    </tr>
-    <tr>
-        <td>Office Category</td>
-        <td>{{ $data->office_category ?? '' }}</td>
-    </tr>
-    <tr>
-        <td>Number of Floors</td>
-        <td>{{ $data->no_of_floor ?? '' }}</td>
-    </tr>
-    <tr>
-        <td>Number of Rooms</td>
-        <td>{{ $data->no_of_room ?? '' }}</td>
-    </tr>
-    <tr>
-        <td>Apartment Size</td>
-        <td>{{ $data->size_of_apartment ?? '' }}</td>
-    </tr>
-    <tr>
-        <td>Age of Apartment</td>
-        <td>{{ $data->age_of_apartment ?? '' }}</td>
-    </tr>
-    <tr>
-        <td>Number of Residences</td>
-        <td>{{ $data->no_of_residence ?? '' }}</td>
-    </tr>
-    <tr>
-        <td>Number of Employees</td>
-        <td>{{ $data->no_of_employee ?? '' }}</td>
-    </tr>
+    @if(!empty($data->company_name) || !empty($data->company_register_national_id) || !empty($data->company_register_id) || !empty($data->office_type) || !empty($data->office_category) || !empty($data->no_of_floor) || !empty($data->no_of_room) || !empty($data->size_of_apartment) || !empty($data->age_of_apartment) || !empty($data->no_of_residence) || !empty($data->no_of_employee))
+        <tr>
+            <td colspan="2" style="background-color: #d0d0d0;">
+                Office / Company Details
+            </td>
+        </tr>
+        @if(!empty($data->company_name))
+            <tr>
+                <td>Company Name</td>
+                <td>{{ $data->office_company_name ?? '-' }}</td>
+            </tr>
+        @endif
+        @if(!empty($data->company_register_national_id))
+        <tr>
+            <td>Company Registration National ID</td>
+            <td>{{ $data->company_register_national_id }}</td>
+        </tr>
+        @endif
+        @if(!empty($data->company_register_id))
+        <tr>
+            <td>Company Registration ID</td>
+            <td>{{ $data->company_register_id }}</td>
+        </tr>
+        @endif
+        @if(!empty($data->office_type))
+        <tr>
+            <td>Office Type</td>
+            <td>{{ $data->office_type }}</td>
+        </tr>
+        @endif
+        @if(!empty($data->office_category))
+        <tr>
+            <td>Office Category</td>
+            <td>{{ $data->office_category }}</td>
+        </tr>
+        @endif
+        @if(!empty($data->no_of_floor))
+        <tr>
+            <td>Number of Floors</td>
+            <td>{{ $data->no_of_floor }}</td>
+        </tr>
+        @endif
+        @if(!empty($data->no_of_room))
+        <tr>
+            <td>Number of Rooms</td>
+            <td>{{ $data->no_of_room }}</td>
+        </tr>
+        @endif
+        @if(!empty($data->size_of_apartment))
+        <tr>
+            <td>Apartment Size</td>
+            <td>{{ $data->size_of_apartment }}</td>
+        </tr>
+        @endif
+        @if(!empty($data->age_of_apartment))
+        <tr>
+            <td>Age of Apartment</td>
+            <td>{{ $data->age_of_apartment }}</td>
+        </tr>
+        @endif
+        @if(!empty($data->no_of_residence))
+        <tr>
+            <td>Number of Residences</td>
+            <td>{{ $data->no_of_residence }}</td>
+        </tr>
+        @endif
+        @if(!empty($data->no_of_employee))
+        <tr>
+            <td>Number of Employees</td>
+            <td>{{ $data->no_of_employee }}</td>
+        </tr>
+        @endif
+    @endif
 
+    @php
+$officeCountry = $data->country_name ?? (!empty($data->country_id) ? getCountryName($data->country_id) : null);
+$officeCity = $data->city_name ?? (!empty($data->city_id) ? getCityName($data->city_id) : null);
+$officeDistrict = $data->district_name ?? (!empty($data->district_id) ? getDistrictName($data->district_id) : null);
+    @endphp
+    @if(!empty($officeCountry) || !empty($officeCity) || !empty($officeDistrict) || !empty($data->street_name) || !empty($data->building_no) || !empty($data->office_no) || !empty($data->block_no) || !empty($data->plate_no) || !empty($data->plot_no) || !empty($data->company_telephone) || !empty($data->company_owner_name) || !empty($data->company_owner_telephone))
     <tr>
         <td colspan="2" style="background-color: #d0d0d0;">
             Office Address
         </td>
     </tr>
+    @if(!empty($officeCountry) && $officeCountry !== '-')
     <tr>
         <td>Country</td>
-        <td>{{ $data->country_name ?? $data->country_id ?? '' }}</td>
+        <td>{{ $officeCountry }}</td>
     </tr>
+    @endif
+    @if(!empty($officeCity) && $officeCity !== '-')
     <tr>
         <td>City</td>
-        <td>{{ $data->city_name ?? $data->city_id ?? '' }}</td>
+        <td>{{ $officeCity }}</td>
     </tr>
+    @endif
+    @if(!empty($officeDistrict) && $officeDistrict !== '-')
     <tr>
         <td>District</td>
-        <td>{{ $data->district_name ?? $data->district_id ?? '' }}</td>
+        <td>{{ $officeDistrict }}</td>
     </tr>
+    @endif
+    @if(!empty($data->street_name))
     <tr>
         <td>Street Name</td>
-        <td>{{ $data->street_name ?? '' }}</td>
+        <td>{{ $data->street_name }}</td>
     </tr>
+    @endif
+    @if(!empty($data->building_no))
     <tr>
         <td>Building Number</td>
-        <td>{{ $data->building_no ?? '' }}</td>
+        <td>{{ $data->building_no }}</td>
     </tr>
+    @endif
+    @if(!empty($data->office_no))
     <tr>
         <td>Office Number</td>
-        <td>{{ $data->office_no ?? '' }}</td>
+        <td>{{ $data->office_no }}</td>
     </tr>
+    @endif
+    @if(!empty($data->block_no))
     <tr>
         <td>Block Number</td>
-        <td>{{ $data->block_no ?? '' }}</td>
+        <td>{{ $data->block_no }}</td>
     </tr>
+    @endif
+    @if(!empty($data->plate_no))
     <tr>
         <td>Plate Number</td>
-        <td>{{ $data->plate_no ?? '' }}</td>
+        <td>{{ $data->plate_no }}</td>
     </tr>
+    @endif
+    @if(!empty($data->plot_no))
     <tr>
         <td>Plot Number</td>
-        <td>{{ $data->plot_no ?? '' }}</td>
+        <td>{{ $data->plot_no }}</td>
     </tr>
+    @endif
+    @if(!empty($data->company_telephone))
     <tr>
         <td>Company Telephone</td>
-        <td>{{ $data->company_telephone ?? '' }}</td>
+        <td>{{ $data->company_telephone }}</td>
     </tr>
+    @endif
+    @if(!empty($data->company_owner_name))
     <tr>
         <td>Company Owner</td>
-        <td>{{ $data->company_owner_name ?? '' }}</td>
+        <td>{{ $data->company_owner_name }}</td>
     </tr>
+    @endif
+    @if(!empty($data->company_owner_telephone))
     <tr>
         <td>Owner Telephone</td>
-        <td>{{ $data->company_owner_telephone ?? '' }}</td>
+        <td>{{ $data->company_owner_telephone }}</td>
     </tr>
+    @endif
+    @endif
 
+    @php
+$protectionSys = !empty($data->protection_system) ? getProtectionSystemName($data->protection_system) : null;
+    @endphp
+    @if(!empty($data->effective_date) || !empty($data->expiry_date) || !empty($data->insurance_limit) || !empty($protectionSys) || !empty($data->inception_date) || !empty($data->insurance_expiry_date))
     <tr>
         <td colspan="2" style="background-color: #d0d0d0;">
             Insurance Details
         </td>
     </tr>
+    @if(!empty($data->effective_date))
     <tr>
         <td>Effective Date</td>
-        <td>{{ !empty($data->effective_date) ? date('m-d-Y', strtotime($data->effective_date)) : '' }}</td>
+        <td>{{ date('m-d-Y', strtotime($data->effective_date)) }}</td>
     </tr>
+    @endif
+    @if(!empty($data->expiry_date))
     <tr>
         <td>Expiry Date</td>
-        <td>{{ !empty($data->expiry_date) ? date('m-d-Y', strtotime($data->expiry_date)) : '' }}</td>
+        <td>{{ date('m-d-Y', strtotime($data->expiry_date)) }}</td>
     </tr>
+    @endif
+    @if(!empty($data->insurance_limit))
     <tr>
         <td>Insurance Limit</td>
-        <td>{{ $data->insurance_limit ?? '' }}</td>
+        <td>{{ $data->insurance_limit }}</td>
     </tr>
+    @endif
+    @if(!empty($protectionSys) && $protectionSys !== '-')
     <tr>
         <td>Protection System</td>
-        <td>{{ getProtectionSystemName($data->protection_system ?? null) }}</td>
+        <td>{{ $protectionSys }}</td>
     </tr>
+    @endif
+    @if(!empty($data->inception_date))
     <tr>
         <td>Inception Date</td>
-        <td>{{ !empty($data->inception_date) ? date('m-d-Y', strtotime($data->inception_date)) : '' }}</td>
+        <td>{{ date('m-d-Y', strtotime($data->inception_date)) }}</td>
     </tr>
+    @endif
+    @if(!empty($data->insurance_expiry_date))
     <tr>
         <td>Insurance Expiry Date</td>
-        <td>{{ !empty($data->insurance_expiry_date) ? date('m-d-Y', strtotime($data->insurance_expiry_date)) : '' }}</td>
+        <td>{{ date('m-d-Y', strtotime($data->insurance_expiry_date)) }}</td>
     </tr>
+    @endif
+    @endif
+@php
+    // Status columns store 1 = yes, 0 = no; the detail answer is shown only for "Yes"
+    $declarationRows = [];
+    foreach ([
+        ['Partner Company Status', 'partner_company_status', null, null],
+        ['Authorized Insurance Policy Status', 'authorized_insurance_police_status', 'Authorized Position', 'authorized_position'],
+        ['Company Registration Status', 'auth_company_register_status', null, null],
+        ['Previous Insurance Policy', 'provious_insurance_policy', 'Previous Insurance Company / Expiry Date', 'previous_insurance_details'],
+        ['Insurance Declined', 'insurance_declined_issue_status', 'Decline Reason / Insurance Company', 'insurance_declined_details'],
+        ['Claims in the Last 5 Years', 'claims_5_year_status', 'Claim / Accident Details', 'claims_5_year_details'],
+    ] as [$label, $statusField, $detailLabel, $detailField]) {
+        $status = $data->{$statusField} ?? null;
+        if ($status === null || $status === '') {
+            continue;
+        }
 
+        $declarationRows[$label] = $status == 1 ? 'Yes' : 'No';
+
+        if ($status == 1 && $detailField && !empty($data->{$detailField})) {
+            $declarationRows[$detailLabel] = $data->{$detailField};
+        }
+    }
+@endphp
+@if(count($declarationRows) || isset($data->renew))
     <tr>
         <td colspan="2" style="background-color: #d0d0d0;">
             Declarations
         </td>
     </tr>
-    <tr>
-        <td>Partner Company Status</td>
-        <td>{{ $data->partner_company_status ?? '' }}</td>
-    </tr>
-    <tr>
-        <td>Authorized Insurance Policy Status</td>
-        <td>{{ $data->authorized_insurance_police_status ?? '' }}</td>
-    </tr>
-    <tr>
-        <td>Company Registration Status</td>
-        <td>{{ $data->auth_company_register_status ?? '' }}</td>
-    </tr>
-    <tr>
-        <td>Previous Insurance Policy</td>
-        <td>{{ $data->provious_insurance_policy ?? '' }}</td>
-    </tr>
-    <tr>
-        <td>Insurance Declined</td>
-        <td>{{ $data->insurance_declined_issue_status ?? '' }}</td>
-    </tr>
-    <tr>
-        <td>Claims in the Last 5 Years</td>
-        <td>{{ $data->claims_5_year_status ?? '' }}</td>
-    </tr>
 
-    @if(!empty($data->renew))
+    @foreach($declarationRows as $label => $value)
+        <tr>
+            <td>{{ $label }}</td>
+            <td>{{ $value }}</td>
+        </tr>
+    @endforeach
+
+    @if(isset($data->renew) && $data->renew !== '')
         <tr>
             <td>Renewal</td>
-            <td>Yes</td>
-        </tr>
-        <tr>
-            <td>Previous Policy ID</td>
-            <td>{{ $data->old_policy_id_for_renew ?? '' }}</td>
-        </tr>
-    @else
-        <tr>
-            <td>Renewal</td>
-            <td>No</td>
+            <td>{{ $data->renew == 1 ? 'Yes' : ($data->renew == 2 ? 'No' : '') }}</td>
         </tr>
     @endif
+
+    @if(!empty($data->old_policy_id_for_renew))
+        <tr>
+            <td>Previous Policy ID</td>
+            <td>{{ $data->old_policy_id_for_renew }}</td>
+        </tr>
+    @endif
+@endif
+
 
     @php
         $officeDocuments = [
@@ -556,26 +653,36 @@ if (!empty($data->letterhead)) {
 
         <!-- POLICY DETAILS -->
         <table class="policy-details">
+            @if(!empty($data->police_no))
             <tr>
                 <td><strong>Policy No.</strong></td>
                 <td>{{ $data->police_no }}</td>
             </tr>
+            @endif
+            @if(!empty($data->plan_name))
             <tr>
                 <td><strong>Plan Name</strong></td>
                 <td>{{ $data->plan_name }}</td>
             </tr>
+            @endif
+            @if(!empty($fullName))
             <tr>
                 <td><strong>Policy Holder</strong></td>
-                <td>{{ $data->first_name }} {{ $data->last_name }} {{ $data->third_name }} {{ $data->family_name }}</td>
+                <td>{{ $fullName }}</td>
             </tr>
+            @endif
+            @if(!empty($data->effective_date) || !empty($data->inception_date))
             <tr>
                 <td><strong>Effective Date</strong></td>
-                <td>{{ date('m-d-Y', strtotime($data->effective_date)) }}</td>
+                <td>{{ date('m-d-Y', strtotime($data->effective_date ?? $data->inception_date)) }}</td>
             </tr>
+            @endif
+            @if(!empty($data->expiry_date))
             <tr>
                 <td><strong>Expiry Date</strong></td>
                 <td>{{ date('m-d-Y', strtotime($data->expiry_date)) }}</td>
             </tr>
+            @endif
             <!-- <tr>
                 <td><strong>Payment Method</strong></td>
                 <td>Annual in advance</td>
