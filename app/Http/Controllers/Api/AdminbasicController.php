@@ -8,6 +8,7 @@ use App\Models\InsurancePlanModels\{HomePlan, LifePlan, CriticalIllnessPlan, Per
 use App\Models\InsurancePlanModels\OfficePlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Helpers\InsurancePlanHelper;
@@ -935,9 +936,29 @@ class AdminbasicController extends Controller
         try {
             $data = [];
 
+            // Only images, PDF and Word documents; checked against the file content, max 10 MB each
+            $fileRule = 'file|mimes:jpg,jpeg,png,pdf,doc,docx|max:10240';
+            $validator = Validator::make($request->all(), [
+                'insurance_type' => 'required|integer|between:1,12',
+                'document' => is_array($request->file('document')) ? 'required|array' : 'required|' . $fileRule,
+                'document.*' => $fileRule,
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'status_code' => 422,
+                    'message' => $validator->errors()->first() ?: __('messages.api.validation_failed'),
+                    'errors' => $validator->errors(),
+                    'data' => []
+                ], 422);
+            }
+
             // Function to generate a unique filename
+            // Extension comes from the validated file content, not from the client's file name
             $generateUniqueFileName = function ($file) {
-                return uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+                $extension = strtolower($file->guessExtension() ?: $file->getClientOriginalExtension());
+                return uniqid() . '_' . time() . '.' . $extension;
             };
 
             // Define the folder paths for each insurance type

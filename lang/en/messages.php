@@ -1835,6 +1835,7 @@ return [
         'password_changed_successfully' => 'Password changed successfully!',
         'validation_failed' => 'Validation failed',
         'policy_already_purchased' => 'This policy is already purchased.',
+        'policy_payment_pending' => 'Payment for this policy is not completed yet. The final policy will be issued after payment.',
         'policy_not_belong_client' => 'Purchase policy does not belong to this client.',
         'signature_saved_successfully' => 'Signature saved successfully.',
         'insurance_company_not_found' => 'Insurance company not found.',

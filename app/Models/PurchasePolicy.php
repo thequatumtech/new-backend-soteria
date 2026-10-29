@@ -111,6 +111,16 @@ class PurchasePolicy extends Model
         $policy->policy_pdf_url = $request['policy_pdf_url'] ?? '';
         $policy->payment_status = 0;
         $policy->save();
+
+        // The draft changed (user went back and edited it), so the old signature no longer
+        // matches; remove it so the client signs the updated draft again.
+        foreach (UserSignature::where('purchase_policy_id', $policy->id)->get() as $signature) {
+            if (!empty($signature->signature) && file_exists(public_path($signature->signature))) {
+                @unlink(public_path($signature->signature));
+            }
+            $signature->delete();
+        }
+
         return $policy;
     }
 

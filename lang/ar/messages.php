@@ -1847,6 +1847,7 @@ return [
 
         'validation_failed' => 'فشل التحقق من البيانات',
         'policy_already_purchased' => 'تم شراء هذه الوثيقة بالفعل.',
+        'policy_payment_pending' => 'لم يتم إكمال الدفع لهذه الوثيقة بعد. سيتم إصدار الوثيقة النهائية بعد الدفع.',
         'policy_not_belong_client' => 'وثيقة الشراء لا تنتمي إلى هذا العميل.',
         'signature_saved_successfully' => 'تم حفظ التوقيع بنجاح.',
 

@@ -1112,17 +1112,6 @@ class ClientController extends Controller
 
         // $client = Client::find($request->client_id);
 
-        $existingSignature = UserSignature::where('purchase_policy_id', $request->purchase_policy_id)
-            ->where('client_id', $request->client_id)
-            ->first();
-
-        if ($existingSignature) {
-            return response()->json([
-                'status' => false,
-                'message' => __('messages.api.policy_already_purchased'),
-            ], 409);
-        }
-
         $purchasePolicy = DB::table('purchase_policy')
             ->where('id', $request->purchase_policy_id)
             ->where('client_id', $request->client_id)
@@ -1133,6 +1122,26 @@ class ClientController extends Controller
                 'status' => false,
                 'message' => __('messages.api.policy_not_belong_client'),
             ], 404);
+        }
+
+        // Only a paid policy is locked; payment_status is set to 1 by storeTransaction
+        if ((int) $purchasePolicy->payment_status === 1) {
+            return response()->json([
+                'status' => false,
+                'message' => __('messages.api.policy_already_purchased'),
+            ], 409);
+        }
+
+        // Signed but not paid (user went back from payment): replace the old signature
+        $existingSignatures = UserSignature::where('purchase_policy_id', $request->purchase_policy_id)
+            ->where('client_id', $request->client_id)
+            ->get();
+
+        foreach ($existingSignatures as $existingSignature) {
+            if (!empty($existingSignature->signature) && file_exists(public_path($existingSignature->signature))) {
+                @unlink(public_path($existingSignature->signature));
+            }
+            $existingSignature->delete();
         }
 
         $file = $request->file('signature');
@@ -1229,6 +1238,13 @@ class ClientController extends Controller
                 ], 404);
             }
 
+            // The final policy is issued only after payment (payment_status is set to 1 by storeTransaction)
+            if ((int) $purchasePolicy->payment_status !== 1) {
+                return response()->json([
+                    'status' => false,
+                    'message' => __('messages.api.policy_payment_pending'),
+                ], 402);
+            }
 
             $client = $purchasePolicy->client;
 
