@@ -311,36 +311,86 @@ if (!empty($data->letterhead)) {
     <h4>Policyholder Details</h4>
     <table class="policy-details">
         <tbody>
-            <tr><td>First Name</td><td>{{ $data->first_name ?? '' }}</td></tr>
-            <tr><td>Last Name</td><td>{{ $data->last_name ?? '' }}</td></tr>
-            <tr><td>Third Name</td><td>{{ $data->third_name ?? '' }}</td></tr>
-            <tr><td>Family Name</td><td>{{ $data->family_name ?? '' }}</td></tr>
-            <tr><td>Nationality</td><td>{{ getNationalityName($data->nationality ?? null) }}</td></tr>
-            <tr><td>Nationality Number</td><td>{{ $data->nationality_no ?? '' }}</td></tr>
-            <tr><td>Residence ID Number</td><td>{{ $data->id_residence_no ?? '' }}</td></tr>
-            <tr><td>Birth Date</td><td>{{ !empty($data->birth_date) ? date('m-d-Y', strtotime($data->birth_date)) : '' }}</td></tr>
-            <tr><td>Gender</td><td>{{ $data->gender ?? '' }}</td></tr>
-            <tr><td>Marital Status</td><td>{{ $data->marital_status ?? null }}</td></tr>
-            <tr><td>Place of Residence</td><td>{{ $data->place_residence ?? '' }}</td></tr>
-            <tr><td>Occupation / Work</td><td>{{ $data->occupancy_work ?? '' }}</td></tr>
-            <tr><td>American Nationality Status</td><td>{{ getYesNoStatus($data->american_notionality_status ?? null) }}</td></tr>
-            <tr><td>Beneficiary First Name</td><td>{{ $data->beneficiary_first_name ?? '' }}</td></tr>
-            <tr><td>Beneficiary Last Name</td><td>{{ $data->beneficiary_last_name ?? '' }}</td></tr>
-            <tr><td>Beneficiary Third Name</td><td>{{ $data->beneficiary_third_name ?? '' }}</td></tr>
+            @if(!empty($data->first_name))
+            <tr><td>First Name</td><td>{{ $data->first_name }}</td></tr>
+            @endif
+            @if(!empty($data->last_name))
+            <tr><td>Last Name</td><td>{{ $data->last_name }}</td></tr>
+            @endif
+            @if(!empty($data->third_name))
+            <tr><td>Third Name</td><td>{{ $data->third_name }}</td></tr>
+            @endif
+            @if(!empty($data->family_name))
+            <tr><td>Family Name</td><td>{{ $data->family_name }}</td></tr>
+            @endif
+            @php
+                $natName = !empty($data->nationality) ? getNationalityName($data->nationality) : null;
+            @endphp
+            @if(!empty($natName) && $natName !== '-')
+            <tr><td>Nationality</td><td>{{ $natName }}</td></tr>
+            @endif
+            @if(!empty($data->nationality_no))
+            <tr><td>Nationality Number</td><td>{{ $data->nationality_no }}</td></tr>
+            @endif
+            @if(!empty($data->id_residence_no))
+            <tr><td>Residence ID Number</td><td>{{ $data->id_residence_no }}</td></tr>
+            @endif
+            @if(!empty($data->birth_date))
+            <tr><td>Birth Date</td><td>{{ date('m-d-Y', strtotime($data->birth_date)) }}</td></tr>
+            @endif
+            @if(!empty($data->gender))
+            <tr><td>Gender</td><td>{{ $data->gender }}</td></tr>
+            @endif
+            @if(!empty($data->marital_status))
+            <tr><td>Marital Status</td><td>{{ $data->marital_status }}</td></tr>
+            @endif
+            @if(!empty($data->place_residence))
+            <tr><td>Place of Residence</td><td>{{ $data->place_residence }}</td></tr>
+            @endif
+            @if(!empty($data->occupancy_work))
+            <tr><td>Occupation / Work</td><td>{{ $data->occupancy_work }}</td></tr>
+            @endif
+            @if(isset($data->american_notionality_status) && $data->american_notionality_status !== '')
+            <tr><td>American Nationality Status</td><td>{{ getYesNoStatus($data->american_notionality_status) }}</td></tr>
+            @endif
+            @if(!empty($data->beneficiary_first_name))
+            <tr><td>Beneficiary First Name</td><td>{{ $data->beneficiary_first_name }}</td></tr>
+            @endif
+            @if(!empty($data->beneficiary_last_name))
+            <tr><td>Beneficiary Last Name</td><td>{{ $data->beneficiary_last_name }}</td></tr>
+            @endif
+            @if(!empty($data->beneficiary_third_name))
+            <tr><td>Beneficiary Third Name</td><td>{{ $data->beneficiary_third_name }}</td></tr>
+            @endif
         </tbody>
     </table>
 </div>
 
 {{-- RESIDENTIAL ADDRESS --}}
+@php
+    $countryName = !empty($data->country_id) ? getCountryName($data->country_id) : null;
+    $cityName = !empty($data->city_id) ? getCityName($data->city_id) : null;
+    $districtName = !empty($data->district_id) ? getDistrictName($data->district_id) : null;
+@endphp
 <div class="policy-summary">
     <h4>Residential Address</h4>
     <table class="policy-details">
         <tbody>
-            <tr><td>Country</td><td>{{ getCountryName($data->country_id ?? null) }}</td></tr>
-            <tr><td>City</td><td>{{ getCityName($data->city_id ?? null) }}</td></tr>
-            <tr><td>District</td><td>{{ getDistrictName($data->district_id ?? null) }}</td></tr>
-            <tr><td>Street Name</td><td>{{ $data->street_name ?? '' }}</td></tr>
-            <tr><td>Building Number</td><td>{{ $data->building_no ?? '' }}</td></tr>
+            @if(!empty($countryName) && $countryName !== '-')
+            <tr><td>Country</td><td>{{ $countryName }}</td></tr>
+            @endif
+            @if(!empty($cityName) && $cityName !== '-')
+            <tr><td>City</td><td>{{ $cityName }}</td></tr>
+            @endif
+            @if(!empty($districtName) && $districtName !== '-')
+            <tr><td>District</td><td>{{ $districtName }}</td></tr>
+            @endif
+            @if(!empty($data->street_name))
+            <tr><td>Street Name</td><td>{{ $data->street_name }}</td></tr>
+            @endif
+            @if(!empty($data->building_no))
+            <tr><td>Building Number</td><td>{{ $data->building_no }}</td></tr>
+            @endif
         </tbody>
     </table>
 </div>
@@ -388,47 +438,96 @@ if (!empty($data->letterhead)) {
 @endif
 
 {{-- MEDICAL HISTORY --}}
+@php
+    $chronicName = !empty($data->chronic_diseases_id) ? getChronicDiseaseName($data->chronic_diseases_id) : null;
+    $prevOpStatus = isset($data->previous_operation) && $data->previous_operation !== '' ? getYesNoStatus($data->previous_operation) : null;
+    $declinedStatus = isset($data->company_declined_policy) && $data->company_declined_policy !== '' ? getYesNoStatus($data->company_declined_policy) : null;
+    $existingLifeStatus = isset($data->exiting_life_insur) && $data->exiting_life_insur !== '' ? getYesNoStatus($data->exiting_life_insur) : null;
+@endphp
 <div class="policy-summary">
     <h4>Medical History and Declarations</h4>
     <table class="policy-details">
         <tbody>
-            <tr><td>Height</td><td>{{ $data->height ?? '' }}</td></tr>
-            <tr><td>Weight</td><td>{{ $data->wight ?? '' }}</td></tr>
-            <tr><td>Chronic Diseases</td><td>{{ getChronicDiseaseName($data->chronic_diseases_id ?? null) }}</td></tr>
-            <tr><td>Previous Operation</td><td>{{ getYesNoStatus($data->previous_operation ?? null) }}</td></tr>
-            <tr><td>Operation Details</td><td>{{ $data->operation_details ?? '' }}</td></tr>
-            <tr><td>Company Declined Policy</td><td>{{ getYesNoStatus($data->company_declined_policy ?? null) }}</td></tr>
-            <tr><td>Declined Policy Details</td><td>{{ $data->declined_policy_details ?? '' }}</td></tr>
-            <tr><td>Existing Life Insurance</td><td>{{ getYesNoStatus($data->exiting_life_insur ?? null) }}</td></tr>
-            <tr><td>Existing Life Insurance Details</td><td>{{ $data->exiting_life_insur_details ?? '' }}</td></tr>
+            @if(!empty($data->height))
+            <tr><td>Height</td><td>{{ $data->height }}</td></tr>
+            @endif
+            @if(!empty($data->wight))
+            <tr><td>Weight</td><td>{{ $data->wight }}</td></tr>
+            @endif
+            @if(!empty($chronicName) && $chronicName !== '-')
+            <tr><td>Chronic Diseases</td><td>{{ $chronicName }}</td></tr>
+            @endif
+            @if(!empty($prevOpStatus))
+            <tr><td>Previous Operation</td><td>{{ $prevOpStatus }}</td></tr>
+            @endif
+            @if(!empty($data->operation_details))
+            <tr><td>Operation Details</td><td>{{ $data->operation_details }}</td></tr>
+            @endif
+            @if(!empty($declinedStatus))
+            <tr><td>Company Declined Policy</td><td>{{ $declinedStatus }}</td></tr>
+            @endif
+            @if(!empty($data->declined_policy_details))
+            <tr><td>Declined Policy Details</td><td>{{ $data->declined_policy_details }}</td></tr>
+            @endif
+            @if(!empty($existingLifeStatus))
+            <tr><td>Existing Life Insurance</td><td>{{ $existingLifeStatus }}</td></tr>
+            @endif
+            @if(!empty($data->exiting_life_insur_details))
+            <tr><td>Existing Life Insurance Details</td><td>{{ $data->exiting_life_insur_details }}</td></tr>
+            @endif
         </tbody>
     </table>
 </div>
 
 {{-- BENEFICIARY DETAILS --}}
+@if(!empty($data->beneficiary_first_name) || !empty($data->beneficiary_last_name) || !empty($data->beneficiary_third_name))
 <div class="policy-summary">
     <h4>Beneficiary Details</h4>
     <table class="policy-details">
         <tbody>
-            <tr><td>First Name</td><td>{{ $data->beneficiary_first_name ?? '' }}</td></tr>
-            <tr><td>Last Name</td><td>{{ $data->beneficiary_last_name ?? '' }}</td></tr>
-            <tr><td>Third Name</td><td>{{ $data->beneficiary_third_name ?? '' }}</td></tr>
+            @if(!empty($data->beneficiary_first_name))
+            <tr><td>First Name</td><td>{{ $data->beneficiary_first_name }}</td></tr>
+            @endif
+            @if(!empty($data->beneficiary_last_name))
+            <tr><td>Last Name</td><td>{{ $data->beneficiary_last_name }}</td></tr>
+            @endif
+            @if(!empty($data->beneficiary_third_name))
+            <tr><td>Third Name</td><td>{{ $data->beneficiary_third_name }}</td></tr>
+            @endif
         </tbody>
     </table>
 </div>
+@endif
 
 {{-- LIFE INSURANCE COVERAGE --}}
+@php
+    $insurancePeriod = $data->periods_val ?? (!empty($data->insurance_period) ? getInsurancePeriodName($data->insurance_period) : null);
+@endphp
 <div class="policy-summary">
     <h4>Life Insurance Coverage Details</h4>
     <table class="policy-details">
         <tbody>
-            <tr><td>Insurance Amount</td><td>{{ $data->insurance_amount ?? '' }}</td></tr>
-            <tr><td>Effective Date</td><td>{{ !empty($data->effective_date) ? date('m-d-Y', strtotime($data->effective_date)) : '' }}</td></tr>
-            <tr><td>Insurance Period (Years)</td><td>{{ $data->periods_val ?? getInsurancePeriodName($data->insurance_period ?? null) }}</td></tr>
-            <tr><td>Inception Date</td><td>{{ !empty($data->inception_date) ? date('m-d-Y', strtotime($data->inception_date)) : '' }}</td></tr>
-            <tr><td>Expiry Date</td><td>{{ !empty($data->expiry_date) ? date('m-d-Y', strtotime($data->expiry_date)) : '' }}</td></tr>
+            @if(!empty($data->insurance_amount))
+            <tr><td>Insurance Amount</td><td>{{ $data->insurance_amount }}</td></tr>
+            @endif
+            @if(!empty($data->effective_date))
+            <tr><td>Effective Date</td><td>{{ date('m-d-Y', strtotime($data->effective_date)) }}</td></tr>
+            @endif
+            @if(!empty($insurancePeriod))
+            <tr><td>Insurance Period (Years)</td><td>{{ $insurancePeriod }}</td></tr>
+            @endif
+            @if(!empty($data->inception_date))
+            <tr><td>Inception Date</td><td>{{ date('m-d-Y', strtotime($data->inception_date)) }}</td></tr>
+            @endif
+            @if(!empty($data->expiry_date))
+            <tr><td>Expiry Date</td><td>{{ date('m-d-Y', strtotime($data->expiry_date)) }}</td></tr>
+            @endif
+            @if(isset($data->renew) && $data->renew !== '')
             <tr><td>Renewal</td><td>{{ !empty($data->renew) ? 'Yes' : 'No' }}</td></tr>
-            <tr><td>Previous Policy ID</td><td>{{ $data->old_policy_id_for_renew ?? '' }}</td></tr>
+            @endif
+            @if(!empty($data->old_policy_id_for_renew))
+            <tr><td>Previous Policy ID</td><td>{{ $data->old_policy_id_for_renew }}</td></tr>
+            @endif
         </tbody>
     </table>
 </div>
@@ -472,26 +571,39 @@ if (!empty($data->letterhead)) {
 
         <!-- POLICY DETAILS -->
         <table class="policy-details">
+            @if(!empty($data->police_no))
             <tr>
                 <td><strong>Policy No.</strong></td>
                 <td>({{ $data->police_no }})</td>
             </tr>
+            @endif
+            @if(!empty($data->plan_name))
             <tr>
                 <td><strong>Plan Name</strong></td>
                 <td>{{ $data->plan_name }}</td>
             </tr>
+            @endif
+            @php
+                $policyHolder = trim(($data->first_name ?? '') . ' ' . ($data->last_name ?? '') . ' ' . ($data->third_name ?? '') . ' ' . ($data->family_name ?? ''));
+            @endphp
+            @if(!empty($policyHolder))
             <tr>
                 <td><strong>Policy Holder</strong></td>
-                <td>{{ $data->first_name }} {{ $data->last_name }} {{ $data->third_name }} {{ $data->family_name }}</td>
+                <td>{{ $policyHolder }}</td>
             </tr>
+            @endif
+            @if(!empty($data->inception_date))
             <tr>
                 <td><strong>Effective Date</strong></td>
                 <td>{{ date('m-d-Y', strtotime($data->inception_date)) }}</td>
             </tr>
+            @endif
+            @if(!empty($data->expiry_date))
             <tr>
                 <td><strong>Expiry Date</strong></td>
                 <td>{{ date('m-d-Y', strtotime($data->expiry_date)) }}</td>
             </tr>
+            @endif
             <!-- <tr>
                 <td><strong>Payment Method</strong></td>
                 <td>Annual in advance</td>

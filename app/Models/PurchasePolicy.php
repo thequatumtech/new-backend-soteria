@@ -545,18 +545,24 @@ class PurchasePolicy extends Model
 
         $policyType = (int) $purchasePolicy->policy_type;
         $policyId   = $purchasePolicy->policy_id;
+        $plan       = null;
 
         switch ($policyType) {
             case 1:
-                return ClientHomeInsurance::getHomeInsuranceDetails($policyId);
+                $plan = ClientHomeInsurance::getHomeInsuranceDetails($policyId);
+                break;
             case 2:
-                return ClientOfficeInsurance::getOfficeInsuranceDetails($policyId);
+                $plan = ClientOfficeInsurance::getOfficeInsuranceDetails($policyId);
+                break;
             case 3:
-                return ClientLifeInsurance::getLifeInsuranceDetails($policyId);
+                $plan = ClientLifeInsurance::getLifeInsuranceDetails($policyId);
+                break;
             case 4:
-                return CriticalIllnessInsurance::getCriticalIllnessInsuranceDetails($policyId);
+                $plan = CriticalIllnessInsurance::getCriticalIllnessInsuranceDetails($policyId);
+                break;
             case 5:
-                return ClientPersonalAccidentInsurance::getClientPersonalAccidentInsuranceDetails($policyId);
+                $plan = ClientPersonalAccidentInsurance::getClientPersonalAccidentInsuranceDetails($policyId);
+                break;
             case 6:
             case 7:
                 $clientMedical = ClientFamilyMedicalInsurance::find($policyId);
@@ -567,22 +573,45 @@ class PurchasePolicy extends Model
                         'gender'         => ($clientMedical->gender == 1 || strtolower($clientMedical->gender ?? '') === 'male') ? 'male' : 'female',
                         'insurance_type' => $clientMedical->insurance_type ?? 1,
                     ];
-                    return ClientFamilyMedicalInsurance::getClientFamilyMedicalInsuranceDetails($dataArr);
+                    $plan = ClientFamilyMedicalInsurance::getClientFamilyMedicalInsuranceDetails($dataArr);
                 }
-                return null;
+                break;
             case 8:
-                return ClientPetsInsurance::getPetsInsuranceDetails($policyId);
+                $plan = ClientPetsInsurance::getPetsInsuranceDetails($policyId);
+                break;
             case 9:
-                return ClientDentalsInsurance::getDentalsInsuranceDetails($policyId);
+                $plan = ClientDentalsInsurance::getDentalsInsuranceDetails($policyId);
+                break;
             case 10:
-                return ClientTravelInsurance::getTravelsInsuranceDetails($policyId);
+                $plan = ClientTravelInsurance::getTravelsInsuranceDetails($policyId);
+                break;
             case 11:
-                return ClientMarineInsurance::getMarineInsuranceDetails($policyId);
+                $plan = ClientMarineInsurance::getMarineInsuranceDetails($policyId);
+                break;
             case 12:
-                return ClientMotorInsurance::getMotorInsuranceDetails($policyId);
+                $plan = ClientMotorInsurance::getMotorInsuranceDetails($policyId);
+                break;
             default:
-                return null;
+                $plan = null;
+                break;
         }
+
+        if ($plan) {
+            $clientId = $plan->client_id ?? $purchasePolicy->client_id ?? null;
+            if ($clientId) {
+                $plan->client_details = Client::with([
+                    'nationality',
+                    'city',
+                    'district',
+                    'country',
+                    'occupation',
+                    'company_city',
+                    'company_district',
+                ])->find($clientId);
+            }
+        }
+
+        return $plan;
     }
     public static function getFilterAllPolicy($filters = [], $groupBy = 'insurance_company')
     {

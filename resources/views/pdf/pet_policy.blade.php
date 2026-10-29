@@ -348,137 +348,184 @@ if (!empty($data->letterhead)) {
 
             <div class="table-scroll">
                 <table class="policy-details">
+                    @php
+                        $ownerName = trim(($data->first_name ?? '') . ' ' . ($data->last_name ?? '') . ' ' . ($data->third_name ?? '') . ' ' . ($data->family_name ?? ''));
+                    @endphp
+                    @if(!empty($ownerName) || !empty($data->nationality_no) || !empty($data->id_residence_no) || !empty($data->birth_date))
                     <tr>
                         <td colspan="2" style="background-color: #d0d0d0;">
                             <strong>Pet Owner Information</strong>
                         </td>
                     </tr>
+                    @if(!empty($ownerName))
                     <tr>
                         <td>Full Name</td>
-                        <td>
-                            {{ $data->first_name ?? '' }}
-                            {{ $data->last_name ?? '' }}
-                            {{ $data->third_name ?? '' }}
-                            {{ $data->family_name ?? '' }}
-                        </td>
+                        <td>{{ $ownerName }}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->nationality_no))
                     <tr>
                         <td>Nationality Number</td>
-                        <td>{{ $data->nationality_no ?? '' }}</td>
+                        <td>{{ $data->nationality_no }}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->id_residence_no))
                     <tr>
                         <td>Residence ID Number</td>
-                        <td>{{ $data->id_residence_no ?? '' }}</td>
+                        <td>{{ $data->id_residence_no }}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->birth_date))
                     <tr>
                         <td>Owner Date of Birth</td>
                         <td>
-                            {{ !empty($data->birth_date) ? date('m-d-Y', strtotime($data->birth_date)) : '' }}
+                            {{ date('m-d-Y', strtotime($data->birth_date)) }}
                         </td>
                     </tr>
+                    @endif
+                    @endif
 
+                    @php
+                        $petType = $data->pets_type ?? $data->type_of_pets ?? null;
+                    @endphp
+                    @if(!empty($data->pets_name) || !empty($petType) || !empty($data->pets_dob) || !empty($data->gender) || !empty($data->breed) || isset($data->pets_existing_condition_status))
                     <tr>
                         <td colspan="2" style="background-color: #d0d0d0;">
                             <strong>Pet Information</strong>
                         </td>
                     </tr>
+                    @if(!empty($data->pets_name))
                     <tr>
                         <td>Pet Name</td>
-                        <td>{{ $data->pets_name ?? '' }}</td>
+                        <td>{{ $data->pets_name }}</td>
                     </tr>
+                    @endif
+                    @if(!empty($petType))
                     <tr>
                         <td>Pet Type</td>
                         <td>
-                            @php
-$petType = $data->pets_type ?? $data->type_of_pets ?? null;
-                            @endphp
-                            {{ $petType == 1 ? 'Dog' : ($petType == 2 ? 'Cat' : ($petType ?? '')) }}
+                            {{ $petType == 1 ? 'Dog' : ($petType == 2 ? 'Cat' : $petType) }}
                         </td>
                     </tr>
+                    @endif
+                    @if(!empty($data->pets_dob))
                     <tr>
                         <td>Pet Date of Birth</td>
                         <td>
-                            {{ !empty($data->pets_dob) ? date('m-d-Y', strtotime($data->pets_dob)) : '' }}
+                            {{ date('m-d-Y', strtotime($data->pets_dob)) }}
                         </td>
                     </tr>
+                    @endif
+                    @if(!empty($data->gender))
                     <tr>
                         <td>Gender</td>
-                        <td>{{ $data->gender ?? '' }}</td>
+                        <td>{{ $data->gender }}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->breed))
                     <tr>
                         <td>Breed</td>
-                        <td>{{ $data->breed ?? '' }}</td>
+                        <td>{{ $data->breed }}</td>
                     </tr>
+                    @endif
+                    @if(isset($data->pets_existing_condition_status) && $data->pets_existing_condition_status !== '')
                     <tr>
                         <td>Existing Medical Condition</td>
                         <td>
-                            {{ !empty($data->pets_existing_condition_status)
-    ? 'Yes'
-    : 'No' }}
+                            {{ !empty($data->pets_existing_condition_status) ? 'Yes' : 'No' }}
                         </td>
                     </tr>
+                    @endif
+                    @if(!empty($data->pets_existing_condition))
                     <tr>
                         <td>Medical Condition Details</td>
-                        <td>{{ $data->pets_existing_condition ?? '' }}</td>
+                        <td>{{ $data->pets_existing_condition }}</td>
                     </tr>
+                    @endif
+                    @endif
 
+                    @if(!empty($data->plan_name) || isset($data->insurance_limit) || isset($purchase->policy_plan_limit) || !empty($data->inception_date) || !empty($data->expiry_date))
                     <tr>
                         <td colspan="2" style="background-color: #d0d0d0;">
                             <strong>Insurance Information</strong>
                         </td>
                     </tr>
+                    @if(!empty($data->plan_name))
                     <tr>
                         <td>Insurance Plan</td>
-                        <td>{{ $data->plan_name ?? '' }}</td>
+                        <td>{{ $data->plan_name }}</td>
                     </tr>
+                    @endif
+                    @if(isset($data->insurance_limit) && $data->insurance_limit !== '')
                     <tr>
                         <td>Insurance Limit</td>
                         <td>
-                            {{ isset($data->insurance_limit)
-    ? number_format((float) $data->insurance_limit, 2) . ' ' . ($abbr ?? 'JOD')
-    : (isset($purchase->policy_plan_limit)
-        ? number_format((float) $purchase->policy_plan_limit, 2) . ' ' . ($abbr ?? 'JOD')
-        : '') }}
+                            {{ number_format((float) $data->insurance_limit, 2) . ' ' . ($abbr ?? 'JOD') }}
                         </td>
                     </tr>
+                    @elseif(isset($purchase->policy_plan_limit) && $purchase->policy_plan_limit !== '')
+                    <tr>
+                        <td>Insurance Limit</td>
+                        <td>
+                            {{ number_format((float) $purchase->policy_plan_limit, 2) . ' ' . ($abbr ?? 'JOD') }}
+                        </td>
+                    </tr>
+                    @endif
+                    @if(!empty($data->inception_date))
                     <tr>
                         <td>Inception Date</td>
                         <td>
-                            {{ !empty($data->inception_date) ? date('m-d-Y', strtotime($data->inception_date)) : '' }}
+                            {{ date('m-d-Y', strtotime($data->inception_date)) }}
                         </td>
                     </tr>
+                    @endif
+                    @if(!empty($data->expiry_date))
                     <tr>
                         <td>Expiry Date</td>
                         <td>
-                            {{ !empty($data->expiry_date) ? date('m-d-Y', strtotime($data->expiry_date)) : '' }}
+                            {{ date('m-d-Y', strtotime($data->expiry_date)) }}
                         </td>
                     </tr>
+                    @endif
+                    @endif
 
+                    @if(!empty($data->vaccine_document) || !empty($data->pets_picture) || !empty($data->pets_passport) || !empty($data->personal_picture_documents) || !empty($data->pets_permit))
                     <tr>
                         <td colspan="2" style="background-color: #d0d0d0;">
                             <strong>Supporting Documents</strong>
                         </td>
                     </tr>
+                    @if(!empty($data->vaccine_document))
                     <tr>
                         <td>Vaccine Document</td>
-                        <td>{!! getDocumentLinks($data->vaccine_document ?? null, 'Not provided') !!}</td>
+                        <td>{!! getDocumentLinks($data->vaccine_document) !!}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->pets_picture))
                     <tr>
                         <td>Pet Picture</td>
-                        <td>{!! getDocumentLinks($data->pets_picture ?? null, 'Not provided') !!}</td>
+                        <td>{!! getDocumentLinks($data->pets_picture) !!}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->pets_passport))
                     <tr>
                         <td>Pet Passport</td>
-                        <td>{!! getDocumentLinks($data->pets_passport ?? null, 'Not provided') !!}</td>
+                        <td>{!! getDocumentLinks($data->pets_passport) !!}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->personal_picture_documents))
                     <tr>
                         <td>Owner Picture</td>
-                        <td>{!! getDocumentLinks($data->personal_picture_documents ?? null, 'Not provided') !!}</td>
+                        <td>{!! getDocumentLinks($data->personal_picture_documents) !!}</td>
                     </tr>
+                    @endif
+                    @if(!empty($data->pets_permit))
                     <tr>
                         <td>Pet Permit</td>
-                        <td>{!! getDocumentLinks($data->pets_permit ?? null, 'Not provided') !!}</td>
+                        <td>{!! getDocumentLinks($data->pets_permit) !!}</td>
                     </tr>
+                    @endif
+                    @endif
                 </table>
             </div>
         </div>
@@ -486,38 +533,70 @@ $petType = $data->pets_type ?? $data->type_of_pets ?? null;
 
         <!-- POLICY DETAILS — 4-column layout, stacks to 2-col pairs on mobile -->
         <table class="policy-details four-col">
+            @if(!empty($data->police_no) || !empty($data->plan_name))
             <tr>
+                @if(!empty($data->police_no))
                 <td class="label"><strong>Policy No.</strong></td>
                 <td>({{ $data->police_no }})</td>
+                @endif
+                @if(!empty($data->plan_name))
                 <td class="label"><strong>Plan Name</strong></td>
                 <td>{{ $data->plan_name }}</td>
+                @endif
             </tr>
+            @endif
+            @if(!empty($ownerName))
             <tr>
                 <td class="label"><strong>Policy Holder</strong></td>
-                <td colspan="3">{{ $data->first_name }} {{ $data->last_name }} {{ $data->third_name }} {{ $data->family_name }}</td>
+                <td colspan="3">{{ $ownerName }}</td>
             </tr>
+            @endif
+            @if(!empty($data->inception_date) || !empty($data->expiry_date))
             <tr>
+                @if(!empty($data->inception_date))
                 <td class="label"><strong>Effective Date</strong></td>
                 <td>{{ date('m-d-Y', strtotime($data->inception_date)) }}</td>
+                @endif
+                @if(!empty($data->expiry_date))
                 <td class="label"><strong>Expiry Date</strong></td>
                 <td>{{ date('m-d-Y', strtotime($data->expiry_date)) }}</td>
+                @endif
             </tr>
-        <tr>
-            <td class="label"><strong>Pets Name</strong></td>
-            <td>{{ $data->pets_name ?? $data->details?->pets_name ?? '' }}</td>
-
-            <td class="label"><strong>Birth Date</strong></td>
-            <td>{{ $data->pets_dob ?? $data->details?->pets_dob ?? '' }}</td>
-        </tr>
-        <tr>
-            <td class="label"><strong>Pets Type</strong></td>
-            <td>
-                {{ ($data->pets_type ?? $data->details?->pets_type ?? null) == 1 ? 'Dog' : 'Cat' }}
-            </td>
-
-            <td class="label"><strong>Nationality No</strong></td>
-            <td>{{ $data->nationality_no ?? $data->details?->nationality_no ?? '' }}</td>
-        </tr>
+            @endif
+            @php
+                $petsNameVal = $data->pets_name ?? $data->details?->pets_name ?? null;
+                $petsDobVal = $data->pets_dob ?? $data->details?->pets_dob ?? null;
+            @endphp
+            @if(!empty($petsNameVal) || !empty($petsDobVal))
+            <tr>
+                @if(!empty($petsNameVal))
+                <td class="label"><strong>Pets Name</strong></td>
+                <td>{{ $petsNameVal }}</td>
+                @endif
+                @if(!empty($petsDobVal))
+                <td class="label"><strong>Birth Date</strong></td>
+                <td>{{ $petsDobVal }}</td>
+                @endif
+            </tr>
+            @endif
+            @php
+                $petsTypeVal = $data->pets_type ?? $data->details?->pets_type ?? null;
+                $natNoVal = $data->nationality_no ?? $data->details?->nationality_no ?? null;
+            @endphp
+            @if(!empty($petsTypeVal) || !empty($natNoVal))
+            <tr>
+                @if(!empty($petsTypeVal))
+                <td class="label"><strong>Pets Type</strong></td>
+                <td>
+                    {{ $petsTypeVal == 1 ? 'Dog' : ($petsTypeVal == 2 ? 'Cat' : $petsTypeVal) }}
+                </td>
+                @endif
+                @if(!empty($natNoVal))
+                <td class="label"><strong>Nationality No</strong></td>
+                <td>{{ $natNoVal }}</td>
+                @endif
+            </tr>
+            @endif
         <tr>
             <td class="label"><strong>Gender</strong></td>
             <td>{{ $data->gender ?? $data->details?->gender ?? '' }}</td>

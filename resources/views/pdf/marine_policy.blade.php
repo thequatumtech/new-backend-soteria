@@ -314,89 +314,134 @@ if (!empty($data->letterhead)) {
                 </td>
             </tr>
 
+            @if(!empty($data->company_status))
             <tr>
                 <td>Applicant Type</td>
                 <td>
                     {{ ($data->company_status ?? null) == 1 ? 'Individual' : (($data->company_status ?? null) == 2 ? 'Company' : '') }}
                 </td>
             </tr>
+            @endif
 
             @if(($data->company_status ?? null) == 1)
+                @php
+                    $fullName = trim(($data->first_name ?? '') . ' ' . ($data->last_name ?? '') . ' ' . ($data->third_name ?? '') . ' ' . ($data->family_name ?? ''));
+                @endphp
+                @if(!empty($fullName))
                 <tr>
                     <td>Full Name</td>
-                    <td>{{ trim(($data->first_name ?? '') . ' ' . ($data->last_name ?? '') . ' ' . ($data->third_name ?? '') . ' ' . ($data->family_name ?? '')) }}
-                    </td>
+                    <td>{{ $fullName }}</td>
                 </tr>
+                @endif
+                @if(!empty($data->nationality))
                 <tr>
                     <td>Nationality</td>
-                    <td>{{ $data->nationality ?? '' }}</td>
+                    <td>{{ $data->nationality }}</td>
                 </tr>
+                @endif
+                @if(!empty($data->nationality_no))
                 <tr>
                     <td>Nationality Number</td>
-                    <td>{{ $data->nationality_no ?? '' }}</td>
+                    <td>{{ $data->nationality_no }}</td>
                 </tr>
+                @endif
+                @if(!empty($data->id_residence_no))
                 <tr>
                     <td>Residence ID</td>
-                    <td>{{ $data->id_residence_no ?? '' }}</td>
+                    <td>{{ $data->id_residence_no }}</td>
                 </tr>
+                @endif
+                @if(!empty($data->birth_date))
                 <tr>
                     <td>Date of Birth</td>
-                    <td>{{ !empty($data->birth_date) ? date('m-d-Y', strtotime($data->birth_date)) : '' }}</td>
+                    <td>{{ date('m-d-Y', strtotime($data->birth_date)) }}</td>
                 </tr>
+                @endif
+                @if(!empty($data->gender))
                 <tr>
                     <td>Gender</td>
-                    <td>{{ $data->gender ?? '' }}</td>
+                    <td>{{ $data->gender }}</td>
                 </tr>
+                @endif
             @elseif(($data->company_status ?? null) == 2)
+                @php
+                    $compCountry = !empty($data->company_country_id) ? getCountryName($data->company_country_id) : null;
+                    $compCity = $data->company_city_name ?? (!empty($data->company_city_id) ? getCityName($data->company_city_id) : null);
+                    $compDistrict = $data->company_district_name ?? (!empty($data->company_district_id) ? getDistrictName($data->company_district_id) : null);
+                    $ownerName = trim(($data->owner_first_name ?? '') . ' ' . ($data->owner_last_name ?? '') . ' ' . ($data->owner_third_name ?? '') . ' ' . ($data->owner_family_name ?? ''));
+                @endphp
+                @if(!empty($data->company_name))
                 <tr>
                     <td>Company Name</td>
-                    <td>{{ $data->company_name ?? '' }}</td>
+                    <td>{{ $data->company_name }}</td>
                 </tr>
+                @endif
+                @if(!empty($data->company_reg_notional_id))
                 <tr>
                     <td>Company Registration National ID</td>
-                    <td>{{ $data->company_reg_notional_id ?? '' }}</td>
+                    <td>{{ $data->company_reg_notional_id }}</td>
                 </tr>
+                @endif
+                @if(!empty($data->company_reg_no))
                 <tr>
                     <td>Company Registration Number</td>
-                    <td>{{ $data->company_reg_no ?? '' }}</td>
+                    <td>{{ $data->company_reg_no }}</td>
                 </tr>
+                @endif
+                @if(!empty($compCountry) && $compCountry !== '-')
                 <tr>
                     <td>Company Country</td>
-                    <td> {{ getCountryName($data->company_country_id ?? null) }} </td>
+                    <td>{{ $compCountry }}</td>
                 </tr>
+                @endif
+                @if(!empty($compCity) && $compCity !== '-')
                 <tr>
                     <td>Company City</td>
-                    <td>{{ $data->company_city_name ?? $data->company_city_id ?? '' }}</td>
+                    <td>{{ $compCity }}</td>
                 </tr>
+                @endif
+                @if(!empty($compDistrict) && $compDistrict !== '-')
                 <tr>
                     <td>Company District</td>
-                    <td>{{ $data->company_district_name ?? $data->company_district_id ?? '' }}</td>
+                    <td>{{ $compDistrict }}</td>
                 </tr>
+                @endif
+                @if(!empty($data->company_street_name))
                 <tr>
                     <td>Street Name</td>
-                    <td>{{ $data->company_street_name ?? '' }}</td>
+                    <td>{{ $data->company_street_name }}</td>
                 </tr>
+                @endif
+                @if(!empty($data->company_building_no))
                 <tr>
                     <td>Building Number</td>
-                    <td>{{ $data->company_building_no ?? '' }}</td>
+                    <td>{{ $data->company_building_no }}</td>
                 </tr>
+                @endif
+                @if(!empty($data->company_office_no))
                 <tr>
                     <td>Office Number</td>
-                    <td>{{ $data->company_office_no ?? '' }}</td>
+                    <td>{{ $data->company_office_no }}</td>
                 </tr>
+                @endif
+                @if(!empty($data->company_contact))
                 <tr>
                     <td>Company Contact</td>
-                    <td>{{ $data->company_contact ?? '' }}</td>
+                    <td>{{ $data->company_contact }}</td>
                 </tr>
+                @endif
+                @if(!empty($ownerName))
                 <tr>
                     <td>Owner Name</td>
-                    <td>{{ trim(($data->owner_first_name ?? '') . ' ' . ($data->owner_last_name ?? '') . ' ' . ($data->owner_third_name ?? '') . ' ' . ($data->owner_family_name ?? '')) }}
-                    </td>
+                    <td>{{ $ownerName }}</td>
                 </tr>
+                @endif
+                @if(!empty($data->company_owner_contact))
                 <tr>
                     <td>Owner Contact</td>
-                    <td>{{ $data->company_owner_contact ?? '' }}</td>
+                    <td>{{ $data->company_owner_contact }}</td>
                 </tr>
+                @endif
             @endif
 
             <tr>
@@ -404,83 +449,115 @@ if (!empty($data->letterhead)) {
                     Shipment Details
                 </td>
             </tr>
+            @php
+                $voyageFrom = $data->vayage_from_name ?? $data->vayage_from_id ?? null;
+                $throughCountry = !empty($data->through_country_id) ? getCountryName($data->through_country_id) : null;
+                $destCountry = !empty($data->destination_country_id) ? getCountryName($data->destination_country_id) : null;
+                $itemCategory = $data->item_category_name ?? $data->item_category_id ?? null;
+                $itemSubcategory = $data->item_subcategory_name ?? $data->item_subcategory_id ?? null;
+            @endphp
+            @if(!empty($voyageFrom))
             <tr>
                 <td>Voyage From</td>
-                <td>{{ $data->vayage_from_name ?? $data->vayage_from_id ?? '' }}</td>
+                <td>{{ $voyageFrom }}</td>
             </tr>
+            @endif
+            @if(!empty($throughCountry) && $throughCountry !== '-')
             <tr>
                 <td>Through Country</td>
-                <td> {{ getCountryName($data->through_country_id ?? null) }} </td>
+                <td>{{ $throughCountry }}</td>
             </tr>
+            @endif
+            @if(!empty($destCountry) && $destCountry !== '-')
             <tr>
                 <td>Destination Country</td>
-                <td>{{ getCountryName($data->destination_country_id ?? null) }} </td>
+                <td>{{ $destCountry }}</td>
             </tr>
+            @endif
+            @if(!empty($data->type_of_transportation))
             <tr>
                 <td>Type of Transportation</td>
-                <td>{{ $data->type_of_transportation ?? '' }}</td>
+                <td>{{ $data->type_of_transportation }}</td>
             </tr>
+            @endif
+            @if(!empty($data->type_of_cover))
             <tr>
                 <td>Type of Cover</td>
-                <td>{{ $data->type_of_cover ?? '' }}</td>
+                <td>{{ $data->type_of_cover }}</td>
             </tr>
+            @endif
+            @if(!empty($itemCategory))
             <tr>
                 <td>Item Category</td>
-                <td>{{ $data->item_category_name ?? $data->item_category_id ?? '' }}</td>
+                <td>{{ $itemCategory }}</td>
             </tr>
+            @endif
+            @if(!empty($itemSubcategory))
             <tr>
                 <td>Item Subcategory</td>
-                <td>{{ $data->item_subcategory_name ?? $data->item_subcategory_id ?? '' }}</td>
+                <td>{{ $itemSubcategory }}</td>
             </tr>
+            @endif
+            @if(!empty($data->bill_no))
             <tr>
                 <td>Bill Number</td>
-                <td>{{ $data->bill_no ?? '' }}</td>
+                <td>{{ $data->bill_no }}</td>
             </tr>
+            @endif
+            @if(!empty($data->insured_items))
             <tr>
                 <td>Insured Items</td>
-                <td>{{ $data->insured_items ?? '' }}</td>
+                <td>{{ $data->insured_items }}</td>
             </tr>
+            @endif
+            @if(!empty($data->trans_shipped_third_country))
             <tr>
                 <td>Transshipped Through Third Country</td>
-                <td>{{ $data->trans_shipped_third_country ?? '' }}</td>
+                <td>{{ $data->trans_shipped_third_country }}</td>
             </tr>
+            @endif
 
             <tr>
                 <td colspan="2" style="background-color: #d0d0d0; font-weight: bold;">
                     Declarations
                 </td>
             </tr>
+            @if(!empty($data->dangerous_activities))
             <tr>
                 <td>Dangerous Activities</td>
-                <td>{{ $data->dangerous_activities ?? '' }}</td>
+                <td>{{ $data->dangerous_activities }}</td>
             </tr>
+            @endif
+            @if(isset($data->existing_policy_status) && $data->existing_policy_status !== '')
             <tr>
                 <td>Existing Policy</td>
-                <td>{{ ($data->existing_policy_status ?? null) == 1 ? 'Yes' : (($data->existing_policy_status ?? null) == 0 ? 'No' : '') }}
-                </td>
+                <td>{{ ($data->existing_policy_status ?? null) == 1 ? 'Yes' : (($data->existing_policy_status ?? null) == 0 ? 'No' : '') }}</td>
             </tr>
+            @endif
             @if(!empty($data->existing_policy_desc))
                 <tr>
                     <td>Existing Policy Description</td>
                     <td>{{ $data->existing_policy_desc }}</td>
                 </tr>
             @endif
+            @if(isset($data->declined_insurance_status) && $data->declined_insurance_status !== '')
             <tr>
                 <td>Previously Declined Insurance</td>
-                <td>{{ ($data->declined_insurance_status ?? null) == 1 ? 'Yes' : (($data->declined_insurance_status ?? null) == 0 ? 'No' : '') }}
-                </td>
+                <td>{{ ($data->declined_insurance_status ?? null) == 1 ? 'Yes' : (($data->declined_insurance_status ?? null) == 0 ? 'No' : '') }}</td>
             </tr>
+            @endif
             @if(!empty($data->declined_insurance_desc))
                 <tr>
                     <td>Declined Insurance Description</td>
                     <td>{{ $data->declined_insurance_desc }}</td>
                 </tr>
             @endif
+            @if(isset($data->claims_accident_status) && $data->claims_accident_status !== '')
             <tr>
                 <td>Previous Claims or Accidents</td>
-                <td>{{ ($data->claims_accident_status ?? null) == 1 ? 'Yes' : (($data->claims_accident_status ?? null) == 0 ? 'No' : '') }}
-                </td>
+                <td>{{ ($data->claims_accident_status ?? null) == 1 ? 'Yes' : (($data->claims_accident_status ?? null) == 0 ? 'No' : '') }}</td>
             </tr>
+            @endif
             @if(!empty($data->claims_accident_desc))
                 <tr>
                     <td>Claims/Accidents Description</td>
@@ -512,10 +589,12 @@ if (!empty($data->letterhead)) {
                 @endif
             @endforeach
 
+            @if(isset($data->renew) && $data->renew !== '')
             <tr>
                 <td>Renewal</td>
                 <td>{{ ($data->renew ?? null) == 1 ? 'Yes' : 'No' }}</td>
             </tr>
+            @endif
             @if(!empty($data->old_policy_id_for_renew))
                 <tr>
                     <td>Previous Policy ID</td>
@@ -528,26 +607,39 @@ if (!empty($data->letterhead)) {
 
         <!-- POLICY DETAILS -->
         <table class="policy-details">
+            @if(!empty($data->police_no))
             <tr>
                 <td><strong>Policy No.</strong></td>
                 <td>({{ $data->police_no }})</td>
             </tr>
+            @endif
+            @if(!empty($data->plan_name))
             <tr>
                 <td><strong>Plan Name</strong></td>
                 <td>{{ $data->plan_name }}</td>
             </tr>
+            @endif
+            @php
+                $policyHolder = trim(($data->first_name ?? '') . ' ' . ($data->last_name ?? '') . ' ' . ($data->third_name ?? '') . ' ' . ($data->family_name ?? ''));
+            @endphp
+            @if(!empty($policyHolder))
             <tr>
                 <td><strong>Policy Holder</strong></td>
-                <td>{{ $data->first_name }} {{ $data->last_name }} {{ $data->third_name }} {{ $data->family_name }}</td>
+                <td>{{ $policyHolder }}</td>
             </tr>
+            @endif
+            @if(!empty($data->effective_date) || !empty($data->inception_date))
             <tr>
                 <td><strong>Effective Date</strong></td>
-                <td>{{ date('m-d-Y', strtotime($data->effective_date)) }}</td>
+                <td>{{ date('m-d-Y', strtotime($data->effective_date ?? $data->inception_date)) }}</td>
             </tr>
+            @endif
+            @if(!empty($data->expiry_date))
             <tr>
                 <td><strong>Expiry Date</strong></td>
                 <td>{{ date('m-d-Y', strtotime($data->expiry_date)) }}</td>
             </tr>
+            @endif
             <!-- <tr>
                 <td><strong>Payment Method</strong></td>
                 <td>Annual in advance</td>

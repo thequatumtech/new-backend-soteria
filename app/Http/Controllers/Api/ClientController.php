@@ -1382,6 +1382,10 @@ class ClientController extends Controller
 
             // Copy all policy-specific fields into the PDF data object.
 if ($combinedDetails) {
+    if (isset($combinedDetails->client_details)) {
+        $data->client_details = $combinedDetails->client_details;
+    }
+
     $detailsArray = method_exists($combinedDetails, 'toArray')
         ? $combinedDetails->toArray()
         : (array) $combinedDetails;
@@ -1527,8 +1531,9 @@ if ($combinedDetails) {
             $path = $directory . '/' . $filename;
 
 
-$isFinalPdf = true;
+            $isFinalPdf = true;
 
+            
             $pdf = Pdf::loadView($templateConfig['view'], [
                 'data' => $data,
                 'purchase' => $purchasePolicy,
