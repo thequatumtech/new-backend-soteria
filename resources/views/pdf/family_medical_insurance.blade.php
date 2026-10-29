@@ -817,7 +817,7 @@ if (!empty($data->letterhead)) {
                                         @if(!empty($data->insurance_type))
                                         <tr>
                                             <td>Insurance Type</td>
-                                            <td>{{ $data->insurance_type }}</td>
+                                            <td>{{ $data->insurance_type == 1 ? 'In-Patient' : ($data->insurance_type == 2 ? 'In-Out Patient' : $data->insurance_type) }}</td>
                                         </tr>
                                         @endif
                                         @if(!empty($data->insurance_class))
@@ -1004,16 +1004,13 @@ $summaryColumns = [];
 if (isset($plan->limit))
     $summaryColumns['Limit'] = number_format((float) $plan->limit, 2) . ' ' . $abbr;
 
-// Net premium = main insured premium x number of family members
+// Net premium = main insured premium x insured persons (main + family members)
 $summaryMembers = $members ?? [];
 if (count($summaryMembers)) {
-    $summaryColumns['Insured Persons'] = count($summaryMembers) + 1;
-
     if (isset($plan->main_member_premium))
-        $summaryColumns['Premium - ' . trim(($data->first_name ?? '') . ' ' . ($data->family_name ?? '')) . ' (Main)'] = number_format((float) $plan->main_member_premium, 2) . ' ' . $abbr;
+        $summaryColumns['Premium per Person'] = number_format((float) $plan->main_member_premium, 2) . ' ' . $abbr;
 
-    if (isset($plan->premium_multiplier))
-        $summaryColumns['Family Members (x)'] = $plan->premium_multiplier;
+    $summaryColumns['Insured Persons (x)'] = $plan->premium_multiplier ?? count($summaryMembers) + 1;
 }
 
 if (isset($plan->net_premium_amount))

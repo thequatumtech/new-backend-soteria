@@ -424,9 +424,9 @@ class ClientFamilyMedicalInsuranceController extends Controller
                 $data['insurance_class']
             );
 
-            // 2. Net premium = main client premium x number of family members (at least 1)
+            // 2. Net premium = main client premium x insured persons (main client + family members)
             $members = $this->normalizeMembers($request);
-            $premiumMultiplier = max(count($members), 1);
+            $premiumMultiplier = count($members) + 1;
             $totalNetPremium = $mainPremium * $premiumMultiplier;
 
             $policy_limit = $this->cleanNumber($plan_data->limit);

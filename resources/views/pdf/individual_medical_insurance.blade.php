@@ -742,7 +742,7 @@ if (!empty($data->letterhead)) {
                     @if(!empty($data->insurance_type))
                     <tr>
                         <td>Insurance Type</td>
-                        <td>{{ $data->insurance_type }}</td>
+                        <td>{{ $data->insurance_type == 1 ? 'In-Patient' : ($data->insurance_type == 2 ? 'In-Out Patient' : $data->insurance_type) }}</td>
                     </tr>
                     @endif
                     @if(!empty($data->insurance_class))

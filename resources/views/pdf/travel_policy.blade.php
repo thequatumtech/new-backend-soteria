@@ -593,15 +593,11 @@ if (!empty($data->letterhead)) {
 
                     @if(isset($plan->premium_multiplier) && !empty($data->members) && count($data->members))
                         <tr>
-                            <td>Insured Persons</td>
-                            <td>{{ count($data->members) + 1 }}</td>
-                        </tr>
-                        <tr>
-                            <td>Premium - {{ trim(($data->first_name ?? '') . ' ' . ($data->family_name ?? '')) }} (Main)</td>
+                            <td>Premium per Person</td>
                             <td>{{ number_format((float) $plan->main_member_premium, 2) }} {{ $abbr ?? 'JOD' }}</td>
                         </tr>
                         <tr>
-                            <td>Family Members (x)</td>
+                            <td>Insured Persons (x)</td>
                             <td>{{ $plan->premium_multiplier }}</td>
                         </tr>
                     @endif

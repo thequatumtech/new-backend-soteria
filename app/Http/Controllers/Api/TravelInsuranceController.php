@@ -286,10 +286,10 @@ class TravelInsuranceController extends Controller
                 $netPremium += ($netPremium * $surchargeBand->surcharge) / 100;
             }
 
-            // Net premium = main client premium x number of family members (at least 1)
+            // Net premium = main client premium x insured persons (main client + family members)
             $members = $this->normalizeMembers($request);
             $mainPremium = round($netPremium, 2);
-            $premiumMultiplier = max(count($members), 1);
+            $premiumMultiplier = count($members) + 1;
             $netPremium = round($mainPremium * $premiumMultiplier, 2);
             // -------------------------
 
