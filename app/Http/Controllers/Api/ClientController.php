@@ -1527,21 +1527,14 @@ if ($combinedDetails) {
             $path = $directory . '/' . $filename;
 
 
-            //   return response()->json([
-            //     'status' => true,
-            //     'message' => __('messages.api.final_pdf_success'),
-            //    'data' => $data,
-            //     'purchase' => $purchasePolicy,
-            //     'plan' => $plan,
-            //     'abbr' => $abbr,
-            // ], 200);
-
+$isFinalPdf = true;
 
             $pdf = Pdf::loadView($templateConfig['view'], [
                 'data' => $data,
                 'purchase' => $purchasePolicy,
                 'plan' => $plan,
                 'abbr' => $abbr,
+                  'isFinalPdf' => $isFinalPdf,
             ]);
 
             $pdf->save($path);
