@@ -450,149 +450,30 @@ if (!empty($data->letterhead)) {
         EMPLOYMENT DETAILS
         ====================================================== --}}
         @php
-            $clientInfo = $data->client_details ?? null;
+            // Only what was entered on this policy; when "employed = No" the app sends none of these.
+            // employer_company_name is used because company_name is the insurance company here.
+            $companyCity = !empty($data->company_city_id) ? getCityName($data->company_city_id) : null;
 
-            $clientCompanyCity = null;
-            $clientCompanyDistrict = null;
-
-            if ($clientInfo) {
-                if (!empty($clientInfo->company_city_id)) {
-                    $clientCompanyCity = getCityName($clientInfo->company_city_id);
-                }
-
-                if (empty($clientCompanyCity) || $clientCompanyCity === '-') {
-                    $clientCompanyCity = $clientInfo->company_city->name ?? null;
-                }
-
-                if (!empty($clientInfo->company_district_id)) {
-                    $clientCompanyDistrict = getDistrictName($clientInfo->company_district_id);
-                }
-
-                if (empty($clientCompanyDistrict) || $clientCompanyDistrict === '-') {
-                    $clientCompanyDistrict = $clientInfo->company_district->name ?? null;
-                }
-            }
+            $employmentRows = array_filter([
+                'Company Name' => $data->employer_company_name ?? null,
+                'Position' => $data->position ?? null,
+                'Nature of Work' => $data->work_nature ?? null,
+                'Company Contact Number' => $data->company_contact ?? null,
+                'Company City' => $companyCity !== '-' ? $companyCity : null,
+            ], fn($value) => $value !== null && $value !== '');
         @endphp
 
-        @if(
-            ($clientInfo && (
-                !empty($clientInfo->employment_type) ||
-                !empty($clientInfo->company_name) ||
-                !empty($clientInfo->position) ||
-                !empty($clientInfo->work_nature) ||
-                !empty($clientInfo->company_contact_no) ||
-                !empty($clientInfo->company_street_name) ||
-                !empty($clientInfo->company_building_no) ||
-                !empty($clientCompanyCity) ||
-                !empty($clientCompanyDistrict)
-            )) ||
-            !empty($data->occupany_type_work) ||
-            !empty($data->occupancy_work) ||
-            !empty($data->company_name)
-        )
+        @if(count($employmentRows))
         <div class="policy-summary">
             <h4>Employment Details</h4>
             <table class="policy-details">
                 <tbody>
-                    @if($clientInfo && !empty($clientInfo->employment_type))
+                    @foreach($employmentRows as $label => $value)
                         <tr>
-                            <td>Employment Type</td>
-                            <td>{{ $clientInfo->employment_type }}</td>
+                            <td>{{ $label }}</td>
+                            <td>{{ $value }}</td>
                         </tr>
-                    @endif
-
-                    @if(!empty($data->occupany_type_work))
-                        <tr>
-                            <td>Occupation / Work</td>
-                            <td>{{ $data->occupany_type_work }}</td>
-                        </tr>
-                    @elseif(!empty($data->occupancy_work))
-                        <tr>
-                            <td>Occupation / Work</td>
-                            <td>{{ $data->occupancy_work }}</td>
-                        </tr>
-                    @elseif($clientInfo && !empty($clientInfo->occupation))
-                        <tr>
-                            <td>Occupation / Work</td>
-                            <td>{{ $clientInfo->occupation->name ?? '' }}</td>
-                        </tr>
-                    @endif
-
-                    @if($clientInfo && !empty($clientInfo->company_name))
-                        <tr>
-                            <td>Company Name</td>
-                            <td>{{ $clientInfo->company_name }}</td>
-                        </tr>
-                    @elseif(!empty($data->company_name))
-                        <tr>
-                            <td>Company Name</td>
-                            <td>{{ $data->company_name }}</td>
-                        </tr>
-                    @endif
-
-                    @if($clientInfo && !empty($clientInfo->position))
-                        <tr>
-                            <td>Position</td>
-                            <td>{{ $clientInfo->position }}</td>
-                        </tr>
-                    @elseif(!empty($data->position))
-                        <tr>
-                            <td>Position</td>
-                            <td>{{ $data->position }}</td>
-                        </tr>
-                    @endif
-
-                    @if($clientInfo && !empty($clientInfo->work_nature))
-                        <tr>
-                            <td>Nature of Work</td>
-                            <td>{{ $clientInfo->work_nature }}</td>
-                        </tr>
-                    @elseif(!empty($data->work_nature))
-                        <tr>
-                            <td>Nature of Work</td>
-                            <td>{{ $data->work_nature }}</td>
-                        </tr>
-                    @endif
-
-                    @if($clientInfo && !empty($clientInfo->company_contact_no))
-                        <tr>
-                            <td>Company Contact Number</td>
-                            <td>{{ $clientInfo->company_contact_no }}</td>
-                        </tr>
-                    @elseif(!empty($data->company_contact))
-                        <tr>
-                            <td>Company Contact Number</td>
-                            <td>{{ $data->company_contact }}</td>
-                        </tr>
-                    @endif
-
-                    @if($clientInfo && !empty($clientInfo->company_street_name))
-                        <tr>
-                            <td>Company Street Name</td>
-                            <td>{{ $clientInfo->company_street_name }}</td>
-                        </tr>
-                    @endif
-
-                    @if($clientInfo && !empty($clientInfo->company_building_no))
-                        <tr>
-                            <td>Company Building Number</td>
-                            <td>{{ $clientInfo->company_building_no }}</td>
-                        </tr>
-                    @endif
-
-                    @if(!empty($clientCompanyCity) && $clientCompanyCity !== '-')
-                        <tr>
-                            <td>Company City</td>
-                            <td>{{ $clientCompanyCity }}</td>
-                        </tr>
-                    @endif
-
-                    @if(!empty($clientCompanyDistrict) && $clientCompanyDistrict !== '-')
-                        <tr>
-                            <td>Company District</td>
-                            <td>{{ $clientCompanyDistrict }}</td>
-                        </tr>
-                    @endif
+                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -655,10 +536,19 @@ if (!empty($data->letterhead)) {
                         <td>{{ date('m-d-Y', strtotime($data->inception_date)) }}</td>
                     </tr>
                     @endif
-                    @if(!empty($data->inception_period_name) || !empty($data->inception_period))
+                    @php
+                        // inception_period holds the InsurancePeriod id (e.g. 7 => "7 months")
+                        $insurancePeriodName = $data->inception_period_name
+                            ?? (is_numeric($data->inception_period ?? null)
+                                ? \App\Models\InsurancePeriod::withTrashed()->where('id', $data->inception_period)->value('name')
+                                : null)
+                            ?? $data->inception_period
+                            ?? null;
+                    @endphp
+                    @if(!empty($insurancePeriodName))
                     <tr>
                         <td>Insurance Period</td>
-                        <td>{{ $data->inception_period_name ?? $data->inception_period }}</td>
+                        <td>{{ $insurancePeriodName }}</td>
                     </tr>
                     @endif
                     @if(!empty($data->expiry_date))

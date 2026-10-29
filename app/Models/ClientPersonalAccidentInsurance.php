@@ -61,6 +61,8 @@ class ClientPersonalAccidentInsurance extends Model
 
         $plan = ClientPersonalAccidentInsurance::select(
             'client_personal_accident_insurances.*',
+            // insurance_companies.company_name below overwrites the client's employer company_name
+            'client_personal_accident_insurances.company_name as employer_company_name',
 
             'personal_accident_plans.plan_name',
             'personal_accident_plans.fees',
