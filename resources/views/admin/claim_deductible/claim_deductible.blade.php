@@ -14,7 +14,8 @@
                     <tr>
 
                         <th class="no-show"> {{__('messages.table_headers.id')}} </th>
-                        <th width="90%"> {{__('messages.claim_deductible.claim_deductible')}} </th>
+                        <th width="45%"> {{__('messages.claim_deductible.claim_no')}} </th>
+                        <th width="45%"> {{__('messages.claim_deductible.percentage')}} </th>
                         <th class="no-order" width="10%"></th>
                     </tr>
                     </thead>
@@ -24,9 +25,10 @@
                         <tr>
                             <td>{{ $key + 1 }}</td>
                             <td>{{$value->name}}</td>
+                            <td>{{ $value->percentage !== null ? rtrim(rtrim(number_format($value->percentage, 2, '.', ''), '0'), '.') . '%' : '' }}</td>
                             <td>
                                 <div class="d-flex gap-3 justify-content-evenly align-items-center px-2">
-                                    <button class="btn p-0 m-0 editbtn" value="{{$value->id}}" data-val="{{$value->name}}" data-bs-toggle="modal" data-bs-target="#editModal">
+                                    <button class="btn p-0 m-0 editbtn" value="{{$value->id}}" data-val="{{$value->name}}" data-percentage="{{$value->percentage}}" data-bs-toggle="modal" data-bs-target="#editModal">
                                         <img src="{{asset('img/icon-edit.png')}}" alt="">
                                     </button>
                                     <button class="btn p-0 m-0 deletebtn" value="{{$value->id}}"><img src="{{asset('img/icon-delete.png')}}" alt=""></button>
@@ -57,9 +59,15 @@
                             <div class="container">
                                 <div class="row">
                                     <div class="col-12 col-lg-6 pt-2">
-                                        <div> {{__('messages.claim_deductible.add_claim_deductible')}} </div>
+                                        <div> {{__('messages.claim_deductible.claim_no')}} </div>
                                         <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                             <input type="text" name="name" style="border: none;" maxlength="100" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-lg-6 pt-2">
+                                        <div> {{__('messages.claim_deductible.percentage')}} </div>
+                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                            <input type="number" name="percentage" style="border: none;" min="0" max="100" step="0.01" required>
                                         </div>
                                     </div>
                                 </div>
@@ -100,10 +108,16 @@
                             <div class="container">
                                 <div class="row">
                                     <div class="col-12 col-lg-6 pt-2">
-                                        <div>{{__('messages.claim_deductible.update_claim_deductible')}}</div>
+                                        <div>{{__('messages.claim_deductible.claim_no')}}</div>
                                         <input type="hidden" id="cd_id" name="cd_id" style="border: none;" value="">
                                         <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
                                         <input type="text" id="name_edit" name="name" style="border: none;" maxlength="100" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-lg-6 pt-2">
+                                        <div>{{__('messages.claim_deductible.percentage')}}</div>
+                                        <div class="shadow1 p-2" style="padding-bottom: 2.5rem;">
+                                        <input type="number" id="percentage_edit" name="percentage" style="border: none;" min="0" max="100" step="0.01" required>
                                         </div>
                                     </div>
                                 </div>
@@ -197,6 +211,7 @@
                 var val = $(this).attr("data-val");
                 // alert(cd_id+" =============== "+val);
                 $("#name_edit").val(val);
+                $("#percentage_edit").val($(this).attr("data-percentage"));
                 $("#cd_id").val(cd_id);
                 $('#editModal').modal('show');
                 $("#edit_cd").validate();

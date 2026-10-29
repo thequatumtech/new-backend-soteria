@@ -449,6 +449,8 @@ return [
         'deleted' => 'تم حذف الفئة العمرية بنجاح',
     ],
     'claim_deductible' => [
+        'claim_no' => 'رقم المطالبة',
+        'percentage' => 'النسبة المئوية',
         'claim_deductible' => 'تحمّل مطالبة المركبات',
         'add_claim_deductible' => 'إضافة تحمّل المطالبة',
         'add' => 'حفظ',

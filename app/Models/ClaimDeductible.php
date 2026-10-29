@@ -13,5 +13,5 @@ class ClaimDeductible extends Model
     use HasFactory;
     use SoftDeletes;
     
-    public $fillable = ['name'];
+    public $fillable = ['name', 'percentage'];
 }

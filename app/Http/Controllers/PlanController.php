@@ -35,6 +35,59 @@ class PlanController extends Controller
 {
     private const line_of_business_id = 6;
 
+    /**
+     * Motor plan types 1 (Comprehensive) and any type added later from Admin Basic (id > 6)
+     * share the comprehensive premium schedule structure.
+     */
+    private function isComprehensiveType($motor_plan_id)
+    {
+        return $motor_plan_id == 1 || $motor_plan_id > 6;
+    }
+
+    private function motorListRedirect($motor_plan_id)
+    {
+        if ($motor_plan_id > 6) {
+            return redirect()->route('motor_plan.motor_plan_custom', ['motor_plan' => $motor_plan_id]);
+        }
+        return redirect()->route('motor_plan.motor_plan_comprehensive');
+    }
+
+    public function motor_plan_custom(Request $request, $motor_plan)
+    {
+        $motor_plan_type = MotorPlan::findOrFail($motor_plan);
+        $title = $motor_plan_type->name;
+        $add_route = route('motor_plan.add_motor_plan_custom', ['motor_plan' => $motor_plan_type->id]);
+
+        $plans = MotorInsurancePlan::with([
+            'insurance_company',
+            'fees',
+            'commissionSchedules'
+        ])
+            ->where('motor_plan_id', $motor_plan_type->id)
+            ->get();
+
+        return view('admin.plan.motor_plan', compact('title', 'add_route', 'plans'));
+    }
+
+    public function add_motor_plan_custom(Request $request, $motor_plan)
+    {
+        $motor_plan_type = MotorPlan::findOrFail($motor_plan);
+        $insurance_companies = InsuranceCompany::where('line_of_business_id', 'like', '%"6"%')->get();
+        $line_of_businesses = LineOfBusiness::where('id', self::line_of_business_id)->first()->name;
+        $motor_plans = MotorPlan::all();
+        $countries = Country::orderBy('name', 'asc')->get();
+        $cities = Cities::orderBy('name', 'asc')->get();
+        $districts = District::orderBy('name', 'asc')->get();
+        $ages = Ages::all();
+        $vehicle_types = VehicleType::all();
+        $vehicle_brands = VehicleBrand::all();
+        $vehicle_categories = VehicleCategory::all();
+        $engine_types = EngineType::all();
+        $claim_deductibles = ClaimDeductible::all();
+        $selected_motor_plan_id = $motor_plan_type->id;
+        return view('admin.plan.add_motor_plan_comprehensive', compact('insurance_companies', 'line_of_businesses', 'motor_plans', 'countries', 'cities', 'districts', 'ages', 'vehicle_types', 'vehicle_brands', 'vehicle_categories', 'engine_types', 'claim_deductibles', 'selected_motor_plan_id'));
+    }
+
     public function motor_plan_comprehensive(Request $request)
     {
         $title = __('messages.plans.comprehensive_plan');
@@ -306,7 +359,7 @@ class PlanController extends Controller
             $motor_insurance_plan_comprehensive_cover_fees->commission_amount = $request->commission_amount;
             $motor_insurance_plan_comprehensive_cover_fees->save();
 
-            if ($request->motor_plan_id == 1) {
+            if ($this->isComprehensiveType($request->motor_plan_id)) {
 
                 MotorInsurancePlanComprehensiveCoverPremium::where('motor_insurance_plan_id', $motor_insurance_plan->id)->delete();
 
@@ -343,7 +396,7 @@ class PlanController extends Controller
                     }
                 }
 
-                return redirect()->route('motor_plan.motor_plan_comprehensive')->with('success', __('messages.plans.add_success'));
+                return $this->motorListRedirect($request->motor_plan_id)->with('success', __('messages.plans.add_success'));
             } elseif ($request->motor_plan_id == 2) {
                 foreach ($request->compulsory_schedule_3_months as $single) {
                     $motor_insurance_plan_3_months_compulsory_premiums = new MotorInsurancePlan3MonthsCompulsoryPremium();
@@ -396,6 +449,9 @@ class PlanController extends Controller
 
         if ($request->form_type == 'edit') {
             $motor_insurance_plan = MotorInsurancePlan::find($request->plan_id);
+            if ($request->filled('insurance_company_id')) {
+                $motor_insurance_plan->insurance_company_id = $request->insurance_company_id;
+            }
             $motor_insurance_plan->plan_name = $request->plan_name;
             // $motor_insurance_plan->start_date = $request->start_date;
             // $motor_insurance_plan->end_date = $request->end_date;
@@ -500,7 +556,7 @@ class PlanController extends Controller
             $motor_insurance_plan_comprehensive_cover_fees->commission_amount = $request->commission_amount;
             $motor_insurance_plan_comprehensive_cover_fees->save();
 
-            if ($request->motor_plan_id == 1) {
+            if ($this->isComprehensiveType($request->motor_plan_id)) {
 
                 $requestCoverIds = [];
 
@@ -596,7 +652,7 @@ class PlanController extends Controller
                         }
                     }
                 }
-                return redirect()->route('motor_plan.motor_plan_comprehensive')->with('success', __('messages.plans.edit_success'));
+                return $this->motorListRedirect($request->motor_plan_id)->with('success', __('messages.plans.edit_success'));
             } elseif ($request->motor_plan_id == 2) {
                 MotorInsurancePlan3MonthsCompulsoryPremium::where('motor_insurance_plan_id', $motor_insurance_plan->id)->delete();
                 foreach ($request->compulsory_schedule_3_months as $single) {
@@ -666,7 +722,7 @@ class PlanController extends Controller
             MotorInsurancePlanAdditionalBenefit::where('motor_insurance_plan_id', $found->id)->delete();
             MotorInsurancePlanComprehensiveCoverFee::where('motor_insurance_plan_id', $found->id)->delete();
 
-            if ($motor_plan_id == 1) {
+            if ($this->isComprehensiveType($motor_plan_id)) {
                 MotorInsurancePlanComprehensiveCoverPremium::where('motor_insurance_plan_id', $found->id)->delete();
             } elseif ($motor_plan_id == 2) {
                 MotorInsurancePlan3MonthsCompulsoryPremium::where('motor_insurance_plan_id', $found->id)->delete();
@@ -698,6 +754,7 @@ class PlanController extends Controller
         $engine_types = EngineType::all();
         $claim_deductibles = ClaimDeductible::all();
         $plan = MotorInsurancePlan::find($decryptedId);
+        $insurance_companies = InsuranceCompany::where('line_of_business_id', 'like', '%"6"%')->get();
         $motor_comprehensive_plans = MotorInsurancePlanComprehensiveCoverPremium::where('motor_insurance_plan_id', $id)->get();
         $commission_schedules = MotorInsurancePlansCommissionScheduleCalculation::where('motor_insurance_plan_id', $plan->id)->get();
         // Decode stored country and city IDs
@@ -727,7 +784,7 @@ class PlanController extends Controller
 
 
         // dd($cities);
-        if ($plan->motor_plan_id == 1) {
+        if ($this->isComprehensiveType($plan->motor_plan_id)) {
             $view_name = 'admin.plan.edit_motor_plan_comprehensive';
         } elseif ($plan->motor_plan_id == 2) {
             $view_name = 'admin.plan.edit_motor_plan_compulsory_3';
@@ -740,6 +797,6 @@ class PlanController extends Controller
         } elseif ($plan->motor_plan_id == 6) {
             $view_name = 'admin.plan.edit_motor_plan_total_loss';
         }
-        return view($view_name, compact('plan', 'countries', 'cities', 'districts', 'ages', 'vehicle_types', 'vehicle_brands', 'vehicle_categories', 'engine_types', 'claim_deductibles', 'motor_comprehensive_plans', 'selected_country_ids', 'selected_city_ids', 'selected_district_ids', 'compulsory_premiums', 'compulsory_premiums_6', 'compulsory_premiums_9', 'commission_schedules', 'total_loss_schedules'));
+        return view($view_name, compact('plan', 'insurance_companies', 'countries', 'cities', 'districts', 'ages', 'vehicle_types', 'vehicle_brands', 'vehicle_categories', 'engine_types', 'claim_deductibles', 'motor_comprehensive_plans', 'selected_country_ids', 'selected_city_ids', 'selected_district_ids', 'compulsory_premiums', 'compulsory_premiums_6', 'compulsory_premiums_9', 'commission_schedules', 'total_loss_schedules'));
     }
 }

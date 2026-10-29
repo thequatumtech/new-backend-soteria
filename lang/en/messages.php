@@ -449,6 +449,8 @@ return [
         'deleted' => 'Number of Visits deleted successfully',
     ],
     'claim_deductible' => [
+        'claim_no' => 'Claim No.',
+        'percentage' => 'Percentage',
         'claim_deductible' => 'Claim Deductible',
         'add_claim_deductible' => 'Add Claim Deductible(s)',
         'add' => 'Submit',
