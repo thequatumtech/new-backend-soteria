@@ -309,7 +309,7 @@ if (!empty($data->letterhead)) {
 {{-- APPLICATION DETAILS --}}
 <table class="policy-details">
     @php
-        $fullName = trim(($data->first_name ?? '') . ' ' . ($data->last_name ?? '') . ' ' . ($data->third_name ?? '') . ' ' . ($data->family_name ?? ''));
+$fullName = trim(($data->first_name ?? '') . ' ' . ($data->last_name ?? '') . ' ' . ($data->third_name ?? '') . ' ' . ($data->family_name ?? ''));
     @endphp
     @if(!empty($fullName) || !empty($data->nationality) || !empty($data->nationality_no) || !empty($data->id_residence_no) || !empty($data->birth_date) || !empty($data->gender) || !empty($data->place_residence))
     <tr>
@@ -362,83 +362,83 @@ if (!empty($data->letterhead)) {
     @endif
 
     @if(!empty($data->company_name) || !empty($data->company_register_national_id) || !empty($data->company_register_id) || !empty($data->office_type) || !empty($data->office_category) || !empty($data->no_of_floor) || !empty($data->no_of_room) || !empty($data->size_of_apartment) || !empty($data->age_of_apartment) || !empty($data->no_of_residence) || !empty($data->no_of_employee))
-    <tr>
-        <td colspan="2" style="background-color: #d0d0d0;">
-            Office / Company Details
-        </td>
-    </tr>
-    @if(!empty($data->company_name))
-    <tr>
-        <td>Company Name</td>
-        <td>{{ $data->company_name }}</td>
-    </tr>
-    @endif
-    @if(!empty($data->company_register_national_id))
-    <tr>
-        <td>Company Registration National ID</td>
-        <td>{{ $data->company_register_national_id }}</td>
-    </tr>
-    @endif
-    @if(!empty($data->company_register_id))
-    <tr>
-        <td>Company Registration ID</td>
-        <td>{{ $data->company_register_id }}</td>
-    </tr>
-    @endif
-    @if(!empty($data->office_type))
-    <tr>
-        <td>Office Type</td>
-        <td>{{ $data->office_type }}</td>
-    </tr>
-    @endif
-    @if(!empty($data->office_category))
-    <tr>
-        <td>Office Category</td>
-        <td>{{ $data->office_category }}</td>
-    </tr>
-    @endif
-    @if(!empty($data->no_of_floor))
-    <tr>
-        <td>Number of Floors</td>
-        <td>{{ $data->no_of_floor }}</td>
-    </tr>
-    @endif
-    @if(!empty($data->no_of_room))
-    <tr>
-        <td>Number of Rooms</td>
-        <td>{{ $data->no_of_room }}</td>
-    </tr>
-    @endif
-    @if(!empty($data->size_of_apartment))
-    <tr>
-        <td>Apartment Size</td>
-        <td>{{ $data->size_of_apartment }}</td>
-    </tr>
-    @endif
-    @if(!empty($data->age_of_apartment))
-    <tr>
-        <td>Age of Apartment</td>
-        <td>{{ $data->age_of_apartment }}</td>
-    </tr>
-    @endif
-    @if(!empty($data->no_of_residence))
-    <tr>
-        <td>Number of Residences</td>
-        <td>{{ $data->no_of_residence }}</td>
-    </tr>
-    @endif
-    @if(!empty($data->no_of_employee))
-    <tr>
-        <td>Number of Employees</td>
-        <td>{{ $data->no_of_employee }}</td>
-    </tr>
-    @endif
+        <tr>
+            <td colspan="2" style="background-color: #d0d0d0;">
+                Office / Company Details
+            </td>
+        </tr>
+        @if(!empty($data->company_name))
+            <tr>
+                <td>Company Name</td>
+                <td>{{ $data->office_company_name ?? '-' }}</td>
+            </tr>
+        @endif
+        @if(!empty($data->company_register_national_id))
+        <tr>
+            <td>Company Registration National ID</td>
+            <td>{{ $data->company_register_national_id }}</td>
+        </tr>
+        @endif
+        @if(!empty($data->company_register_id))
+        <tr>
+            <td>Company Registration ID</td>
+            <td>{{ $data->company_register_id }}</td>
+        </tr>
+        @endif
+        @if(!empty($data->office_type))
+        <tr>
+            <td>Office Type</td>
+            <td>{{ $data->office_type }}</td>
+        </tr>
+        @endif
+        @if(!empty($data->office_category))
+        <tr>
+            <td>Office Category</td>
+            <td>{{ $data->office_category }}</td>
+        </tr>
+        @endif
+        @if(!empty($data->no_of_floor))
+        <tr>
+            <td>Number of Floors</td>
+            <td>{{ $data->no_of_floor }}</td>
+        </tr>
+        @endif
+        @if(!empty($data->no_of_room))
+        <tr>
+            <td>Number of Rooms</td>
+            <td>{{ $data->no_of_room }}</td>
+        </tr>
+        @endif
+        @if(!empty($data->size_of_apartment))
+        <tr>
+            <td>Apartment Size</td>
+            <td>{{ $data->size_of_apartment }}</td>
+        </tr>
+        @endif
+        @if(!empty($data->age_of_apartment))
+        <tr>
+            <td>Age of Apartment</td>
+            <td>{{ $data->age_of_apartment }}</td>
+        </tr>
+        @endif
+        @if(!empty($data->no_of_residence))
+        <tr>
+            <td>Number of Residences</td>
+            <td>{{ $data->no_of_residence }}</td>
+        </tr>
+        @endif
+        @if(!empty($data->no_of_employee))
+        <tr>
+            <td>Number of Employees</td>
+            <td>{{ $data->no_of_employee }}</td>
+        </tr>
+        @endif
     @endif
 
     @php
-        $officeCountry = $data->country_name ?? (!empty($data->country_id) ? getCountryName($data->country_id) : null);
-        $officeCity = $data->city_name ?? (!empty($data->city_id) ? getCityName($data->city_id) : null);
-        $officeDistrict = $data->district_name ?? (!empty($data->district_id) ? getDistrictName($data->district_id) : null);
+$officeCountry = $data->country_name ?? (!empty($data->country_id) ? getCountryName($data->country_id) : null);
+$officeCity = $data->city_name ?? (!empty($data->city_id) ? getCityName($data->city_id) : null);
+$officeDistrict = $data->district_name ?? (!empty($data->district_id) ? getDistrictName($data->district_id) : null);
     @endphp
     @if(!empty($officeCountry) || !empty($officeCity) || !empty($officeDistrict) || !empty($data->street_name) || !empty($data->building_no) || !empty($data->office_no) || !empty($data->block_no) || !empty($data->plate_no) || !empty($data->plot_no) || !empty($data->company_telephone) || !empty($data->company_owner_name) || !empty($data->company_owner_telephone))
     <tr>
@@ -521,7 +521,7 @@ if (!empty($data->letterhead)) {
     @endif
 
     @php
-        $protectionSys = !empty($data->protection_system) ? getProtectionSystemName($data->protection_system) : null;
+$protectionSys = !empty($data->protection_system) ? getProtectionSystemName($data->protection_system) : null;
     @endphp
     @if(!empty($data->effective_date) || !empty($data->expiry_date) || !empty($data->insurance_limit) || !empty($protectionSys) || !empty($data->inception_date) || !empty($data->insurance_expiry_date))
     <tr>
@@ -566,63 +566,78 @@ if (!empty($data->letterhead)) {
     </tr>
     @endif
     @endif
-
-    @if(!empty($data->partner_company_status) || !empty($data->authorized_insurance_police_status) || !empty($data->auth_company_register_status) || !empty($data->provious_insurance_policy) || !empty($data->insurance_declined_issue_status) || !empty($data->claims_5_year_status) || isset($data->renew))
+@if(
+        in_array($data->partner_company_status, [1, 2]) ||
+        in_array($data->authorized_insurance_police_status, [1, 2]) ||
+        in_array($data->auth_company_register_status, [1, 2]) ||
+        in_array($data->provious_insurance_policy, [1, 2]) ||
+        in_array($data->insurance_declined_issue_status, [1, 2]) ||
+        in_array($data->claims_5_year_status, [1, 2]) ||
+        isset($data->renew)
+    )
     <tr>
         <td colspan="2" style="background-color: #d0d0d0;">
             Declarations
         </td>
     </tr>
-    @if(!empty($data->partner_company_status))
-    <tr>
-        <td>Partner Company Status</td>
-        <td>{{ $data->partner_company_status }}</td>
-    </tr>
+
+    @if(in_array($data->partner_company_status, [1, 2]))
+        <tr>
+            <td>Partner Company Status</td>
+            <td>{{ $data->partner_company_status == 1 ? 'Yes' : 'No' }}</td>
+        </tr>
     @endif
-    @if(!empty($data->authorized_insurance_police_status))
-    <tr>
-        <td>Authorized Insurance Policy Status</td>
-        <td>{{ $data->authorized_insurance_police_status }}</td>
-    </tr>
+
+    @if(in_array($data->authorized_insurance_police_status, [1, 2]))
+        <tr>
+            <td>Authorized Insurance Policy Status</td>
+            <td>{{ $data->authorized_insurance_police_status == 1 ? 'Yes' : 'No' }}</td>
+        </tr>
     @endif
-    @if(!empty($data->auth_company_register_status))
-    <tr>
-        <td>Company Registration Status</td>
-        <td>{{ $data->auth_company_register_status }}</td>
-    </tr>
+
+    @if(in_array($data->auth_company_register_status, [1, 2]))
+        <tr>
+            <td>Company Registration Status</td>
+            <td>{{ $data->auth_company_register_status == 1 ? 'Yes' : 'No' }}</td>
+        </tr>
     @endif
-    @if(!empty($data->provious_insurance_policy))
-    <tr>
-        <td>Previous Insurance Policy</td>
-        <td>{{ $data->provious_insurance_policy }}</td>
-    </tr>
+
+    @if(in_array($data->provious_insurance_policy, [1, 2]))
+        <tr>
+            <td>Previous Insurance Policy</td>
+            <td>{{ $data->provious_insurance_policy == 1 ? 'Yes' : 'No' }}</td>
+        </tr>
     @endif
-    @if(!empty($data->insurance_declined_issue_status))
-    <tr>
-        <td>Insurance Declined</td>
-        <td>{{ $data->insurance_declined_issue_status }}</td>
-    </tr>
+
+    @if(in_array($data->insurance_declined_issue_status, [1, 2]))
+        <tr>
+            <td>Insurance Declined</td>
+            <td>{{ $data->insurance_declined_issue_status == 1 ? 'Yes' : 'No' }}</td>
+        </tr>
     @endif
-    @if(!empty($data->claims_5_year_status))
-    <tr>
-        <td>Claims in the Last 5 Years</td>
-        <td>{{ $data->claims_5_year_status }}</td>
-    </tr>
+
+    @if(in_array($data->claims_5_year_status, [1, 2]))
+        <tr>
+            <td>Claims in the Last 5 Years</td>
+            <td>{{ $data->claims_5_year_status == 1 ? 'Yes' : 'No' }}</td>
+        </tr>
     @endif
 
     @if(isset($data->renew) && $data->renew !== '')
-    <tr>
-        <td>Renewal</td>
-        <td>{{ !empty($data->renew) ? 'Yes' : 'No' }}</td>
-    </tr>
+        <tr>
+            <td>Renewal</td>
+            <td>{{ $data->renew == 1 ? 'Yes' : ($data->renew == 2 ? 'No' : '') }}</td>
+        </tr>
     @endif
+
     @if(!empty($data->old_policy_id_for_renew))
-    <tr>
-        <td>Previous Policy ID</td>
-        <td>{{ $data->old_policy_id_for_renew }}</td>
-    </tr>
+        <tr>
+            <td>Previous Policy ID</td>
+            <td>{{ $data->old_policy_id_for_renew }}</td>
+        </tr>
     @endif
-    @endif
+@endif
+
 
     @php
         $officeDocuments = [

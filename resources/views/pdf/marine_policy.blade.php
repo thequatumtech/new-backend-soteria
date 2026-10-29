@@ -450,11 +450,14 @@ if (!empty($data->letterhead)) {
                 </td>
             </tr>
             @php
-                $voyageFrom = $data->vayage_from_name ?? $data->vayage_from_id ?? null;
+
+                $voyageFrom = getCountryName($data->vayage_from_id ?? null);
+
                 $throughCountry = !empty($data->through_country_id) ? getCountryName($data->through_country_id) : null;
                 $destCountry = !empty($data->destination_country_id) ? getCountryName($data->destination_country_id) : null;
-                $itemCategory = $data->item_category_name ?? $data->item_category_id ?? null;
-                $itemSubcategory = $data->item_subcategory_name ?? $data->item_subcategory_id ?? null;
+                 $itemCategory = getInsuredItemCategoryName($data->item_category_id ?? null);
+
+    $itemSubcategory = getInsuredItemSubCategoryName($data->item_subcategory_id ?? null);
             @endphp
             @if(!empty($voyageFrom))
             <tr>

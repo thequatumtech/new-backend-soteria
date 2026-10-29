@@ -349,7 +349,7 @@ if (!empty($data->letterhead)) {
             <div class="table-scroll">
                 <table class="policy-details">
                     @php
-                        $ownerName = trim(($data->first_name ?? '') . ' ' . ($data->last_name ?? '') . ' ' . ($data->third_name ?? '') . ' ' . ($data->family_name ?? ''));
+$ownerName = trim(($data->first_name ?? '') . ' ' . ($data->last_name ?? '') . ' ' . ($data->third_name ?? '') . ' ' . ($data->family_name ?? ''));
                     @endphp
                     @if(!empty($ownerName) || !empty($data->nationality_no) || !empty($data->id_residence_no) || !empty($data->birth_date))
                     <tr>
@@ -386,62 +386,62 @@ if (!empty($data->letterhead)) {
                     @endif
 
                     @php
-                        $petType = $data->pets_type ?? $data->type_of_pets ?? null;
+$petType = $data->pets_type ?? $data->type_of_pets ?? null;
                     @endphp
                     @if(!empty($data->pets_name) || !empty($petType) || !empty($data->pets_dob) || !empty($data->gender) || !empty($data->breed) || isset($data->pets_existing_condition_status))
-                    <tr>
-                        <td colspan="2" style="background-color: #d0d0d0;">
-                            <strong>Pet Information</strong>
-                        </td>
-                    </tr>
-                    @if(!empty($data->pets_name))
-                    <tr>
-                        <td>Pet Name</td>
-                        <td>{{ $data->pets_name }}</td>
-                    </tr>
-                    @endif
-                    @if(!empty($petType))
-                    <tr>
-                        <td>Pet Type</td>
-                        <td>
-                            {{ $petType == 1 ? 'Dog' : ($petType == 2 ? 'Cat' : $petType) }}
-                        </td>
-                    </tr>
-                    @endif
-                    @if(!empty($data->pets_dob))
-                    <tr>
-                        <td>Pet Date of Birth</td>
-                        <td>
-                            {{ date('m-d-Y', strtotime($data->pets_dob)) }}
-                        </td>
-                    </tr>
-                    @endif
-                    @if(!empty($data->gender))
-                    <tr>
-                        <td>Gender</td>
-                        <td>{{ $data->gender }}</td>
-                    </tr>
-                    @endif
-                    @if(!empty($data->breed))
-                    <tr>
-                        <td>Breed</td>
-                        <td>{{ $data->breed }}</td>
-                    </tr>
-                    @endif
-                    @if(isset($data->pets_existing_condition_status) && $data->pets_existing_condition_status !== '')
-                    <tr>
-                        <td>Existing Medical Condition</td>
-                        <td>
-                            {{ !empty($data->pets_existing_condition_status) ? 'Yes' : 'No' }}
-                        </td>
-                    </tr>
-                    @endif
-                    @if(!empty($data->pets_existing_condition))
-                    <tr>
-                        <td>Medical Condition Details</td>
-                        <td>{{ $data->pets_existing_condition }}</td>
-                    </tr>
-                    @endif
+                        <tr>
+                            <td colspan="2" style="background-color: #d0d0d0;">
+                                <strong>Pet Information</strong>
+                            </td>
+                        </tr>
+                        @if(!empty($data->pets_name))
+                        <tr>
+                            <td>Pet Name</td>
+                            <td>{{ $data->pets_name }}</td>
+                        </tr>
+                        @endif
+                        @if(!empty($petType))
+                        <tr>
+                            <td>Pet Type</td>
+                            <td>
+                                {{ $petType == 1 ? 'Dog' : ($petType == 2 ? 'Cat' : $petType) }}
+                            </td>
+                        </tr>
+                        @endif
+                        @if(!empty($data->pets_dob))
+                        <tr>
+                            <td>Pet Date of Birth</td>
+                            <td>
+                                {{ date('m-d-Y', strtotime($data->pets_dob)) }}
+                            </td>
+                        </tr>
+                        @endif
+                        @if(!empty($data->gender))
+                        <tr>
+                            <td>Gender</td>
+                            <td>{{ $data->gender }}</td>
+                        </tr>
+                        @endif
+                        @if(!empty($data->breed))
+                        <tr>
+                            <td>Breed</td>
+                            <td>{{ $data->breed }}</td>
+                        </tr>
+                        @endif
+                        @if(isset($data->pets_existing_condition_status) && $data->pets_existing_condition_status !== '')
+                            <tr>
+                                <td>Existing Medical Condition</td>
+                                <td>
+                                    {{ $data->pets_existing_condition_status == 1 ? 'Yes' : ($data->pets_existing_condition_status == 2 ? 'No' : '') }}
+                                </td>
+                            </tr>
+                        @endif
+                        @if(!empty($data->pets_existing_condition))
+                        <tr>
+                            <td>Medical Condition Details</td>
+                            <td>{{ $data->pets_existing_condition }}</td>
+                        </tr>
+                        @endif
                     @endif
 
                     @if(!empty($data->plan_name) || isset($data->insurance_limit) || isset($purchase->policy_plan_limit) || !empty($data->inception_date) || !empty($data->expiry_date))
@@ -564,8 +564,8 @@ if (!empty($data->letterhead)) {
             </tr>
             @endif
             @php
-                $petsNameVal = $data->pets_name ?? $data->details?->pets_name ?? null;
-                $petsDobVal = $data->pets_dob ?? $data->details?->pets_dob ?? null;
+$petsNameVal = $data->pets_name ?? $data->details?->pets_name ?? null;
+$petsDobVal = $data->pets_dob ?? $data->details?->pets_dob ?? null;
             @endphp
             @if(!empty($petsNameVal) || !empty($petsDobVal))
             <tr>
@@ -580,7 +580,7 @@ if (!empty($data->letterhead)) {
             </tr>
             @endif
             @php
-                $petsTypeVal = $data->pets_type ?? $data->details?->pets_type ?? null;
+                $petsTypeVal = $data->type_of_pets ?? null;
                 $natNoVal = $data->nationality_no ?? $data->details?->nationality_no ?? null;
             @endphp
             @if(!empty($petsTypeVal) || !empty($natNoVal))
@@ -588,7 +588,7 @@ if (!empty($data->letterhead)) {
                 @if(!empty($petsTypeVal))
                 <td class="label"><strong>Pets Type</strong></td>
                 <td>
-                    {{ $petsTypeVal == 1 ? 'Dog' : ($petsTypeVal == 2 ? 'Cat' : $petsTypeVal) }}
+                    {{ $petsTypeVal }}
                 </td>
                 @endif
                 @if(!empty($natNoVal))
@@ -707,50 +707,50 @@ if (!empty($purchase->gross_premium))
             @if(isset($isFinalPdf) && $isFinalPdf)
 
         @php
-/*
-|--------------------------------------------------------------------------
-| Check User Signature
-|--------------------------------------------------------------------------
-*/
-$userSignaturePath = null;
+    /*
+    |--------------------------------------------------------------------------
+    | Check User Signature
+    |--------------------------------------------------------------------------
+    */
+    $userSignaturePath = null;
 
-if (!empty($data->user_signature)) {
-    $path = public_path($data->user_signature);
+    if (!empty($data->user_signature)) {
+        $path = public_path($data->user_signature);
 
-    if (file_exists($path)) {
-        $userSignaturePath = $path;
+        if (file_exists($path)) {
+            $userSignaturePath = $path;
+        }
     }
-}
 
-/*
-|--------------------------------------------------------------------------
-| Company Stamp
-|--------------------------------------------------------------------------
-*/
-$companyStampPath = null;
+    /*
+    |--------------------------------------------------------------------------
+    | Company Stamp
+    |--------------------------------------------------------------------------
+    */
+    $companyStampPath = null;
 
-if (!empty($data->company_stamp)) {
-    $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp);
+    if (!empty($data->company_stamp)) {
+        $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->company_stamp);
 
-    if (file_exists($path)) {
-        $companyStampPath = $path;
+        if (file_exists($path)) {
+            $companyStampPath = $path;
+        }
     }
-}
 
-/*
-|--------------------------------------------------------------------------
-| Authorized Signature
-|--------------------------------------------------------------------------
-*/
-$authorizedSignaturePath = null;
+    /*
+    |--------------------------------------------------------------------------
+    | Authorized Signature
+    |--------------------------------------------------------------------------
+    */
+    $authorizedSignaturePath = null;
 
-if (!empty($data->authorized_signature)) {
-    $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature);
+    if (!empty($data->authorized_signature)) {
+        $path = public_path('insurance/' . $data->insurance_company_id . '/' . $data->authorized_signature);
 
-    if (file_exists($path)) {
-        $authorizedSignaturePath = $path;
+        if (file_exists($path)) {
+            $authorizedSignaturePath = $path;
+        }
     }
-}
         @endphp
 
         @if($userSignaturePath)
@@ -832,7 +832,7 @@ if (!empty($data->authorized_signature)) {
         @endif
 
            @endif
-           
+
         <footer>
             <p>This contract is prepared in two replicas for each Contracting Party.</p>
         </footer>

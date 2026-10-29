@@ -76,7 +76,8 @@ class ClientOfficeInsurance extends Model
     ];
     public static function getOfficeInsuranceDetails($id)
     {
-        $plan = ClientOfficeInsurance::select('client_office_insurances.*', 'office_plans.plan_name', 'office_plans.insurance_policy_text','office_plans.net_premium',
+        $plan = ClientOfficeInsurance::select('client_office_insurances.*',
+            'client_office_insurances.company_name as office_company_name','office_plans.plan_name', 'office_plans.insurance_policy_text','office_plans.net_premium',
         'office_plans.limit',
         'office_plans.fees',
         'office_plans.stamps',
