@@ -298,7 +298,7 @@ class MotorInsuranceController extends Controller
 
             $commission_percentage = $plan->fees->commission_percentage ?? 0;
 
-            if ($plan->motor_plan_id == 1) {
+            if ($plan->motor_plan_id == 1 || $plan->motor_plan_id > 6) {
 
                 // Determine Net Premium from Comprehensive Schedule
                 $vehicle_brand_id = $data['vahicle_brand_id'] ?? null;
@@ -497,7 +497,8 @@ class MotorInsuranceController extends Controller
             $pdf = PDF::loadView('pdf.motor_policy', [
                 'data' => $data,
                 'abbr' => $abbr,
-                'plan' => $plan
+                'plan' => $plan,
+                'country' => optional($client->country)->name
             ]);
 
             $pdf->save($path);
@@ -533,6 +534,40 @@ class MotorInsuranceController extends Controller
                 'status_code' => 500,
                 'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
                 'data' => []
+            ]);
+        }
+    }
+
+    // Plans of any motor plan type (including types added later from Admin Basic > Motor Plan)
+    public function getMotorPlansByType(Request $request)
+    {
+        try {
+            $query = MotorInsurancePlan::with([
+                'insurance_company',
+                'insurance_company.currency'
+            ])
+                ->whereHas('insurance_company', function ($q) {
+                    $q->whereNull('deleted_at');
+                })
+                ->where('motor_plan_id', $request->motor_plan_id);
+
+            $query = InsurancePlanHelper::filterByClientCurrency(
+                $query,
+                $request->user_id
+            );
+
+            return response()->json([
+                'status' => true,
+                'status_code' => 200,
+                'message' => __('messages.api.get_motor_comprehensive_plan_successfully'),
+                'data' => $query->get()
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => false,
+                'status_code' => 500,
+                'message' => $e->getMessage() . ' ' . $e->getFile() . ' ' . $e->getLine(),
+                'data' => array()
             ]);
         }
     }

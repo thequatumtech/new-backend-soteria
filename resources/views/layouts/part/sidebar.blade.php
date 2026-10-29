@@ -217,12 +217,12 @@ $authorized_routes = json_decode($admin->authorized_routes, 1);
                     </div>
                 </li>
 
-                <li class="sidebar-dropdown {{in_array($currentRouteName, ['motor_plan.motor_plan_comprehensive','motor_plan.add_motor_plan_comprehensive','motor_plan.add_motor_plan_compulsory_3_months','motor_plan.motor_plan_compulsory_3_months','motor_plan.add_motor_plan_compulsory_6_months','motor_plan.motor_plan_compulsory_6_months','motor_plan.add_motor_plan_compulsory_9_months','motor_plan.motor_plan_compulsory_9_months','motor_plan.add_motor_plan_compulsory_12_months','motor_plan.motor_plan_compulsory_12_months','motor_plan.add_motor_plan_total_loss','motor_plan.motor_plan_total_loss','motor_plan.edit']) ? 'active-main active' : '' }} ">
+                <li class="sidebar-dropdown {{in_array($currentRouteName, ['motor_plan.motor_plan_comprehensive','motor_plan.add_motor_plan_comprehensive','motor_plan.add_motor_plan_compulsory_3_months','motor_plan.motor_plan_compulsory_3_months','motor_plan.add_motor_plan_compulsory_6_months','motor_plan.motor_plan_compulsory_6_months','motor_plan.add_motor_plan_compulsory_9_months','motor_plan.motor_plan_compulsory_9_months','motor_plan.add_motor_plan_compulsory_12_months','motor_plan.motor_plan_compulsory_12_months','motor_plan.add_motor_plan_total_loss','motor_plan.motor_plan_total_loss','motor_plan.motor_plan_custom','motor_plan.add_motor_plan_custom','motor_plan.edit']) ? 'active-main active' : '' }} ">
                     <a href="javascript:void(0)">
                         <i class="far fa-gem"></i>
                         <span>{{__('messages.sidebar_titles.motor_plans')}}</span>
                     </a>
-                    <div class="sidebar-submenu" style="{{in_array($currentRouteName, ['motor_plan.motor_plan_comprehensive','motor_plan.add_motor_plan_comprehensive','motor_plan.add_motor_plan_compulsory_3_months','motor_plan.motor_plan_compulsory_3_months','motor_plan.add_motor_plan_compulsory_6_months','motor_plan.motor_plan_compulsory_6_months','motor_plan.add_motor_plan_compulsory_9_months','motor_plan.motor_plan_compulsory_9_months','motor_plan.add_motor_plan_compulsory_12_months','motor_plan.motor_plan_compulsory_12_months','motor_plan.add_motor_plan_total_loss','motor_plan.motor_plan_total_loss','motor_plan.edit']) ? 'display:block;' : '' }} ">
+                    <div class="sidebar-submenu" style="{{in_array($currentRouteName, ['motor_plan.motor_plan_comprehensive','motor_plan.add_motor_plan_comprehensive','motor_plan.add_motor_plan_compulsory_3_months','motor_plan.motor_plan_compulsory_3_months','motor_plan.add_motor_plan_compulsory_6_months','motor_plan.motor_plan_compulsory_6_months','motor_plan.add_motor_plan_compulsory_9_months','motor_plan.motor_plan_compulsory_9_months','motor_plan.add_motor_plan_compulsory_12_months','motor_plan.motor_plan_compulsory_12_months','motor_plan.add_motor_plan_total_loss','motor_plan.motor_plan_total_loss','motor_plan.motor_plan_custom','motor_plan.add_motor_plan_custom','motor_plan.edit']) ? 'display:block;' : '' }} ">
                         <ul>
                             <li class="{{in_array($currentRouteName, ['motor_plan.motor_plan_comprehensive','motor_plan.add_motor_plan_comprehensive']) ? 'active-main' : '' }}">
                                 <a href="{{ route('motor_plan.motor_plan_comprehensive') }}">{{__('messages.sidebar_titles.comprehensive')}}</a>
@@ -242,6 +242,11 @@ $authorized_routes = json_decode($admin->authorized_routes, 1);
                             <li class="{{in_array($currentRouteName, ['motor_plan.motor_plan_total_loss','motor_plan.add_motor_plan_total_loss']) ? 'active-main' : '' }}">
                                 <a href="{{ route('motor_plan.motor_plan_total_loss') }}">{{__('messages.sidebar_titles.total_loss')}}</a>
                             </li>
+                            @foreach(\App\Models\MotorPlan::where('id', '>', 6)->orderBy('id')->get() as $customMotorPlan)
+                            <li class="{{ (in_array($currentRouteName, ['motor_plan.motor_plan_custom','motor_plan.add_motor_plan_custom']) && request()->route('motor_plan') == $customMotorPlan->id) ? 'active-main' : '' }}">
+                                <a href="{{ route('motor_plan.motor_plan_custom', ['motor_plan' => $customMotorPlan->id]) }}">{{ $customMotorPlan->name }}</a>
+                            </li>
+                            @endforeach
                         </ul>
                     </div>
                 </li>

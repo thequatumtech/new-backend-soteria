@@ -685,6 +685,8 @@ Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
              */
             //        Route::get('plans', [PlanController::class, 'index'])->name('plan');
             Route::get('comprehensive', [PlanController::class, 'motor_plan_comprehensive'])->name('motor_plan.motor_plan_comprehensive');
+            Route::get('motor-plan-type/{motor_plan}', [PlanController::class, 'motor_plan_custom'])->name('motor_plan.motor_plan_custom');
+            Route::get('add-motor-plan-type/{motor_plan}', [PlanController::class, 'add_motor_plan_custom'])->name('motor_plan.add_motor_plan_custom');
             Route::get('add-motor-plan-comprehensive', [PlanController::class, 'add_motor_plan_comprehensive'])->name('motor_plan.add_motor_plan_comprehensive');
             Route::get('compulsory-3-months', [PlanController::class, 'motor_plan_compulsory_3_months'])->name('motor_plan.motor_plan_compulsory_3_months');
             Route::get('add-motor-plan-compulsory-3-months', [PlanController::class, 'add_motor_plan_compulsory_3_months'])->name('motor_plan.add_motor_plan_compulsory_3_months');
