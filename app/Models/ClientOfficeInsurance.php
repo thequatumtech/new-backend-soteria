@@ -73,6 +73,10 @@ class ClientOfficeInsurance extends Model
         'restricted_protection_system_ids',
         'restricted_office_age_ids',
         'office_age',
+        'authorized_position',
+        'previous_insurance_details',
+        'insurance_declined_details',
+        'claims_5_year_details',
     ];
     public static function getOfficeInsuranceDetails($id)
     {

@@ -566,62 +566,42 @@ $protectionSys = !empty($data->protection_system) ? getProtectionSystemName($dat
     </tr>
     @endif
     @endif
-@if(
-        in_array($data->partner_company_status, [1, 2]) ||
-        in_array($data->authorized_insurance_police_status, [1, 2]) ||
-        in_array($data->auth_company_register_status, [1, 2]) ||
-        in_array($data->provious_insurance_policy, [1, 2]) ||
-        in_array($data->insurance_declined_issue_status, [1, 2]) ||
-        in_array($data->claims_5_year_status, [1, 2]) ||
-        isset($data->renew)
-    )
+@php
+    // Status columns store 1 = yes, 0 = no; the detail answer is shown only for "Yes"
+    $declarationRows = [];
+    foreach ([
+        ['Partner Company Status', 'partner_company_status', null, null],
+        ['Authorized Insurance Policy Status', 'authorized_insurance_police_status', 'Authorized Position', 'authorized_position'],
+        ['Company Registration Status', 'auth_company_register_status', null, null],
+        ['Previous Insurance Policy', 'provious_insurance_policy', 'Previous Insurance Company / Expiry Date', 'previous_insurance_details'],
+        ['Insurance Declined', 'insurance_declined_issue_status', 'Decline Reason / Insurance Company', 'insurance_declined_details'],
+        ['Claims in the Last 5 Years', 'claims_5_year_status', 'Claim / Accident Details', 'claims_5_year_details'],
+    ] as [$label, $statusField, $detailLabel, $detailField]) {
+        $status = $data->{$statusField} ?? null;
+        if ($status === null || $status === '') {
+            continue;
+        }
+
+        $declarationRows[$label] = $status == 1 ? 'Yes' : 'No';
+
+        if ($status == 1 && $detailField && !empty($data->{$detailField})) {
+            $declarationRows[$detailLabel] = $data->{$detailField};
+        }
+    }
+@endphp
+@if(count($declarationRows) || isset($data->renew))
     <tr>
         <td colspan="2" style="background-color: #d0d0d0;">
             Declarations
         </td>
     </tr>
 
-    @if(in_array($data->partner_company_status, [1, 2]))
+    @foreach($declarationRows as $label => $value)
         <tr>
-            <td>Partner Company Status</td>
-            <td>{{ $data->partner_company_status == 1 ? 'Yes' : 'No' }}</td>
+            <td>{{ $label }}</td>
+            <td>{{ $value }}</td>
         </tr>
-    @endif
-
-    @if(in_array($data->authorized_insurance_police_status, [1, 2]))
-        <tr>
-            <td>Authorized Insurance Policy Status</td>
-            <td>{{ $data->authorized_insurance_police_status == 1 ? 'Yes' : 'No' }}</td>
-        </tr>
-    @endif
-
-    @if(in_array($data->auth_company_register_status, [1, 2]))
-        <tr>
-            <td>Company Registration Status</td>
-            <td>{{ $data->auth_company_register_status == 1 ? 'Yes' : 'No' }}</td>
-        </tr>
-    @endif
-
-    @if(in_array($data->provious_insurance_policy, [1, 2]))
-        <tr>
-            <td>Previous Insurance Policy</td>
-            <td>{{ $data->provious_insurance_policy == 1 ? 'Yes' : 'No' }}</td>
-        </tr>
-    @endif
-
-    @if(in_array($data->insurance_declined_issue_status, [1, 2]))
-        <tr>
-            <td>Insurance Declined</td>
-            <td>{{ $data->insurance_declined_issue_status == 1 ? 'Yes' : 'No' }}</td>
-        </tr>
-    @endif
-
-    @if(in_array($data->claims_5_year_status, [1, 2]))
-        <tr>
-            <td>Claims in the Last 5 Years</td>
-            <td>{{ $data->claims_5_year_status == 1 ? 'Yes' : 'No' }}</td>
-        </tr>
-    @endif
+    @endforeach
 
     @if(isset($data->renew) && $data->renew !== '')
         <tr>
