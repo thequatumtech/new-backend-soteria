@@ -698,17 +698,9 @@ $hasEmploymentInfo =
                                 'Content Document' => $contentDocuments,
                             ] as $label => $documents)
                             @foreach($documents as $index => $document)
-                                @php $documentUrl = getDocumentUrl($document); @endphp
-
                                 <tr>
                                     <td>{{ $label }} {{ $index + 1 }}</td>
-                                    <td>
-                                        @if($documentUrl)
-                                            <a href="{{ $documentUrl }}">{{ $documentUrl }}</a>
-                                        @else
-                                            Document not found
-                                        @endif
-                                    </td>
+                                    <td>{!! getDocumentPreview($document) !!}</td>
                                 </tr>
                             @endforeach
                         @endforeach

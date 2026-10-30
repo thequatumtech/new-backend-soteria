@@ -359,18 +359,47 @@ if (!function_exists('getDocumentUrl')) {
     }
 }
 
-if (!function_exists('getDocumentLinks')) {
-    // HTML links for a document field, for use in PDFs with {!! !!}
-    function getDocumentLinks($value, $empty = '-')
+if (!function_exists('getDocumentPreview')) {
+    // One document for a PDF: images are shown directly as a small thumbnail (dompdf reads the
+    // local file), anything else (PDF / Word) as a download link without the full path
+    function getDocumentPreview($path)
     {
-        $links = [];
+        $path = ltrim(trim((string) $path), '/');
 
-        foreach (getDocumentPaths($value) as $path) {
-            $url = getDocumentUrl($path);
-            $links[] = $url ? '<a href="' . e($url) . '">' . e($url) . '</a>' : 'Document not found';
+        $localPath = null;
+        if ($path !== '' && file_exists(public_path($path))) {
+            $localPath = public_path($path);
+        } elseif ($path !== '' && file_exists(storage_path('app/public/' . $path))) {
+            $localPath = storage_path('app/public/' . $path);
         }
 
-        return count($links) ? implode('<br>', $links) : e($empty);
+        if (!$localPath) {
+            return 'Document not found';
+        }
+
+        $extension = strtolower(pathinfo($localPath, PATHINFO_EXTENSION));
+
+        // Check the extension and that the file really is an image (older uploads kept the app's file name)
+        $imageInfo = in_array($extension, ['jpg', 'jpeg', 'png', 'gif'], true) ? @getimagesize($localPath) : false;
+
+        if ($imageInfo && in_array($imageInfo[2], [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF], true)) {
+            return '<img src="' . e($localPath) . '" alt="Document" style="max-width:120px; max-height:90px; border:1px solid #ccc; margin:2px;">';
+        }
+
+        $url = getDocumentUrl($path);
+        $label = 'Download ' . strtoupper($extension ?: 'file');
+
+        return $url ? '<a href="' . e($url) . '" download>' . e($label) . '</a>' : e($label);
+    }
+}
+
+if (!function_exists('getDocumentLinks')) {
+    // Previews for a document field, for use in PDFs with {!! !!}
+    function getDocumentLinks($value, $empty = '-')
+    {
+        $previews = array_map('getDocumentPreview', getDocumentPaths($value));
+
+        return count($previews) ? implode(' ', $previews) : e($empty);
     }
 }
 
