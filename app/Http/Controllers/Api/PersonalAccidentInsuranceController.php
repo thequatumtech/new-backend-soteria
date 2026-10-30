@@ -51,24 +51,28 @@ class PersonalAccidentInsuranceController extends Controller
     }
 
     // Dangerous activities can arrive as an array, a JSON / comma separated string,
-    // or as flat "dangerous_field[0]" keys inside an encrypted JSON body; values can be ids or names
+    // or as flat "dangerous_field[0]" / "dangerous_field[]" keys inside an encrypted JSON body; values can be ids or names.
+    // The app sends the misspelled "dangerours_field[]" key, so accept that spelling too.
     private function requestedDangerousActivityIds(Request $request)
     {
-        $value = $request->input('dangerous_field');
-
-        if (empty($value)) {
-            $value = array_values(array_filter(
-                $request->all(),
-                fn($key) => str_starts_with($key, 'dangerous_field['),
-                ARRAY_FILTER_USE_KEY
-            ));
+        $value = [];
+        foreach ($request->all() as $key => $item) {
+            if (preg_match('/^danger(ous|ours)_field(\[.*\])?$/', $key)) {
+                $value = array_merge($value, (array) $item);
+            }
         }
 
-        if (is_string($value)) {
-            $value = str_starts_with(trim($value), '[') ? (json_decode($value, true) ?? []) : explode(',', $value);
+        $values = [];
+        foreach ($value as $item) {
+            $item = trim((string) (is_array($item) ? implode(',', $item) : $item));
+            if (str_starts_with($item, '[')) {
+                $values = array_merge($values, (array) (json_decode($item, true) ?? []));
+            } else {
+                $values = array_merge($values, explode(',', $item));
+            }
         }
 
-        $values = array_filter(array_map('trim', array_map('strval', (array) $value)), 'strlen');
+        $values = array_filter(array_map('trim', array_map('strval', $values)), 'strlen');
         $ids = array_filter($values, 'is_numeric');
         $names = array_diff($values, $ids);
 
