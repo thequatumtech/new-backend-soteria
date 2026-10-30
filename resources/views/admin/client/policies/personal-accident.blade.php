@@ -258,36 +258,9 @@
         <div class="row">
 
             <div class="col-md-6 detail-item">
-                <div class="detail-label">Dangerous Field</div>
+                <div class="detail-label">Dangerous Activities</div>
                 <div class="detail-value">
-                    @if(!empty($policy_details->dangerous_field))
-
-                        @php
-                            $dangerousFields = $policy_details->dangerous_field;
-
-                            if (is_string($dangerousFields)) {
-                                $decoded = json_decode($dangerousFields, true);
-
-                                if (is_array($decoded)) {
-                                    $dangerousFields = $decoded;
-                                } else {
-                                    $dangerousFields = array_map(
-                                        'trim',
-                                        explode(',', $dangerousFields)
-                                    );
-                                }
-                            }
-                        @endphp
-
-                        @if(is_array($dangerousFields))
-                            {{ implode(', ', $dangerousFields) }}
-                        @else
-                            {{ $dangerousFields }}
-                        @endif
-
-                    @else
-                        -
-                    @endif
+                    {{ getDangerousActivityName($policy_details->dangerous_field ?? null) }}
                 </div>
             </div>
 

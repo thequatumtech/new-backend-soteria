@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\{ClientPersonalAccidentInsurance, PurchasePolicy};
+use App\Models\{ClientPersonalAccidentInsurance, DangerousActivities, PurchasePolicy};
 // use App\Models\InsurancePlanModels\PersonalAccidentPlan;
 use App\Models\InsurancePlanModels\{PersonalAccidentPlan, PersonalAccidentPlanPricingSchedule};
 use App\Models\InsurancePeriod;
@@ -48,6 +48,35 @@ class PersonalAccidentInsuranceController extends Controller
         }
 
         return [];
+    }
+
+    // Dangerous activities can arrive as an array, a JSON / comma separated string,
+    // or as flat "dangerous_field[0]" keys inside an encrypted JSON body; values can be ids or names
+    private function requestedDangerousActivityIds(Request $request)
+    {
+        $value = $request->input('dangerous_field');
+
+        if (empty($value)) {
+            $value = array_values(array_filter(
+                $request->all(),
+                fn($key) => str_starts_with($key, 'dangerous_field['),
+                ARRAY_FILTER_USE_KEY
+            ));
+        }
+
+        if (is_string($value)) {
+            $value = str_starts_with(trim($value), '[') ? (json_decode($value, true) ?? []) : explode(',', $value);
+        }
+
+        $values = array_filter(array_map('trim', array_map('strval', (array) $value)), 'strlen');
+        $ids = array_filter($values, 'is_numeric');
+        $names = array_diff($values, $ids);
+
+        if (!empty($names)) {
+            $ids = array_merge($ids, DangerousActivities::whereIn('name', $names)->pluck('id')->all());
+        }
+
+        return array_values(array_unique(array_map('intval', $ids)));
     }
 
     private function restrictionError($type)
@@ -164,9 +193,9 @@ class PersonalAccidentInsuranceController extends Controller
             $restrictedDistricts = $this->normalizeRestricted($plan->restricted_district_ids);
             $restrictedAges = $this->normalizeRestricted($plan->restricted_age_ids);
             $restrictedOccupations = $this->normalizeRestricted($plan->restricted_occupation_ids);
-            $userDangerousFields = $this->normalizeRestricted($request->dangerous_field ?? null);
+            $userDangerousFields = $this->requestedDangerousActivityIds($request);
             $data['dangerous_field'] = !empty($userDangerousFields) ? implode(',', $userDangerousFields) : null;
-            $restrictedDangerousFields = $this->normalizeRestricted($plan->restricted_dangerous_activities_ids ?? null);
+            $restrictedDangerousFields = array_map('intval', $this->normalizeRestricted($plan->restricted_dangerous_activities_ids ?? null));
 
             if ($clientCountry && in_array($clientCountry, $restrictedCountries)) {
                 return $this->restrictionError('country');

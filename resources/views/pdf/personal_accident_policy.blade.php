@@ -489,7 +489,7 @@ if (!empty($data->letterhead)) {
                     @if(!empty($data->dangerous_field))
                     <tr>
                         <td>Dangerous Activities</td>
-                        <td>{{ $data->dangerous_field }}</td>
+                        <td>{{ getDangerousActivityName($data->dangerous_field) }}</td>
                     </tr>
                     @endif
                     @if(!empty($data->occupany_type_work))
