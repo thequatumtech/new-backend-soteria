@@ -259,6 +259,11 @@ class MarineInsuranceController extends Controller
                 }
             }
 
+            // Block updating another client's policy or one that is already paid
+            if ($draftError = PurchasePolicy::draftUpdateError($request->purchase_id ?? null, $request->user_id)) {
+                return $draftError;
+            }
+
             $existingMarine = PurchasePolicy::find($request->purchase_id ?? 0);
 
             if ($existingMarine) {

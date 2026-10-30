@@ -189,6 +189,11 @@ class DentalInsuranceController extends Controller
 
 
 
+            // Block updating another client's policy or one that is already paid
+            if ($draftError = PurchasePolicy::draftUpdateError($request->purchase_id ?? null, $request->user_id)) {
+                return $draftError;
+            }
+
             $existingDental = PurchasePolicy::find($request->purchase_id ?? 0);
 
             if ($existingDental) {

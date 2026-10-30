@@ -192,6 +192,11 @@ class LifeInsuranceController extends Controller
                     ], 422);
                 }
             }
+            // Block updating another client's policy or one that is already paid
+            if ($draftError = PurchasePolicy::draftUpdateError($request->purchase_id ?? null, $request->user_id)) {
+                return $draftError;
+            }
+
             $existingLife = PurchasePolicy::find($request->purchase_id ?? 0);
 
             $plan_data = LifePlan::with([

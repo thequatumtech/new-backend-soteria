@@ -86,6 +86,42 @@ class PurchasePolicy extends Model
         $policy->save();
         return $policy;
     }
+    // A save request with purchase_id updates that draft. Returns an error response when the
+    // draft belongs to another client or is already paid, otherwise null.
+    public static function draftUpdateError($purchaseId, $clientId)
+    {
+        if (empty($purchaseId)) {
+            return null;
+        }
+
+        $policy = PurchasePolicy::find($purchaseId);
+
+        // Unknown id: the save creates a new policy, as before
+        if (!$policy) {
+            return null;
+        }
+
+        if ((int) $policy->client_id !== (int) $clientId) {
+            return response()->json([
+                'status' => false,
+                'status_code' => 404,
+                'message' => __('messages.api.policy_not_belong_client'),
+                'data' => []
+            ], 404);
+        }
+
+        if ((int) $policy->payment_status === 1) {
+            return response()->json([
+                'status' => false,
+                'status_code' => 409,
+                'message' => __('messages.api.policy_already_purchased'),
+                'data' => []
+            ], 409);
+        }
+
+        return null;
+    }
+
     public static function updatePurchasePolicy($request)
     {
         $policy = PurchasePolicy::find($request['purchase_id']);
