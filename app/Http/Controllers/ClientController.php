@@ -35,6 +35,8 @@ class ClientController extends Controller
 
         $client = Client::with([
             'agent',
+            // latest policy first
+            'purchased_policies' => fn($query) => $query->orderByDesc('id'),
             'purchased_policies.finalPolicyPdf',
             'purchased_policies.insurance_company',
         ])->findOrFail($decryptedId);
@@ -170,6 +172,7 @@ class ClientController extends Controller
 {
     $purchased_policy = PurchasePolicy::with(['client', 'insurance_company', 'finalPolicyPdf'])
         ->where('client_id', $id)
+        ->orderByDesc('id') // latest policy first
         ->get();
 
     if ($purchased_policy->isNotEmpty()) {

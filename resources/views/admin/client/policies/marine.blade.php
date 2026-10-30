@@ -133,21 +133,21 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Company Country ID</div>
                 <div class="detail-value">
-                    {{ $policy_details->company_country_id ?? '-' }}
+                    {{ getCountryName($policy_details->company_country_id ?? null) }}
                 </div>
             </div>
 
             <div class="col-md-4 detail-item">
-                <div class="detail-label">Company City ID</div>
+                <div class="detail-label">Company City</div>
                 <div class="detail-value">
-                    {{ $policy_details->company_city_id ?? '-' }}
+                    {{ getCityName($policy_details->company_city_id ?? null) }}
                 </div>
             </div>
 
             <div class="col-md-4 detail-item">
-                <div class="detail-label">Company District ID</div>
+                <div class="detail-label">Company District</div>
                 <div class="detail-value">
-                    {{ $policy_details->company_district_id ?? '-' }}
+                    {{ getDistrictName($policy_details->company_district_id ?? null) }}
                 </div>
             </div>
 
@@ -228,14 +228,14 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Partner Status</div>
                 <div class="detail-value">
-                    {{ $policy_details->company_partner_status ?? '-' }}
+                    {{ getYesNoStatus($policy_details->company_partner_status ?? null) }}
                 </div>
             </div>
 
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Authorized Status</div>
                 <div class="detail-value">
-                    {{ $policy_details->company_authorized_status ?? '-' }}
+                    {{ getYesNoStatus($policy_details->company_authorized_status ?? null) }}
                 </div>
             </div>
 
@@ -249,7 +249,7 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Company Register Status</div>
                 <div class="detail-value">
-                    {{ $policy_details->company_register_status ?? '-' }}
+                    {{ getYesNoStatus($policy_details->company_register_status ?? null) }}
                 </div>
             </div>
 
@@ -329,7 +329,7 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Dangerous Activities</div>
                 <div class="detail-value">
-                    {{ $policy_details->dangerous_activities ?? '-' }}
+                    {{ getDangerousActivityName($policy_details->dangerous_activities ?? null) }}
                 </div>
             </div>
 
@@ -473,15 +473,15 @@
                 <div class="detail-label">Payment Status</div>
                 <div class="detail-value">
 
-                    @if(isset($policy_details->payment_status))
+                    @if(isset($policy->payment_status))
 
-                        @if($policy_details->payment_status == 1)
+                        @if($policy->payment_status == 1)
 
                             <span class="badge bg-success badge-status">
                                 Paid
                             </span>
 
-                        @elseif($policy_details->payment_status == 0)
+                        @elseif($policy->payment_status == 0)
 
                             <span class="badge bg-warning text-dark badge-status">
                                 Pending
@@ -489,7 +489,7 @@
 
                         @else
 
-                            {{ $policy_details->payment_status }}
+                            {{ $policy->payment_status }}
 
                         @endif
 

@@ -117,14 +117,14 @@
         <div class="row">
 
             <div class="col-md-4 detail-item">
-                <div class="detail-label">City ID</div>
+                <div class="detail-label">City</div>
                 <div class="detail-value">
                     {{ getCityName($policy_details->city_id) }}
                 </div>
             </div>
 
             <div class="col-md-4 detail-item">
-                <div class="detail-label">District ID</div>
+                <div class="detail-label">District</div>
                 <div class="detail-value">
                     {{ getDistrictName($policy_details->district_id) }}
                 </div>
@@ -177,16 +177,16 @@
             </div>
 
             <div class="col-md-4 detail-item">
-                <div class="detail-label">Company City ID</div>
+                <div class="detail-label">Company City</div>
                 <div class="detail-value">
-                    {{ $policy_details->company_city_id ?? '-' }}
+                    {{ getCityName($policy_details->company_city_id ?? null) }}
                 </div>
             </div>
 
             <div class="col-md-4 detail-item">
-                <div class="detail-label">Company District ID</div>
+                <div class="detail-label">Company District</div>
                 <div class="detail-value">
-                    {{ $policy_details->company_district_id ?? '-' }}
+                    {{ getDistrictName($policy_details->company_district_id ?? null) }}
                 </div>
             </div>
 
@@ -239,7 +239,7 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Chronic Diseases</div>
                 <div class="detail-value">
-                    {{ $policy_details->chronic_diseases_id ?? '-' }}
+                    {{ getChronicDiseaseName($policy_details->chronic_diseases_id ?? null) }}
                 </div>
             </div>
 
@@ -260,7 +260,7 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Pregnancy Status</div>
                 <div class="detail-value">
-                    {{ $policy_details->pregnant_status ?? '-' }}
+                    {{ getYesNoStatus($policy_details->pregnant_status ?? null) }}
                 </div>
             </div>
 
@@ -274,14 +274,14 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Dangerous Activity Status</div>
                 <div class="detail-value">
-                    {{ $policy_details->dangerous_status ?? '-' }}
+                    {{ getYesNoStatus($policy_details->dangerous_status ?? null) }}
                 </div>
             </div>
 
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Dangerous Activity</div>
                 <div class="detail-value">
-                    {{ $policy_details->dangerous_id ?? '-' }}
+                    {{ getDangerousActivityName($policy_details->dangerous_id ?? null) }}
                 </div>
             </div>
 
@@ -299,7 +299,7 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Insurance Type</div>
                 <div class="detail-value">
-                    {{ $policy_details->insurance_type ?? '-' }}
+                    {{ ($policy_details->insurance_type ?? null) == 1 ? 'In-Patient' : (($policy_details->insurance_type ?? null) == 2 ? 'In-Out Patient' : ($policy_details->insurance_type ?? '-')) }}
                 </div>
             </div>
 
@@ -374,13 +374,13 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Payment Status</div>
                 <div class="detail-value">
-                    @if(isset($policy_details->payment_status))
-                        @if($policy_details->payment_status == 1)
+                    @if(isset($policy->payment_status))
+                        @if($policy->payment_status == 1)
                             Paid
-                        @elseif($policy_details->payment_status == 0)
+                        @elseif($policy->payment_status == 0)
                             Pending
                         @else
-                            {{ $policy_details->payment_status }}
+                            {{ $policy->payment_status }}
                         @endif
                     @else
                         -

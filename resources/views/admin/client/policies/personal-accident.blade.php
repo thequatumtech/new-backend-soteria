@@ -152,9 +152,9 @@
             </div>
 
             <div class="col-md-4 detail-item">
-                <div class="detail-label">Company City ID</div>
+                <div class="detail-label">Company City</div>
                 <div class="detail-value">
-                    {{ $policy_details->company_city_id ?? '-' }}
+                    {{ getCityName($policy_details->company_city_id ?? null) }}
                 </div>
             </div>
 
@@ -170,14 +170,14 @@
         <div class="row">
 
             <div class="col-md-4 detail-item">
-                <div class="detail-label">City ID</div>
+                <div class="detail-label">City</div>
                 <div class="detail-value">
                     {{ getCityName($policy_details->city_id) }}
                 </div>
             </div>
 
             <div class="col-md-4 detail-item">
-                <div class="detail-label">District ID</div>
+                <div class="detail-label">District</div>
                 <div class="detail-value">
                     {{ getDistrictName($policy_details->district_id) }}
                 </div>
@@ -329,15 +329,15 @@
                 <div class="detail-label">Payment Status</div>
                 <div class="detail-value">
 
-                    @if(isset($policy_details->payment_status))
+                    @if(isset($policy->payment_status))
 
-                        @if($policy_details->payment_status == 1)
+                        @if($policy->payment_status == 1)
 
                             <span class="badge bg-success badge-status">
                                 Paid
                             </span>
 
-                        @elseif($policy_details->payment_status == 0)
+                        @elseif($policy->payment_status == 0)
 
                             <span class="badge bg-warning text-dark badge-status">
                                 Pending
@@ -345,7 +345,7 @@
 
                         @else
 
-                            {{ $policy_details->payment_status }}
+                            {{ $policy->payment_status }}
 
                         @endif
 

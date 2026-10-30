@@ -162,7 +162,7 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Existing Condition Status</div>
                 <div class="detail-value">
-                    {{ $policy_details->pets_existing_condition_status ?? '-' }}
+                    {{ getYesNoStatus($policy_details->pets_existing_condition_status ?? null) }}
                 </div>
             </div>
 
@@ -267,15 +267,15 @@
                 <div class="detail-label">Payment Status</div>
                 <div class="detail-value">
 
-                    @if(isset($policy_details->payment_status))
+                    @if(isset($policy->payment_status))
 
-                        @if($policy_details->payment_status == 1)
+                        @if($policy->payment_status == 1)
 
                             <span class="badge bg-success badge-status">
                                 Paid
                             </span>
 
-                        @elseif($policy_details->payment_status == 0)
+                        @elseif($policy->payment_status == 0)
 
                             <span class="badge bg-warning text-dark badge-status">
                                 Pending
@@ -283,7 +283,7 @@
 
                         @else
 
-                            {{ $policy_details->payment_status }}
+                            {{ $policy->payment_status }}
 
                         @endif
 

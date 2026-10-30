@@ -202,14 +202,14 @@
             </div>
 
             <div class="col-md-4 detail-item">
-                <div class="detail-label">City ID</div>
+                <div class="detail-label">City</div>
                 <div class="detail-value">
                     {{ getCityName($policy_details->city_id) }}
                 </div>
             </div>
 
             <div class="col-md-4 detail-item">
-                <div class="detail-label">District ID</div>
+                <div class="detail-label">District</div>
                 <div class="detail-value">
                     {{ getDistrictName($policy_details->district_id) }}
                 </div>
@@ -248,9 +248,9 @@
             </div>
 
             <div class="col-md-4 detail-item">
-                <div class="detail-label">Company City ID</div>
+                <div class="detail-label">Company City</div>
                 <div class="detail-value">
-                    {{ $policy_details->city_id_2 ?? '-' }}
+                    {{ getCityName($policy_details->city_id_2 ?? null) }}
                 </div>
             </div>
 
@@ -314,7 +314,7 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Protection System</div>
                 <div class="detail-value">
-                    {{ $policy_details->protection_system ?? '-' }}
+                    {{ getProtectionSystemName($policy_details->protection_system ?? null) }}
                 </div>
             </div>
 
@@ -368,7 +368,11 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Payment Status</div>
                 <div class="detail-value">
-                    {{ $policy_details->payment_status ?? '-' }}
+                    @if($policy->payment_status == 1)
+                        <span class="badge bg-success badge-status">Paid</span>
+                    @else
+                        <span class="badge bg-warning text-dark badge-status">Pending</span>
+                    @endif
                 </div>
             </div>
 

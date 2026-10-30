@@ -160,14 +160,14 @@
         <div class="row">
 
             <div class="col-md-4 detail-item">
-                <div class="detail-label">City ID</div>
+                <div class="detail-label">City</div>
                 <div class="detail-value">
                     {{ getCityName($policy_details->city_id) }}
                 </div>
             </div>
 
             <div class="col-md-4 detail-item">
-                <div class="detail-label">District ID</div>
+                <div class="detail-label">District</div>
                 <div class="detail-value">
                     {{ getDistrictName($policy_details->district_id) }}
                 </div>
@@ -220,16 +220,16 @@
             </div>
 
             <div class="col-md-4 detail-item">
-                <div class="detail-label">Company City ID</div>
+                <div class="detail-label">Company City</div>
                 <div class="detail-value">
-                    {{ $policy_details->company_city_id ?? '-' }}
+                    {{ getCityName($policy_details->company_city_id ?? null) }}
                 </div>
             </div>
 
             <div class="col-md-4 detail-item">
-                <div class="detail-label">Company District ID</div>
+                <div class="detail-label">Company District</div>
                 <div class="detail-value">
-                    {{ $policy_details->company_district_id ?? '-' }}
+                    {{ getDistrictName($policy_details->company_district_id ?? null) }}
                 </div>
             </div>
 
@@ -293,7 +293,7 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Chronic Diseases</div>
                 <div class="detail-value">
-                    {{ $policy_details->chronic_diseases_id ?? '-' }}
+                    {{ getChronicDiseaseName($policy_details->chronic_diseases_id ?? null) }}
                 </div>
             </div>
 
