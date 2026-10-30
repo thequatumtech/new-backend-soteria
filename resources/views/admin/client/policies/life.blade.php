@@ -396,7 +396,8 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Insurance Period</div>
                 <div class="detail-value">
-                        {{ getInsurancePeriodName($policy_details->insurance_period) }}
+                        {{-- Life insurance_period is a number of years, not an insurance_periods id --}}
+                        {{ !empty($policy_details->insurance_period) ? (int) $policy_details->insurance_period . ' ' . ((int) $policy_details->insurance_period === 1 ? 'Year' : 'Years') : '-' }}
 
                 </div>
             </div>
@@ -565,53 +566,9 @@
         {{-- DOCUMENTS --}}
         {{-- ========================= --}}
 
-        <h6 class="section-title mt-4">Policy Documents</h6>
-
-        <div class="d-flex flex-wrap gap-2">
-
-            @if(!empty($policy_details->documents))
-
-                @php
-    $documents = $policy_details->documents;
-
-    if (is_string($documents)) {
-        $decodedDocuments = json_decode($documents, true);
-
-        if (json_last_error() === JSON_ERROR_NONE) {
-            $documents = $decodedDocuments;
-        }
-    }
-                @endphp
-
-                @if(is_array($documents))
-
-                    @foreach($documents as $key => $document)
-
-                        @if(is_string($document) && !empty($document))
-
-                            <a href="{{ asset($document) }}" target="_blank" class="btn btn-outline-primary document-btn">
-                                View {{ ucwords(str_replace('_', ' ', $key)) }}
-                            </a>
-
-                        @endif
-
-                    @endforeach
-
-                @else
-
-                    <a href="{{ asset($documents) }}" target="_blank" class="btn btn-outline-primary document-btn">
-                        View Document
-                    </a>
-
-                @endif
-
-            @else
-
-                <span class="text-muted">No policy documents available.</span>
-
-            @endif
-
-        </div>
+        @include('admin.client.policies.partials.documents', [
+            'documentFields' => ['Photo' => $policy_details->photo_documents ?? null, 'Insured Document' => $policy_details->insured_documents ?? null, 'Family Book' => $policy_details->family_book_documents ?? null],
+        ])
 
     </div>
 

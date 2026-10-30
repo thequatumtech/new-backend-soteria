@@ -501,7 +501,10 @@ if (!empty($data->letterhead)) {
 
 {{-- LIFE INSURANCE COVERAGE --}}
 @php
-    $insurancePeriod = $data->periods_val ?? (!empty($data->insurance_period) ? getInsurancePeriodName($data->insurance_period) : null);
+    // Life insurance_period is a number of years (get-life-insurance-period: 1..13), not an insurance_periods id
+    $insurancePeriod = !empty($data->insurance_period)
+        ? (int) $data->insurance_period . ' ' . ((int) $data->insurance_period === 1 ? 'Year' : 'Years')
+        : null;
 @endphp
 <div class="policy-summary">
     <h4>Life Insurance Coverage Details</h4>
@@ -514,7 +517,7 @@ if (!empty($data->letterhead)) {
             <tr><td>Effective Date</td><td>{{ date('m-d-Y', strtotime($data->effective_date)) }}</td></tr>
             @endif
             @if(!empty($insurancePeriod))
-            <tr><td>Insurance Period (Years)</td><td>{{ $insurancePeriod }}</td></tr>
+            <tr><td>Insurance Period</td><td>{{ $insurancePeriod }}</td></tr>
             @endif
             @if(!empty($data->inception_date))
             <tr><td>Inception Date</td><td>{{ date('m-d-Y', strtotime($data->inception_date)) }}</td></tr>

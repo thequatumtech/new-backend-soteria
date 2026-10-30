@@ -449,68 +449,9 @@
         {{-- POLICY DOCUMENTS --}}
         {{-- ========================= --}}
 
-        <h6 class="section-title mt-4">Policy Documents</h6>
-
-        <div class="d-flex flex-wrap gap-2">
-
-            @php
-                $documentFields = [
-                    'photo_documents_1' => 'Photo Document 1',
-                    'photo_documents_2' => 'Photo Document 2',
-                    'photo_documents_3' => 'Photo Document 3',
-                ];
-
-                $hasDocuments = false;
-            @endphp
-
-            @foreach($documentFields as $field => $label)
-
-                @if(!empty($policy_details->$field))
-
-                    @php
-                        $hasDocuments = true;
-                        $document = $policy_details->$field;
-                    @endphp
-
-                    @if(is_string($document) && str_starts_with($document, '['))
-
-                        @php
-                            $decoded = json_decode($document, true);
-                        @endphp
-
-                        @if(is_array($decoded))
-
-                            @foreach($decoded as $doc)
-
-                                @if(!empty($doc))
-
-                                    <a href="{{ asset($doc) }}" target="_blank" class="btn btn-outline-primary document-btn">
-                                        View {{ $label }}
-                                    </a>
-
-                                @endif
-
-                            @endforeach
-
-                        @endif
-
-                    @else
-
-                        <a href="{{ asset($document) }}" target="_blank" class="btn btn-outline-primary document-btn">
-                            View {{ $label }}
-                        </a>
-
-                    @endif
-
-                @endif
-
-            @endforeach
-
-            @if(!$hasDocuments)
-                <span class="text-muted">No policy documents available.</span>
-            @endif
-
-        </div>
+        @include('admin.client.policies.partials.documents', [
+            'documentFields' => ['Photo 1' => $policy_details->photo_documents_1 ?? null, 'Photo 2' => $policy_details->photo_documents_2 ?? null, 'Photo 3' => $policy_details->photo_documents_3 ?? null, 'Photo 4' => $policy_details->photo_documents_4 ?? null],
+        ])
 
     </div>
 

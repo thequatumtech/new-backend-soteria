@@ -583,76 +583,9 @@
         {{-- DOCUMENTS --}}
         {{-- ========================= --}}
 
-        <h6 class="section-title mt-4">Policy Documents</h6>
-
-        <div class="d-flex flex-wrap gap-2">
-
-            @php
-                $documentFields = [
-                    'rent_contract_documents'              => 'Rent Contract',
-                    'property_photo_documents'             => 'Property Photos',
-                    'contents_documents'                   => 'Contents Documents',
-                    'policy_issuer_documents'              => 'Policy Issuer Documents',
-                    'company_owner_documents'              => 'Company Owner Documents',
-                    'career_municipality_license_documents'=> 'Career Municipality License',
-                    'owner_id_documents'                   => 'Owner ID Documents',
-                    'practice_documents'                   => 'Practice Documents',
-                    'company_tax_certi_documents'          => 'Company Tax Certificate',
-                ];
-
-                $hasDocuments = false;
-            @endphp
-
-            @foreach($documentFields as $field => $label)
-
-                @if(!empty($policy_details->$field))
-
-                    @php
-                        $hasDocuments = true;
-                        $document = $policy_details->$field;
-                    @endphp
-
-                    {{-- JSON ARRAY DOCUMENTS --}}
-
-                    @if(is_string($document) && str_starts_with($document, '['))
-
-                        @php $decoded = json_decode($document, true); @endphp
-
-                        @if(is_array($decoded))
-
-                            @foreach($decoded as $doc)
-
-                                @if(!empty($doc))
-
-                                    <a href="{{ asset($doc) }}" target="_blank" class="btn btn-outline-primary document-btn">
-                                        View {{ $label }}
-                                    </a>
-
-                                @endif
-
-                            @endforeach
-
-                        @endif
-
-                    @else
-
-                        {{-- SINGLE DOCUMENT --}}
-
-                        <a href="{{ asset($document) }}" target="_blank" class="btn btn-outline-primary document-btn">
-                            View {{ $label }}
-                        </a>
-
-                    @endif
-
-                @endif
-
-            @endforeach
-
-            @if(!$hasDocuments)
-                <span class="text-muted">No policy documents available.</span>
-            @endif
-
-        </div>
+        @include('admin.client.policies.partials.documents', [
+            'documentFields' => ['Rent Contract' => $policy_details->rent_contract_documents ?? null, 'Property Photo' => $policy_details->property_photo_documents ?? null, 'Contents' => $policy_details->contents_documents ?? null, 'Policy Issuer Authorization' => $policy_details->policy_issuer_documents ?? null, 'Company Owner' => $policy_details->company_owner_documents ?? null, 'Career / Municipality License' => $policy_details->career_municipality_license_documents ?? null, 'Owner ID' => $policy_details->owner_id_documents ?? null, 'Practice License' => $policy_details->practice_documents ?? null, 'Company Tax Certificate' => $policy_details->company_tax_certi_documents ?? null],
+        ])
 
     </div>
 

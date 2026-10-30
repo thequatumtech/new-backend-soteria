@@ -588,68 +588,9 @@
         {{-- DOCUMENTS --}}
         {{-- ========================= --}}
 
-        <h6 class="section-title mt-4">Policy Documents</h6>
-
-        <div class="d-flex flex-wrap gap-2">
-
-            @php
-$documentFields = [
-    'register_document' => 'Register Document',
-    'billing_of_landing_doc' => 'Bill of Lading',
-    'copy_of_invoice_doc' => 'Copy of Invoice',
-    'insured_id_doc' => 'Insured ID',
-    'policy_issuer_doc' => 'Policy Issuer Document',
-    'company_reg_owner_doc' => 'Company Registration / Owner Document',
-    'career_municipality_license_doc' => 'Career Municipality License',
-    'company_tax_certificate_doc' => 'Company Tax Certificate',
-    'practice_certificate_doc' => 'Practice Certificate',
-];
-
-$hasDocuments = false;
-            @endphp
-
-            @foreach($documentFields as $field => $label)
-
-                @if(!empty($policy_details->$field))
-
-                    @php
-        $hasDocuments = true;
-        $document = $policy_details->$field;
-                    @endphp
-
-                    @if(is_string($document) && str_starts_with($document, '['))
-
-                        @php $decoded = json_decode($document, true); @endphp
-
-                        @if(is_array($decoded))
-
-                            @foreach($decoded as $doc)
-                                @if(!empty($doc))
-                                    <a href="{{ asset($doc) }}" target="_blank" class="btn btn-outline-primary document-btn">
-                                        View {{ $label }}
-                                    </a>
-                                @endif
-                            @endforeach
-
-                        @endif
-
-                    @else
-
-                        <a href="{{ asset($document) }}" target="_blank" class="btn btn-outline-primary document-btn">
-                            View {{ $label }}
-                        </a>
-
-                    @endif
-
-                @endif
-
-            @endforeach
-
-            @if(!$hasDocuments)
-                <span class="text-muted">No policy documents available.</span>
-            @endif
-
-        </div>
+        @include('admin.client.policies.partials.documents', [
+            'documentFields' => ['Register Document' => $policy_details->register_document ?? null],
+        ])
 
     </div>
 
