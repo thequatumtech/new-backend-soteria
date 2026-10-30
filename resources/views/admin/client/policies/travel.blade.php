@@ -244,12 +244,6 @@
 
         <div class="row">
 
-            <div class="col-md-4 detail-item">
-                <div class="detail-label">Plan ID</div>
-                <div class="detail-value">
-                    {{ $policy_details->plan_id ?? '-' }}
-                </div>
-            </div>
 
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Plan Name</div>
