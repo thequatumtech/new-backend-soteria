@@ -341,7 +341,7 @@ $hasResidence = collect([
 
 $hasEmployment = collect([
     $data->occupancy_work ?? null,
-    $data->company_name ?? null,
+    $data->employer_company_name ?? null,
     $data->position ?? null,
     $data->work_nature ?? null,
     $data->company_city_name ?? null,
@@ -465,7 +465,7 @@ $hasInsurance = !empty($data->plan_name)
 
                         $employmentType = $clientInfo->employment_type ?? null;
                         $occupation = $data->occupancy_work ?? ($clientInfo->occupation->name ?? null);
-                        $companyName = $clientInfo->company_name ?? ($data->company_name ?? null);
+                        $companyName = $clientInfo->company_name ?? ($data->employer_company_name ?? null);
                         $position = $clientInfo->position ?? ($data->position ?? null);
                         $workNature = $clientInfo->work_nature ?? ($data->work_nature ?? null);
                         $companyContact = $clientInfo->company_contact_no ?? ($data->company_contact ?? null);

@@ -83,6 +83,8 @@ class ClientFamilyMedicalInsurance extends Model
             // Fetch the critical illness insurance details
             $plan = ClientFamilyMedicalInsurance::select(
                 'client_family_medical_insurances.*',
+                // insurance_companies.company_name below overwrites the client's employer company_name
+                'client_family_medical_insurances.company_name as employer_company_name',
                 'in_patient_plans.plan_name',
                 'in_patient_plans.fees',
                 'in_patient_plans.stamps',
@@ -113,6 +115,8 @@ class ClientFamilyMedicalInsurance extends Model
             // Fetch the other insurance type details
             $plan = ClientFamilyMedicalInsurance::select(
                 'client_family_medical_insurances.*',
+                // insurance_companies.company_name below overwrites the client's employer company_name
+                'client_family_medical_insurances.company_name as employer_company_name',
                 'in_out_patient_plans.plan_name',
                 'in_out_patient_plans.fees',
                 'in_out_patient_plans.stamps',

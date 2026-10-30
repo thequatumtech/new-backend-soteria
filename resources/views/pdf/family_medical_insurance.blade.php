@@ -569,7 +569,7 @@ if (!empty($data->letterhead)) {
                             !empty($clientCompanyDistrict)
                         )) ||
                         !empty($data->occupancy_work) ||
-                        !empty($data->company_name)
+                        !empty($data->employer_company_name)
                     )
                     <tr>
                         <td>
@@ -601,10 +601,10 @@ if (!empty($data->letterhead)) {
                                                 <td>Company Name</td>
                                                 <td>{{ $clientInfo->company_name }}</td>
                                             </tr>
-                                        @elseif(!empty($data->company_name))
+                                        @elseif(!empty($data->employer_company_name))
                                             <tr>
                                                 <td>Company Name</td>
-                                                <td>{{ $data->company_name }}</td>
+                                                <td>{{ $data->employer_company_name }}</td>
                                             </tr>
                                         @endif
 

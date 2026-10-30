@@ -77,6 +77,8 @@ class CriticalIllnessInsurance extends Model
         // Fetch the criticalIllness insurance details
         $plan = CriticalIllnessInsurance::select(
             'critical_illness_insurances.*',
+            // insurance_companies.company_name below overwrites the client's employer company_name
+            'critical_illness_insurances.company_name as employer_company_name',
             'critical_illness_plans.plan_name',
             'critical_illness_plans.fees',
             'critical_illness_plans.stamps',

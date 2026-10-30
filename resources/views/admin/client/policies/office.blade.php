@@ -193,7 +193,7 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Age of Apartment</div>
                 <div class="detail-value">
-                    {{ $policy_details->age_of_apartment ?? '-' }}
+                    {{ ($policy_details->age_of_apartment ?? '') !== '' ? $policy_details->age_of_apartment . ' ' . ($policy_details->age_of_apartment == 1 ? 'Year' : 'Years') : '-' }}
                 </div>
             </div>
 

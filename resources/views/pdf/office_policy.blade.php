@@ -418,7 +418,7 @@ $fullName = trim(($data->first_name ?? '') . ' ' . ($data->last_name ?? '') . ' 
         @if(!empty($data->age_of_apartment))
         <tr>
             <td>Age of Apartment</td>
-            <td>{{ $data->age_of_apartment }}</td>
+            <td>{{ $data->age_of_apartment }} {{ $data->age_of_apartment == 1 ? 'Year' : 'Years' }}</td>
         </tr>
         @endif
         @if(!empty($data->no_of_residence))

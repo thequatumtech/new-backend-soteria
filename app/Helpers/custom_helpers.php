@@ -315,6 +315,22 @@ if (!function_exists('getDangerousActivityName')) {
     }
 }
 
+if (!function_exists('getHomeTypeName')) {
+    // Home insurance home_type: the app sends 1 = Apartment, 2 = Villa (older rows may hold the name)
+    function getHomeTypeName($value)
+    {
+        if ($value === null || $value === '') {
+            return '-';
+        }
+
+        return match ((string) $value) {
+            '1' => 'Apartment',
+            '2' => 'Villa',
+            default => (string) $value,
+        };
+    }
+}
+
 if (!function_exists('getDocumentPaths')) {
     // Document fields hold "path", "path1,path2" or a JSON array of paths
     function getDocumentPaths($value)

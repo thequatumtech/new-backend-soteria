@@ -91,6 +91,8 @@ class ClientLifeInsurance extends Model
         // Fetch the life insurance details
         $plan = ClientLifeInsurance::select(
             'client_life_insurances.*',
+            // insurance_companies.company_name below overwrites the client's employer company_name
+            'client_life_insurances.company_name as employer_company_name',
             'life_plans.plan_name',
             'life_plans.fees',
             'life_plans.stamps',

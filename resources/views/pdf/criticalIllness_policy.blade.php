@@ -490,7 +490,7 @@ $insuredDocuments = getDocumentPaths($data->insured_documents ?? null);
         !empty($clientCompanyDistrict)
     )) ||
     !empty($data->occupancy_work) ||
-    !empty($data->company_name)
+    !empty($data->employer_company_name)
 )
                 <tr>
                     <td colspan="2" style="background-color: #d0d0d0;">
@@ -522,10 +522,10 @@ $insuredDocuments = getDocumentPaths($data->insured_documents ?? null);
                         <td>Company Name</td>
                         <td>{{ $clientInfo->company_name }}</td>
                     </tr>
-                @elseif(!empty($data->company_name))
+                @elseif(!empty($data->employer_company_name))
                     <tr>
                         <td>Company Name</td>
-                        <td>{{ $data->company_name }}</td>
+                        <td>{{ $data->employer_company_name }}</td>
                     </tr>
                 @endif
 

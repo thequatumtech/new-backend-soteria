@@ -116,7 +116,7 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Home Type</div>
                 <div class="detail-value">
-                    {{ $policy_details->home_type ?? '-' }}
+                    {{ getHomeTypeName($policy_details->home_type ?? null) }}
                 </div>
             </div>
 
@@ -137,7 +137,7 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Age of Building / Villa</div>
                 <div class="detail-value">
-                    {{ !empty($policy_details->home_age) ? $policy_details->home_age : '-' }}
+                    {{ !empty($policy_details->home_age) ? $policy_details->home_age . ' ' . ($policy_details->home_age == 1 ? 'Year' : 'Years') : '-' }}
                 </div>
             </div>
 
@@ -232,6 +232,9 @@
         </div>
 
 
+        {{-- shown only when the client entered employment details (not shown for unemployed) --}}
+        @if(!empty($policy_details->employer_company_name) || !empty($policy_details->city_id_2) || !empty($policy_details->position) || !empty($policy_details->work_nature))
+
         {{-- ========================= --}}
         {{-- EMPLOYMENT INFORMATION --}}
         {{-- ========================= --}}
@@ -243,7 +246,7 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Company Name</div>
                 <div class="detail-value">
-                    {{ $policy_details->company_name ?? '-' }}
+                    {{ $policy_details->employer_company_name ?? '-' }}
                 </div>
             </div>
 
@@ -269,6 +272,8 @@
             </div>
 
         </div>
+        @endif
+
 
 
         {{-- ========================= --}}

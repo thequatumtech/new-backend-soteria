@@ -60,6 +60,8 @@ class ClientDentalsInsurance extends Model
         // Fetch the criticalIllness insurance details
         $plan = ClientDentalsInsurance::select(
                 'client_dentals_insurances.*',
+                // insurance_companies.company_name below overwrites the client's employer company_name
+                'client_dentals_insurances.company_name as employer_company_name',
                 'dental_plans.plan_name',
                 'dental_plans.fees',
                 'dental_plans.stamps',

@@ -64,6 +64,8 @@ class ClientHomeInsurance extends Model
     {
         $plan = ClientHomeInsurance::select(
             'client_home_insurances.*',
+            // insurance_companies.company_name below overwrites the client's employer company_name
+            'client_home_insurances.company_name as employer_company_name',
             'home_plans.plan_name',
             'home_plans.insurance_policy_text',
             'home_plans.insurance_policy_pdf',

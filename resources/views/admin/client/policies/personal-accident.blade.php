@@ -108,6 +108,9 @@
         </div>
 
 
+        {{-- shown only when the client entered employment details (not shown for unemployed) --}}
+        @if(!empty($policy_details->employer_company_name) || !empty($policy_details->position) || !empty($policy_details->work_nature) || !empty($policy_details->occupany_type_work) || !empty($policy_details->company_contact) || !empty($policy_details->company_city_id))
+
         {{-- ========================= --}}
         {{-- EMPLOYMENT INFORMATION --}}
         {{-- ========================= --}}
@@ -119,7 +122,7 @@
             <div class="col-md-4 detail-item">
                 <div class="detail-label">Company Name</div>
                 <div class="detail-value">
-                    {{ $policy_details->company_name ?? '-' }}
+                    {{ $policy_details->employer_company_name ?? '-' }}
                 </div>
             </div>
 
@@ -159,6 +162,8 @@
             </div>
 
         </div>
+        @endif
+
 
 
         {{-- ========================= --}}

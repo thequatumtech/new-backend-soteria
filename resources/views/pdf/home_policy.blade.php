@@ -416,7 +416,7 @@ if (!empty($data->letterhead)) {
                                             @if(!empty($data->home_type))
                                                 <tr>
                                                     <td>Home Type</td>
-                                                    <td>{{ $data->home_type }}</td>
+                                                    <td>{{ getHomeTypeName($data->home_type) }}</td>
                                                 </tr>
                                             @endif
                                             @if(!empty($data->home_category))
@@ -572,7 +572,7 @@ $employmentType = $clientInfo->employment_type ?? null;
 $occupation = $data->occupancy_work
     ?? ($clientInfo->occupation->name ?? null);
 $companyName = $clientInfo->company_name
-    ?? ($data->company_name ?? null);
+    ?? ($data->employer_company_name ?? null);
 $position = $clientInfo->position
     ?? ($data->position ?? null);
 $workNature = $clientInfo->work_nature
