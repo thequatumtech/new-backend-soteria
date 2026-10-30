@@ -289,7 +289,7 @@
                                                 <div>
                                                     <img src="{{asset('img/icon-upload.png')}}">
                                                 </div>
-                                                <input type="file" name="company_stamp"  id="">
+                                                <input type="file" name="company_stamp" accept=".jpg,.jpeg,.png"  id="">
                                                 <div class="file-margin">
                                                     <label class="custom-file-label text-center" style="color: #ced4da; font-size: 1rem;">Upload your Document Here</label>
                                                     <label id="company_tcompany_stampax_certificate-error" class="error" for="company_stamp"></label>
@@ -304,7 +304,7 @@
                                                 <div>
                                                     <img src="{{asset('img/icon-upload.png')}}">
                                                 </div>
-                                                <input type="file" name="authorized_signature"  >
+                                                <input type="file" name="authorized_signature" accept=".jpg,.jpeg,.png"  >
                                                 <div class="file-margin">
                                                     <label class="custom-file-label text-center" style="color: #ced4da; font-size: 1rem;">Upload your Document Here</label>
                                                     <label id="authorized_signature-error" class="error" for="authorized_signature"></label>
@@ -321,7 +321,7 @@
                                                 <div>
                                                     <img src="{{asset('img/icon-upload.png')}}">
                                                 </div>
-                                                <input type="file" name="letterhead"   >
+                                                <input type="file" name="letterhead" accept=".jpg,.jpeg,.png"   >
                                                 <div class="file-margin">
                                                     <label class="custom-file-label text-center" style="color: #ced4da; font-size: 1rem;">Upload your Document Here</label>
                                                     <label id="letterhead-error" class="error" for="letterhead"></label>
@@ -336,7 +336,7 @@
                                                 <div>
                                                     <img src="{{asset('img/icon-upload.png')}}">
                                                 </div>
-                                                <input type="file" name="logo"  id="">
+                                                <input type="file" name="logo" accept=".jpg,.jpeg,.png"  id="">
                                                 <div class="file-margin">
                                                     <label class="custom-file-label text-center" style="color: #ced4da; font-size: 1rem;">Upload your Document Here</label>
                                                     <label id="logo-error" class="error" for="logo"></label>
@@ -660,7 +660,7 @@
                                                 <div>
                                                     <img src="{{asset('img/icon-upload.png')}}">
                                                 </div>
-                                                <input type="file" name="company_stamp"  >
+                                                <input type="file" name="company_stamp" accept=".jpg,.jpeg,.png"  >
                                                 <div>
                                                     <label class="custom-file-label text-center" style="color: #ced4da; font-size: 1rem;">Upload your Document Here</label>
                                                 </div>
@@ -677,7 +677,7 @@
                                                 <div>
                                                     <img src="{{asset('img/icon-upload.png')}}">
                                                 </div>
-                                                <input type="file" name="authorized_signature"  >
+                                                <input type="file" name="authorized_signature" accept=".jpg,.jpeg,.png"  >
                                                 <div>
                                                     <label class="custom-file-label text-center" style="color: #ced4da; font-size: 1rem;">Upload your Document Here</label>
                                                 </div>
@@ -696,7 +696,7 @@
                                                 <div>
                                                     <img src="{{asset('img/icon-upload.png')}}">
                                                 </div>
-                                                <input type="file" name="letterhead"   >
+                                                <input type="file" name="letterhead" accept=".jpg,.jpeg,.png"   >
                                                 <div>
                                                     <label class="custom-file-label text-center" style="color: #ced4da; font-size: 1rem;">Upload your Document Here</label>
                                                 </div>
@@ -713,7 +713,7 @@
                                                 <div>
                                                     <img src="{{asset('img/icon-upload.png')}}">
                                                 </div>
-                                                <input type="file" name="logo"  >
+                                                <input type="file" name="logo" accept=".jpg,.jpeg,.png"  >
                                                 <div>
                                                     <label class="custom-file-label text-center" style="color: #ced4da; font-size: 1rem;">Upload your Document Here</label>
                                                 </div>

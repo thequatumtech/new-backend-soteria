@@ -56,10 +56,10 @@ class InsuranceCompanyController extends Controller
                     'municipality_license' => 'nullable|file|max:10240',
                     'practice_certificate' => 'nullable|file|max:10240',
                     'company_tax_certificate' => 'nullable|file|max:10240',
-                    'company_stamp' => 'nullable|file|max:10240',
-                    'authorized_signature' => 'nullable|file|max:10240',
-                    'letterhead' => 'nullable|file|max:10240',
-                    'logo' => 'nullable|file|max:10240',
+                    'company_stamp' => 'nullable|file|mimes:jpg,jpeg,png|max:10240', // drawn as an image in the policy PDFs
+                    'authorized_signature' => 'nullable|file|mimes:jpg,jpeg,png|max:10240', // drawn as an image in the policy PDFs
+                    'letterhead' => 'nullable|file|mimes:jpg,jpeg,png|max:10240', // drawn as an image in the policy PDFs
+                    'logo' => 'nullable|file|mimes:jpg,jpeg,png|max:10240', // drawn as an image in the policy PDFs
                ]);
 
                $insuranceCompany = InsuranceCompany::create([
@@ -207,10 +207,10 @@ class InsuranceCompanyController extends Controller
                     'municipality_license' => 'nullable|file|max:10240',
                     'practice_certificate' => 'nullable|file|max:10240',
                     'company_tax_certificate' => 'nullable|file|max:10240',
-                    'company_stamp' => 'nullable|file|max:10240',
-                    'authorized_signature' => 'nullable|file|max:10240',
-                    'letterhead' => 'nullable|file|max:10240',
-                    'logo' => 'nullable|file|max:10240',
+                    'company_stamp' => 'nullable|file|mimes:jpg,jpeg,png|max:10240', // drawn as an image in the policy PDFs
+                    'authorized_signature' => 'nullable|file|mimes:jpg,jpeg,png|max:10240', // drawn as an image in the policy PDFs
+                    'letterhead' => 'nullable|file|mimes:jpg,jpeg,png|max:10240', // drawn as an image in the policy PDFs
+                    'logo' => 'nullable|file|mimes:jpg,jpeg,png|max:10240', // drawn as an image in the policy PDFs
                     'commissions.*' => 'required_with:line_of_business|numeric|min:0',
                     'issuance.*' => 'required_with:line_of_business|numeric|min:0',
                     'stamps.*' => 'required_with:line_of_business|numeric|min:0',
